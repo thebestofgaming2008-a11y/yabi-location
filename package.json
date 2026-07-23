@@ -1,0 +1,19 @@
+{
+  "name": "yabi-location",
+  "version": "1.0.0",
+  "private": true,
+  "description": "YABI Location public website and Convex lead backend",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "convex:dev": "convex dev",
+    "convex:deploy": "convex deploy"
+  },
+  "dependencies": {
+    "@convex-dev/rate-limiter": "^0.3.2",
+    "convex": "^1.42.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "^7.0.2"
+  }
+}

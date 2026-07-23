@@ -1,0 +1,9 @@
+node_modules/
+.codex-remote-attachments/
+.env
+.env.*
+!.env.example
+.deploy/
+.wrangler/
+dist/
+*.log

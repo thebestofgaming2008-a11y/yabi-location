@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="YABI Location">
+  <rect width="64" height="64" rx="14" fill="#072e67"/>
+  <path d="M10 18h44v20H10z" fill="#fff" opacity=".12"/>
+  <path d="m14 20 10 16v10h7V36l10-16h-8l-5.5 9.5L22 20z" fill="#fff"/>
+  <circle cx="47" cy="43" r="5" fill="#2f78ff"/>
+</svg>
