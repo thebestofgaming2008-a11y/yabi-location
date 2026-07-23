@@ -16,24 +16,29 @@ The public journey is:
 4. Convex validates, rate-limits, deduplicates, and stores the request.
 5. Staff review the lead and contact the visitor.
 
-Current architecture:
+Current active development architecture:
 
-- Public site and CDN: Cloudflare Pages
-- Production database and API: Convex, Europe (Ireland)
+- Development preview and CDN: Cloudflare Pages
+- Development database and API: Convex, Europe (Ireland)
 - Transactional email: planned with Resend, not configured
 - Bot challenge: planned with Cloudflare Turnstile, not configured
 - Staff administration: Convex dashboard for now; a dedicated staff portal is
   recommended
+
+The separate production deployments are retained as rollback infrastructure but
+are not referenced by the active development preview.
 
 ## 2. Current implementation status
 
 ### Completed
 
 - [x] Cloudflare Pages project created: `yabi-location`
-- [x] Stable public URL: `https://yabi-location.pages.dev`
+- [x] Development preview URL:
+  `https://development.yabi-location.pages.dev`
 - [x] HTTPS and Cloudflare CDN enabled
 - [x] Production Convex project created: `monz/yabi-location`
 - [x] Separate Convex development and production deployments
+- [x] Active form points only to the Convex development deployment
 - [x] Production deployment located in Europe (Ireland)
 - [x] Real quote-submission API connected to the public form
 - [x] Server-side input validation and length limits
@@ -77,8 +82,8 @@ Current architecture:
 - [ ] Production monitoring and alert recipients configured
 - [ ] Git repository and repeatable deployment pipeline configured
 
-The existing Pages URL should be treated as a launch candidate until every
-launch blocker above is closed.
+The development preview is blocked from search engines and should be used only
+for testing until every launch blocker above is closed.
 
 ## 3. Mandatory business information
 
