@@ -51,6 +51,8 @@ Current architecture:
 - [x] Sitemap, robots file, favicon, canonical metadata, Open Graph, and social
   sharing metadata
 - [x] Responsive WebP hero images
+- [x] Client-supplied vehicle photos optimized and displayed in the fleet
+  catalogue
 - [x] Live end-to-end production submission test
 - [x] Duplicate retry test
 - [x] TypeScript and Convex production deployment checks
@@ -437,7 +439,8 @@ capacity alone is not enough if the business cannot process the resulting leads.
 - [ ] Branded 404 and error pages
 - [ ] FAQ covering eligibility, documents, deposit, VAT, kilometres, insurance,
   delivery/pickup, and discount terms
-- [ ] Real vehicle photography with approved model/year captions
+- [x] Real vehicle photography integrated with model-level captions
+- [ ] Client approval of every model/year caption
 - [ ] Image release/ownership records
 - [ ] French copy edit by a native professional
 - [ ] Dutch version for the Belgian market
@@ -501,4 +504,3 @@ The site is ready for official promotion only when:
 9. Final approved CGV and privacy/legal text, or the lawyer responsible for it.
 10. Names/email addresses of the people who need Cloudflare, Convex, Resend,
     source-control, monitoring, and lead-dashboard access.
-
