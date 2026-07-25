@@ -240,7 +240,7 @@ footer { padding: 5rem 0 1.5rem; background: var(--navy-deep); color: white; }
 .footer-grid > div > a:not(.button):hover { color: white; }
 .footer-cta { padding-left: 2rem; border-left: 1px solid rgba(255,255,255,.14); }
 .footer-cta .button { margin-top: .6rem; }
-.footer-bottom { margin-top: 4rem; padding-top: 1.3rem; display: flex; justify-content: space-between; gap: 2rem; border-top: 1px solid rgba(255,255,255,.13); color: rgba(255,255,255,.38); font-size: .58rem; }
+.footer-bottom { margin-top: 4rem; padding-top: 1.3rem; display: flex; justify-content: space-between; gap: 2rem; border-top: 1px solid rgba(255,255,255,.13); color: rgba(255,255,255,.68); font-size: .58rem; }
 
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity .65s ease, transform .65s ease; }
 .reveal.visible { opacity: 1; transform: none; }
