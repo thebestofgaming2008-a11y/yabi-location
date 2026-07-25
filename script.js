@@ -1,65 +1,18 @@
 const menuToggle = document.querySelector(".menu-toggle");
 const navLinks = document.querySelector(".nav-links");
-const menuBackdrop = document.querySelector(".menu-backdrop");
-const siteChrome = document.querySelector("#site-chrome");
-
-function setMenuState(isOpen) {
-  menuToggle?.setAttribute("aria-expanded", String(isOpen));
-  navLinks?.classList.toggle("open", isOpen);
-  menuBackdrop?.classList.toggle("is-visible", isOpen);
-  if (menuBackdrop) menuBackdrop.tabIndex = isOpen ? 0 : -1;
-  document.body.classList.toggle("menu-open", isOpen);
-  siteChrome?.classList.remove("is-hidden");
-}
 
 menuToggle?.addEventListener("click", () => {
-  setMenuState(menuToggle.getAttribute("aria-expanded") !== "true");
+  const isOpen = menuToggle.getAttribute("aria-expanded") === "true";
+  menuToggle.setAttribute("aria-expanded", String(!isOpen));
+  navLinks?.classList.toggle("open", !isOpen);
 });
 
 navLinks?.querySelectorAll("a").forEach((link) => {
-  link.addEventListener("click", () => setMenuState(false));
+  link.addEventListener("click", () => {
+    navLinks.classList.remove("open");
+    menuToggle?.setAttribute("aria-expanded", "false");
+  });
 });
-
-menuBackdrop?.addEventListener("click", () => setMenuState(false));
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && menuToggle?.getAttribute("aria-expanded") === "true") {
-    setMenuState(false);
-    menuToggle.focus();
-  }
-});
-
-window.addEventListener("resize", () => {
-  if (window.innerWidth > 980) setMenuState(false);
-});
-
-let previousScrollY = window.scrollY;
-let scrollFrameRequested = false;
-
-function updateSiteChrome() {
-  const currentScrollY = Math.max(window.scrollY, 0);
-  const movement = currentScrollY - previousScrollY;
-  const menuIsOpen = menuToggle?.getAttribute("aria-expanded") === "true";
-
-  siteChrome?.classList.toggle("has-scrolled", currentScrollY > 8);
-  if (!menuIsOpen) {
-    if (currentScrollY < 16 || movement < -7) {
-      siteChrome?.classList.remove("is-hidden");
-    } else if (movement > 7 && currentScrollY > 120) {
-      siteChrome?.classList.add("is-hidden");
-    }
-  }
-
-  previousScrollY = currentScrollY;
-  scrollFrameRequested = false;
-}
-
-window.addEventListener("scroll", () => {
-  if (!scrollFrameRequested) {
-    scrollFrameRequested = true;
-    window.requestAnimationFrame(updateSiteChrome);
-  }
-}, { passive: true });
 
 const startDate = document.querySelector("#start-date");
 if (startDate) {
@@ -170,8 +123,7 @@ quoteForm?.addEventListener("submit", async (event) => {
   } catch (error) {
     if (feedback) {
       feedback.className = "form-feedback is-error";
-      const message = error instanceof Error ? error.message : "Une erreur inattendue est survenue.";
-      feedback.textContent = `${message} 0489 82 76 77`;
+      feedback.textContent = `${error.message} 0489 82 76 77`;
     }
   } finally {
     if (submitButton) {

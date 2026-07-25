@@ -5,25 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="YABI Location propose des véhicules utilitaires L1H1, L2H2 et L3H2 en location mensuelle en Belgique.">
   <meta name="theme-color" content="#072e67">
-  <meta name="robots" content="index, follow">
+  <meta name="robots" content="noindex, nofollow, noarchive">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="fr_BE">
   <meta property="og:site_name" content="YABI Location">
   <meta property="og:title" content="YABI Location — Location d’utilitaires en Belgique">
   <meta property="og:description" content="Véhicules utilitaires L1H1, L2H2 et L3H2 en location mensuelle. Jusqu’à 15 % de réduction dès plus de 3 mois.">
-  <meta property="og:image" content="https://yabi-location.pages.dev/assets/fleet-social.jpg">
+  <meta property="og:image" content="https://development.yabi-location.pages.dev/assets/fleet-social.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Flotte de véhicules utilitaires YABI Location">
-  <meta property="og:url" content="https://yabi-location.pages.dev/">
+  <meta property="og:url" content="https://development.yabi-location.pages.dev/">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="YABI Location — Location d’utilitaires en Belgique">
   <meta name="twitter:description" content="L1H1, L2H2 et L3H2 en location mensuelle. Jusqu’à 15 % de réduction dès plus de 3 mois.">
-  <meta name="twitter:image" content="https://yabi-location.pages.dev/assets/fleet-social.jpg">
-  <link rel="canonical" href="https://yabi-location.pages.dev/">
+  <meta name="twitter:image" content="https://development.yabi-location.pages.dev/assets/fleet-social.jpg">
+  <link rel="canonical" href="https://development.yabi-location.pages.dev/">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="/assets/fleet-hero-1600.webp" imagesrcset="/assets/fleet-hero-960.webp 960w, /assets/fleet-hero-1600.webp 1536w" imagesizes="100vw" fetchpriority="high">
-  <title>YABI Location | Utilitaires en location mensuelle</title>
+  <title>[DEV] YABI Location | Utilitaires en location mensuelle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -33,34 +33,38 @@
 <body>
   <a class="skip-link" href="#main">Aller au contenu</a>
 
-  <div class="site-chrome" id="site-chrome">
-    <div class="offer-bar">
-      <p><strong>–15&nbsp;%</strong> sur votre loyer mensuel dès 4 mois de location</p>
-    </div>
-
-    <header class="site-header" id="accueil">
-      <nav class="nav shell" aria-label="Navigation principale">
-        <a class="brand brand-original" href="#accueil" aria-label="YABI Location, accueil">
-          <img class="brand-logo" src="assets/yabi-logo.webp" width="710" height="560" alt="YABI Location">
-        </a>
-
-        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-links">
-          <span></span><span></span><span></span>
-          <span class="sr-only">Ouvrir le menu</span>
-        </button>
-
-        <div class="nav-links" id="nav-links">
-          <a href="#flotte">La flotte</a>
-          <a href="#tarifs">Tarifs</a>
-          <a href="#services">Services</a>
-          <a href="#cgv">CGV</a>
-          <a class="nav-contact" href="contact.html">Contactez-nous</a>
-          <a class="button button-sm" href="#devis">Demander un devis</a>
-        </div>
-      </nav>
-    </header>
+  <div class="dev-banner" role="status">
+    Environnement de développement · Demandes de test uniquement
   </div>
-  <button class="menu-backdrop" type="button" aria-label="Fermer le menu" tabindex="-1"></button>
+
+  <div class="offer-bar">
+    <p><strong>Offre longue durée</strong><span aria-hidden="true">•</span> Plus de 3 mois&nbsp;: <strong>–15&nbsp;% sur votre loyer mensuel</strong></p>
+    <a href="#tarifs">Voir les tarifs</a>
+  </div>
+
+  <header class="site-header" id="accueil">
+    <nav class="nav shell" aria-label="Navigation principale">
+      <a class="brand brand-original" href="#accueil" aria-label="YABI Location, accueil">
+        <span class="brand-photo" aria-hidden="true">
+          <img src="assets/yabi-logo-source.jpg" alt="">
+        </span>
+      </a>
+
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-links">
+        <span></span><span></span><span></span>
+        <span class="sr-only">Ouvrir le menu</span>
+      </button>
+
+      <div class="nav-links" id="nav-links">
+        <a href="#flotte">La flotte</a>
+        <a href="#tarifs">Tarifs</a>
+        <a href="#services">Services</a>
+        <a href="#cgv">CGV</a>
+        <a class="nav-phone" href="tel:+32489827677">0489 82 76 77</a>
+        <a class="button button-sm" href="#devis">Demander un devis</a>
+      </div>
+    </nav>
+  </header>
 
   <main id="main">
     <section class="hero">
@@ -383,7 +387,7 @@
       </div>
       <div>
         <h3>Navigation</h3>
-        <a href="#flotte">Notre flotte</a><a href="#tarifs">Tarifs</a><a href="#services">Services</a><a href="#cgv">CGV</a><a href="contact.html">Contactez-nous</a>
+        <a href="#flotte">Notre flotte</a><a href="#tarifs">Tarifs</a><a href="#services">Services</a><a href="#cgv">CGV</a>
       </div>
       <div>
         <h3>Contact</h3>

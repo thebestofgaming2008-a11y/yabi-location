@@ -1,4 +1,2 @@
 User-agent: *
-Allow: /
-
-Sitemap: https://yabi-location.pages.dev/sitemap.xml
+Disallow: /
