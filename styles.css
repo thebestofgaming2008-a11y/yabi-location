@@ -161,7 +161,7 @@ img { max-width: 100%; display: block; }
 .showroom-picker-head { padding: 1.35rem 1.35rem .8rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--line-soft); }
 .showroom-picker-head strong { color: var(--navy); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
 .showroom-picker-head span { color: var(--muted); font-size: .68rem; }
-.showroom-picker { padding: 0 1.35rem 1.35rem; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .65rem; }
+.showroom-picker { padding: 0 1.35rem 1.35rem; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .65rem; }
 .showroom-choice { min-width: 0; padding: .45rem; display: grid; gap: .45rem; border: 1px solid var(--line-soft); border-radius: 7px; background: white; color: var(--ink); text-align: left; cursor: pointer; transition: border-color .2s, box-shadow .2s, transform .2s; }
 .showroom-choice:hover { border-color: #9bbce6; transform: translateY(-2px); }
 .showroom-choice.is-active { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(18,97,207,.11); }
