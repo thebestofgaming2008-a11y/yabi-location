@@ -5,6 +5,7 @@ import { httpAction } from "./_generated/server";
 const http = httpRouter();
 
 const vehicleValues = new Set([
+  "unspecified",
   "l1h1",
   "master_l2h2_2023",
   "citroen_l2h2_2019",
@@ -143,7 +144,7 @@ const submitQuote = httpAction(async (ctx, request) => {
   const company = cleanString(body.company, 120);
   const email = cleanString(body.email, 254).toLowerCase();
   const phone = cleanString(body.phone, 32);
-  const vehicle = cleanString(body.vehicle, 40);
+  const vehicle = cleanString(body.vehicle, 40) || "unspecified";
   const duration = cleanString(body.duration, 40);
   const startDate = cleanString(body.startDate, 10);
   const message = cleanString(body.message, 2_000);
@@ -185,6 +186,7 @@ const submitQuote = httpAction(async (ctx, request) => {
       email,
       phone,
       vehicle: vehicle as
+        | "unspecified"
         | "l1h1"
         | "master_l2h2_2023"
         | "citroen_l2h2_2019"

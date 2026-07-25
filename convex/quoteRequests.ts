@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { internalMutation } from "./_generated/server";
+import { internal } from "./_generated/api";
+import { internalMutation, internalQuery } from "./_generated/server";
 import { durationValidator, vehicleValidator } from "./schema";
 import { quoteRateLimiter } from "./rateLimits";
 
@@ -87,7 +88,7 @@ export const createFromWebsite = internalMutation({
       .toUpperCase();
     const reference = `YABI-${compactId}`;
 
-    await ctx.db.insert("quoteRequests", {
+    const quoteRequestId = await ctx.db.insert("quoteRequests", {
       reference,
       idempotencyKey: args.idempotencyKey,
       fullName: args.fullName,
@@ -107,9 +108,67 @@ export const createFromWebsite = internalMutation({
       requestFingerprint: args.requestFingerprint,
       createdAt: now,
       updatedAt: now,
-      emailStatus: "not_configured",
+      emailStatus: "pending",
+    });
+
+    await ctx.scheduler.runAfter(0, internal.emails.sendQuoteNotification, {
+      quoteRequestId,
     });
 
     return { ok: true, duplicate: false, reference };
+  },
+});
+
+export const getForEmail = internalQuery({
+  args: { quoteRequestId: v.id("quoteRequests") },
+  returns: v.union(
+    v.null(),
+    v.object({
+      reference: v.string(),
+      fullName: v.string(),
+      company: v.optional(v.string()),
+      email: v.string(),
+      phone: v.string(),
+      vehicle: vehicleValidator,
+      duration: durationValidator,
+      startDate: v.optional(v.string()),
+      message: v.optional(v.string()),
+      createdAt: v.number(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const request = await ctx.db.get(args.quoteRequestId);
+    if (!request) return null;
+    return {
+      reference: request.reference,
+      fullName: request.fullName,
+      company: request.company,
+      email: request.email,
+      phone: request.phone,
+      vehicle: request.vehicle,
+      duration: request.duration,
+      startDate: request.startDate,
+      message: request.message,
+      createdAt: request.createdAt,
+    };
+  },
+});
+
+export const setEmailStatus = internalMutation({
+  args: {
+    quoteRequestId: v.id("quoteRequests"),
+    emailStatus: v.union(
+      v.literal("not_configured"),
+      v.literal("sent"),
+      v.literal("failed"),
+    ),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.quoteRequestId, {
+      emailStatus: args.emailStatus,
+      updatedAt: Date.now(),
+    });
+    return null;
   },
 });

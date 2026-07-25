@@ -86,10 +86,11 @@ if (startDate) {
 
 document.querySelectorAll(".select-vehicle").forEach((button) => {
   button.addEventListener("click", () => {
-    const vehicleSelect = document.querySelector("#vehicle-select");
-    if (vehicleSelect) vehicleSelect.value = button.dataset.vehicle || "";
     document.querySelector("#devis, #quote")?.scrollIntoView({ behavior: "smooth" });
-    window.setTimeout(() => vehicleSelect?.focus(), 650);
+    window.setTimeout(
+      () => document.querySelector('#quote-form input[name="name"]')?.focus(),
+      650,
+    );
   });
 });
 
@@ -205,7 +206,7 @@ quoteForm?.addEventListener("submit", async (event) => {
     company: data.get("company"),
     email: data.get("email"),
     phone: data.get("phone"),
-    vehicle: data.get("vehicle"),
+    vehicle: "unspecified",
     duration: data.get("duration"),
     startDate: data.get("start"),
     message: data.get("message"),

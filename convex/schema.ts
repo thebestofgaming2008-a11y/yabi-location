@@ -2,6 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export const vehicleValidator = v.union(
+  v.literal("unspecified"),
   v.literal("l1h1"),
   v.literal("master_l2h2_2023"),
   v.literal("citroen_l2h2_2019"),
