@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Contact YABI Location for a monthly commercial van rental offer in Belgium.">
+  <meta name="theme-color" content="#072e67">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:site_name" content="YABI Location">
+  <meta property="og:title" content="Contact YABI Location">
+  <meta property="og:description" content="Describe your needs and receive a personalised offer for your commercial van.">
+  <meta property="og:image" content="https://yabi-location.pages.dev/assets/fleet-social.jpg">
+  <meta property="og:url" content="https://yabi-location.pages.dev/contact-en">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://yabi-location.pages.dev/contact-en">
+  <link rel="alternate" hreflang="fr-BE" href="https://yabi-location.pages.dev/contact">
+  <link rel="alternate" hreflang="en" href="https://yabi-location.pages.dev/contact-en">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <title>Contact and quote | YABI Location</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20260725-4">
+  <script src="script.js?v=20260725-4" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="site-chrome" id="site-chrome">
+    <div class="offer-bar">
+      <p><strong>15% off</strong> your monthly rental from the 4th month</p>
+    </div>
+
+    <header class="site-header" id="accueil">
+      <nav class="nav shell" aria-label="Main navigation">
+        <a class="brand brand-original" href="en.html" aria-label="YABI Location, home">
+          <img class="brand-logo" src="assets/yabi-logo.webp" width="96" height="76" alt="YABI Location">
+        </a>
+
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-links">
+          <span></span><span></span><span></span>
+          <span class="sr-only">Open menu</span>
+        </button>
+
+        <div class="nav-links" id="nav-links">
+          <a href="en.html#fleet">Fleet</a>
+          <a href="en.html#prices">Prices</a>
+          <a href="en.html#services">Services</a>
+          <a href="en.html#terms">Terms</a>
+          <a class="nav-contact" href="/contact-en" aria-current="page">Contact us</a>
+          <a class="language-link" href="/contact" hreflang="fr-BE" aria-label="Voir la version française">FR</a>
+          <a class="button button-sm" href="#contact-form">Request a quote</a>
+        </div>
+      </nav>
+    </header>
+  </div>
+  <button class="menu-backdrop" type="button" aria-label="Close menu" tabindex="-1"></button>
+
+  <main id="main">
+    <section class="contact-hero">
+      <div class="shell contact-hero-grid">
+        <p class="eyebrow eyebrow-light"><span></span> Direct contact · Belgium</p>
+        <h1>Let’s talk about<br><em>your next vehicle.</em></h1>
+        <p class="contact-hero-copy">One van or several vehicles: tell us about your mission, rental length and load volume. Our team will reply with a clear, tailored proposal.</p>
+      </div>
+    </section>
+
+    <section class="contact-page-section" id="contact-form">
+      <div class="shell contact-page-grid">
+        <div class="contact-panel">
+          <p class="eyebrow"><span></span> Contact us</p>
+          <h2>One contact,<br>clear answers.</h2>
+          <p>Prefer to speak directly? Call us or write to us. We are available every day.</p>
+          <div class="contact-cards">
+            <a href="tel:+32489827677"><small>Main phone</small><strong>0489 82 76 77</strong></a>
+            <a href="tel:+32456564043"><small>Second number</small><strong>0456 56 40 43</strong></a>
+            <a href="mailto:contact.yabilocation@gmail.com"><small>Email</small><strong>contact.yabilocation@gmail.com</strong></a>
+          </div>
+          <p class="contact-hours"><strong>Opening hours</strong><br>Monday to Sunday · 7am to 7pm</p>
+        </div>
+
+        <form class="quote-form" id="quote-form" data-endpoint="https://kindhearted-caiman-242.eu-west-1.convex.site/api/quotes">
+          <div class="form-heading">
+            <span>Your request</span>
+            <p>Fields marked * are required.</p>
+          </div>
+          <div class="form-row">
+            <label>Full name *<input type="text" name="name" autocomplete="name" required placeholder="Your name"></label>
+            <label>Company<input type="text" name="company" autocomplete="organization" placeholder="Company name"></label>
+          </div>
+          <div class="form-row">
+            <label>Email *<input type="email" name="email" autocomplete="email" required placeholder="vous@entreprise.be"></label>
+            <label>Phone *<input type="tel" name="phone" autocomplete="tel" required placeholder="+32 ..."></label>
+          </div>
+          <label>Preferred vehicle *
+            <select name="vehicle" id="vehicle-select" required>
+              <option value="">Select a category</option>
+              <option value="l1h1">L1H1 — 1 200 € excl. VAT/month</option>
+              <option value="master_l2h2_2023">Renault Master L2H2 2023 — 1 950 € excl. VAT/month</option>
+              <option value="citroen_l2h2_2019">Citroën Jumper L2H2 2019 — 1 500 € excl. VAT/month</option>
+              <option value="l3h2">L3H2 — 2 340 € excl. VAT/month</option>
+              <option value="fleet">Several vehicles / fleet</option>
+            </select>
+          </label>
+          <div class="form-row">
+            <label>Preferred duration *
+              <select name="duration" id="duration-select" required>
+                <option value="">Select a duration</option>
+                <option value="1_month">1 month</option>
+                <option value="2_months">2 months</option>
+                <option value="3_months">3 months</option>
+                <option value="4_6_months">4 to 6 months — 15% discount</option>
+                <option value="over_6_months">More than 6 months — 15% discount</option>
+              </select>
+            </label>
+            <label>Start date<input type="date" name="start" id="start-date"></label>
+          </div>
+          <label>Your needs<textarea name="message" rows="5" placeholder="Business activity, estimated mileage, number of vehicles..."></textarea></label>
+          <label class="hp-field" aria-hidden="true">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+          <label class="consent"><input type="checkbox" name="consent" required><span>I agree that YABI Location may use this information only to process my request and contact me. I can request access to or deletion of my data at any time by email.</span></label>
+          <button class="button button-full" type="submit">Send my request <span aria-hidden="true">→</span></button>
+          <p class="form-feedback" id="form-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-grid">
+      <div>
+        <a class="brand brand-footer" href="en.html">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="brand-copy"><strong>YABI</strong><small>LOCATION</small></span>
+        </a>
+        <p>Van rental designed for professionals.</p>
+      </div>
+      <div>
+        <h3>Navigation</h3>
+        <a href="en.html#fleet">Our fleet</a>
+        <a href="en.html#prices">Prices</a>
+        <a href="en.html#services">Services</a>
+        <a href="en.html#terms">Terms</a>
+        <a href="/contact">Français</a>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <a href="tel:+32489827677">0489 82 76 77</a>
+        <a href="tel:+32456564043">0456 56 40 43</a>
+        <a href="mailto:contact.yabilocation@gmail.com">contact.yabilocation@gmail.com</a>
+        <span>Belgium · 7 days/week, 7am–7pm</span>
+      </div>
+      <div class="footer-cta">
+        <p>Want to see vehicles and prices?</p>
+        <a class="button button-white" href="en.html#fleet">View the fleet →</a>
+      </div>
+    </div>
+    <div class="shell footer-bottom">
+      <p>© 2026 YABI Location. All rights reserved.</p>
+      <p>Prices shown excluding VAT · Subject to availability and file approval.</p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -2,6 +2,24 @@ const menuToggle = document.querySelector(".menu-toggle");
 const navLinks = document.querySelector(".nav-links");
 const menuBackdrop = document.querySelector(".menu-backdrop");
 const siteChrome = document.querySelector("#site-chrome");
+const isEnglish = document.documentElement.lang?.startsWith("en");
+const copy = isEnglish ? {
+  expand: "Expand all <span>↓</span>",
+  collapse: "Collapse all <span>↑</span>",
+  unavailable: "The quote service is temporarily unavailable. Call us on 0489 82 76 77.",
+  sending: "Sending your request securely...",
+  tooMany: "You have sent several requests. Try again in a few minutes or call us.",
+  failed: "The request could not be sent. Check your details or call us.",
+  success: (reference) => `Request sent successfully. Your reference: ${reference}.`
+} : {
+  expand: "Tout déplier <span>↓</span>",
+  collapse: "Tout replier <span>↑</span>",
+  unavailable: "Le service de devis est momentanément indisponible. Appelez-nous au 0489 82 76 77.",
+  sending: "Envoi sécurisé de votre demande...",
+  tooMany: "Vous avez envoyé plusieurs demandes. Réessayez dans quelques minutes ou appelez-nous.",
+  failed: "La demande n’a pas pu être envoyée. Vérifiez vos informations ou appelez-nous.",
+  success: (reference) => `Demande envoyée avec succès. Votre référence : ${reference}.`
+};
 
 function setMenuState(isOpen) {
   menuToggle?.setAttribute("aria-expanded", String(isOpen));
@@ -94,7 +112,7 @@ expandButton?.addEventListener("click", () => {
   document.querySelectorAll("#cgv-accordion details").forEach((detail) => {
     detail.open = allExpanded;
   });
-  expandButton.innerHTML = allExpanded ? "Tout replier <span>↑</span>" : "Tout déplier <span>↓</span>";
+  expandButton.innerHTML = allExpanded ? copy.collapse : copy.expand;
 });
 
 const quoteForm = document.querySelector("#quote-form");
@@ -113,7 +131,7 @@ quoteForm?.addEventListener("submit", async (event) => {
   if (!endpoint) {
     if (feedback) {
       feedback.className = "form-feedback is-error";
-      feedback.textContent = "Le service de devis est momentanément indisponible. Appelez-nous au 0489 82 76 77.";
+      feedback.textContent = copy.unavailable;
     }
     return;
   }
@@ -141,7 +159,7 @@ quoteForm?.addEventListener("submit", async (event) => {
   }
   if (feedback) {
     feedback.className = "form-feedback";
-    feedback.textContent = "Envoi sécurisé de votre demande…";
+    feedback.textContent = copy.sending;
   }
 
   try {
@@ -154,16 +172,16 @@ quoteForm?.addEventListener("submit", async (event) => {
 
     if (!response.ok || !result.ok) {
       if (response.status === 429) {
-        throw new Error("Vous avez envoyé plusieurs demandes. Réessayez dans quelques minutes ou appelez-nous.");
+        throw new Error(copy.tooMany);
       }
-      throw new Error("La demande n’a pas pu être envoyée. Vérifiez vos informations ou appelez-nous.");
+      throw new Error(copy.failed);
     }
 
     quoteForm.reset();
     formIdempotencyKey = crypto.randomUUID();
     if (feedback) {
       feedback.className = "form-feedback is-success";
-      feedback.textContent = `Demande envoyée avec succès. Votre référence : ${result.reference}.`;
+      feedback.textContent = copy.success(result.reference);
     }
   } catch (error) {
     if (feedback) {
