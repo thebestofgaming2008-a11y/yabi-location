@@ -29,8 +29,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260725-4">
-  <script src="script.js?v=20260725-4" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260725-5">
+  <script src="script.js?v=20260725-5" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -117,7 +117,7 @@
               <span class="availability"><i></i> On request</span>
             </div>
             <figure class="vehicle-media">
-              <img src="assets/vehicles/fiat-doblo-white.webp" width="480" height="320" loading="lazy" decoding="async" alt="White Fiat Doblò commercial van, front view">
+              <img src="assets/vehicles/fiat-doblo-white-studio-v2.jpg" width="1536" height="1024" loading="lazy" decoding="async" alt="White Fiat Doblò commercial van, front view">
             </figure>
             <p class="vehicle-model">Peugeot Partner · Fiat Doblò</p>
             <h3>L1H1</h3>
@@ -185,42 +185,106 @@
 
         <div class="fleet-gallery-heading reveal">
           <div>
-            <p class="eyebrow"><span></span> Vehicle preview</p>
-            <h3>Vehicle photos.</h3>
+            <p class="eyebrow"><span></span> View the vehicles</p>
+            <h3>The fleet in detail.</h3>
           </div>
-          <p>Model photos are shown for illustration. Colour, engine and configuration may vary depending on the available vehicle.</p>
+          <p>Select a model, then use the arrows to see every available angle. These photos match the models and colours presented by YABI Location.</p>
         </div>
 
-        <div class="fleet-gallery" aria-label="YABI Location vehicle gallery">
-          <figure class="gallery-item reveal">
-            <img src="assets/vehicles/peugeot-partner-black.webp" width="507" height="313" loading="lazy" decoding="async" alt="Black Peugeot Partner, front view">
-            <figcaption>Peugeot Partner <span>Compact format</span></figcaption>
-          </figure>
-          <figure class="gallery-item reveal">
-            <img src="assets/vehicles/renault-master-teal-rear.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Teal Renault Master, rear view">
-            <figcaption>Renault Master <span>Rear view</span></figcaption>
-          </figure>
-          <figure class="gallery-item reveal">
-            <img src="assets/vehicles/citroen-jumper-black-front.webp" width="1280" height="720" loading="lazy" decoding="async" alt="Black Citroën Jumper, front view">
-            <figcaption>Citroën Jumper <span>Black · Front view</span></figcaption>
-          </figure>
-          <figure class="gallery-item reveal">
-            <img src="assets/vehicles/citroen-jumper-black-rear.webp" width="1280" height="720" loading="lazy" decoding="async" alt="Black Citroën Jumper, rear view">
-            <figcaption>Citroën Jumper <span>Black · Rear view</span></figcaption>
-          </figure>
-          <figure class="gallery-item reveal">
-            <img src="assets/vehicles/citroen-jumper-silver-front.webp" width="1280" height="720" loading="lazy" decoding="async" alt="Grey Citroën Jumper, front view">
-            <figcaption>Citroën Jumper <span>Grey · Front view</span></figcaption>
-          </figure>
-          <figure class="gallery-item reveal">
-            <img src="assets/vehicles/citroen-jumper-silver-rear.webp" width="1280" height="720" loading="lazy" decoding="async" alt="Grey Citroën Jumper, rear view">
-            <figcaption>Citroën Jumper <span>Grey · Rear view</span></figcaption>
-          </figure>
-          <figure class="gallery-item reveal">
-            <img src="assets/vehicles/citroen-jumper-white-rear.webp" width="1280" height="720" loading="lazy" decoding="async" alt="White Citroën Jumper, rear view">
-            <figcaption>Citroën Jumper <span>White · Rear view</span></figcaption>
-          </figure>
-        </div>
+        <section class="showroom reveal" data-showroom aria-label="Interactive YABI Location vehicle gallery">
+          <div class="showroom-stage">
+            <div class="showroom-media">
+              <img id="showroom-image" src="assets/vehicles/peugeot-partner-black-studio-v2.jpg" width="1536" height="1024" loading="lazy" decoding="async" alt="Black Peugeot Partner, front view">
+              <div class="showroom-controls">
+                <button id="showroom-previous" type="button" aria-label="Previous view" disabled>‹</button>
+                <span id="showroom-view-count" aria-live="polite">1 / 1</span>
+                <button id="showroom-next" type="button" aria-label="Next view" disabled>›</button>
+              </div>
+            </div>
+            <div class="showroom-copy" aria-live="polite">
+              <p class="showroom-format" id="showroom-format">L1H1 · Compact</p>
+              <h4 id="showroom-name">Peugeot Partner</h4>
+              <p class="showroom-meta" id="showroom-meta">Black · Front view</p>
+              <div class="showroom-price">
+                <small>From</small>
+                <strong id="showroom-price">1 200&nbsp;€</strong>
+                <span>excl. VAT / month</span>
+              </div>
+              <button class="button select-vehicle" id="showroom-quote" type="button" data-vehicle="l1h1">Choose this vehicle <span aria-hidden="true">→</span></button>
+              <p class="showroom-note">Availability and the exact configuration are confirmed in your quote.</p>
+            </div>
+          </div>
+
+          <div class="showroom-picker-head">
+            <strong>Choose a vehicle</strong>
+            <span>Tap a photo</span>
+          </div>
+          <div class="showroom-picker" role="list">
+            <button class="showroom-choice is-active" type="button" aria-pressed="true" role="listitem"
+              data-gallery-srcs="assets/vehicles/peugeot-partner-black-studio-v2.jpg"
+              data-gallery-alts="Black Peugeot Partner, front view"
+              data-gallery-views="Front view"
+              data-gallery-name="Peugeot Partner" data-gallery-format="L1H1 · Compact" data-gallery-color="Black"
+              data-gallery-price="1 200 €" data-gallery-vehicle="l1h1">
+              <img src="assets/vehicles/peugeot-partner-black-studio-v2.jpg" width="1536" height="1024" loading="lazy" decoding="async" alt="">
+              <span><strong>Partner</strong><small>Black</small></span>
+            </button>
+            <button class="showroom-choice" type="button" aria-pressed="false" role="listitem"
+              data-gallery-srcs="assets/vehicles/fiat-doblo-white-studio-v2.jpg"
+              data-gallery-alts="White Fiat Doblò, front view"
+              data-gallery-views="Front view"
+              data-gallery-name="Fiat Doblò" data-gallery-format="L1H1 · Compact" data-gallery-color="White"
+              data-gallery-price="1 200 €" data-gallery-vehicle="l1h1">
+              <img src="assets/vehicles/fiat-doblo-white-studio-v2.jpg" width="1536" height="1024" loading="lazy" decoding="async" alt="">
+              <span><strong>Doblò</strong><small>White</small></span>
+            </button>
+            <button class="showroom-choice" type="button" aria-pressed="false" role="listitem"
+              data-gallery-srcs="assets/vehicles/renault-master-teal-front.webp|assets/vehicles/renault-master-teal-rear.webp"
+              data-gallery-alts="Teal Renault Master, front view|Teal Renault Master, rear view"
+              data-gallery-views="Front view|Rear view"
+              data-gallery-name="Renault Master" data-gallery-format="L2H2 · 2023" data-gallery-color="Teal"
+              data-gallery-price="1 950 €" data-gallery-vehicle="master_l2h2_2023">
+              <img src="assets/vehicles/renault-master-teal-front.webp" width="1600" height="824" loading="lazy" decoding="async" alt="">
+              <span><strong>Master</strong><small>Teal</small></span>
+            </button>
+            <button class="showroom-choice" type="button" aria-pressed="false" role="listitem"
+              data-gallery-srcs="assets/vehicles/citroen-jumper-black-front.webp|assets/vehicles/citroen-jumper-black-rear.webp"
+              data-gallery-alts="Black Citroën Jumper, front view|Black Citroën Jumper, rear view"
+              data-gallery-views="Front view|Rear view"
+              data-gallery-name="Citroën Jumper" data-gallery-format="L2H2 · 2019" data-gallery-color="Black"
+              data-gallery-price="1 500 €" data-gallery-vehicle="citroen_l2h2_2019">
+              <img src="assets/vehicles/citroen-jumper-black-front.webp" width="1280" height="720" loading="lazy" decoding="async" alt="">
+              <span><strong>Jumper</strong><small>Black</small></span>
+            </button>
+            <button class="showroom-choice" type="button" aria-pressed="false" role="listitem"
+              data-gallery-srcs="assets/vehicles/citroen-jumper-silver-front.webp|assets/vehicles/citroen-jumper-silver-rear.webp"
+              data-gallery-alts="Grey Citroën Jumper, front view|Grey Citroën Jumper, rear view"
+              data-gallery-views="Front view|Rear view"
+              data-gallery-name="Citroën Jumper" data-gallery-format="L2H2 · 2019" data-gallery-color="Grey"
+              data-gallery-price="1 500 €" data-gallery-vehicle="citroen_l2h2_2019">
+              <img src="assets/vehicles/citroen-jumper-silver-front.webp" width="1280" height="720" loading="lazy" decoding="async" alt="">
+              <span><strong>Jumper</strong><small>Grey</small></span>
+            </button>
+            <button class="showroom-choice" type="button" aria-pressed="false" role="listitem"
+              data-gallery-srcs="assets/vehicles/citroen-jumper-white-front.webp|assets/vehicles/citroen-jumper-white-rear.webp"
+              data-gallery-alts="White Citroën Jumper, front view|White Citroën Jumper, rear view"
+              data-gallery-views="Front view|Rear view"
+              data-gallery-name="Citroën Jumper" data-gallery-format="L2H2 · 2019" data-gallery-color="White"
+              data-gallery-price="1 500 €" data-gallery-vehicle="citroen_l2h2_2019">
+              <img src="assets/vehicles/citroen-jumper-white-front.webp" width="1280" height="720" loading="lazy" decoding="async" alt="">
+              <span><strong>Jumper</strong><small>White</small></span>
+            </button>
+            <button class="showroom-choice" type="button" aria-pressed="false" role="listitem"
+              data-gallery-srcs="assets/vehicles/peugeot-boxer-silver.webp"
+              data-gallery-alts="Grey Peugeot Boxer, front view"
+              data-gallery-views="Front view"
+              data-gallery-name="Peugeot Boxer" data-gallery-format="L3H2 · Large volume" data-gallery-color="Grey"
+              data-gallery-price="2 340 €" data-gallery-vehicle="l3h2">
+              <img src="assets/vehicles/peugeot-boxer-silver.webp" width="1600" height="1066" loading="lazy" decoding="async" alt="">
+              <span><strong>Boxer</strong><small>Grey</small></span>
+            </button>
+          </div>
+        </section>
       </div>
     </section>
 
