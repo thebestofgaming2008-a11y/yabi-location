@@ -25,7 +25,7 @@ function allowedOrigin(request: Request): string | null {
   if (!origin) return null;
 
   const configured = (process.env.CLIENT_ORIGIN ??
-    "https://development.yabi-location.pages.dev")
+    "https://yabi-location.pages.dev")
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean);
