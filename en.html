@@ -29,8 +29,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260725-7">
-  <script src="script.js?v=20260725-7" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260725-8">
+  <script src="script.js?v=20260725-8" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -109,7 +109,169 @@
           <p>Tradesperson, courier, company or independent professional: choose the format that fits your load and your working environment.</p>
         </div>
 
-        <div class="fleet-grid">
+        <div class="fleet-guide" aria-label="Van size guide">
+          <p class="fleet-guide-intro">Simply choose based on what you need to carry.</p>
+          <div class="fleet-guide-options">
+            <div><span>01</span><strong>L1H1</strong><small>City &amp; small deliveries</small></div>
+            <div><span>02</span><strong>L2H2</strong><small>Everyday professional use</small></div>
+            <div><span>03</span><strong>L3H2</strong><small>Large loads</small></div>
+          </div>
+        </div>
+
+        <div class="fleet-shop-grid">
+          <article class="rental-card">
+            <figure class="rental-card-media">
+              <img src="assets/vehicles/storefront/peugeot-partner-black-front.webp" width="1448" height="1086" loading="lazy" decoding="async" alt="Black Peugeot Partner Tepee L1H1, front view">
+              <span class="rental-format">L1H1</span>
+            </figure>
+            <div class="rental-card-body">
+              <div class="rental-card-heading">
+                <div>
+                  <p>Peugeot · 2018</p>
+                  <h3>Partner Tepee</h3>
+                </div>
+                <span class="availability"><i></i> On request</span>
+              </div>
+              <p class="rental-use"><strong>Best for</strong> city jobs, small parcels and quick local trips.</p>
+              <ul class="rental-specs" aria-label="Key features">
+                <li>Compact</li><li>City-friendly</li><li>Black</li>
+              </ul>
+              <div class="rental-card-footer">
+                <p class="rental-price"><small>From</small><strong>€1,200</strong><span>excl. VAT / month</span></p>
+                <button class="button rental-cta select-vehicle" type="button">Request a quote <span aria-hidden="true">→</span></button>
+              </div>
+            </div>
+          </article>
+
+          <article class="rental-card">
+            <figure class="rental-card-media">
+              <img src="assets/vehicles/storefront/fiat-doblo-white-front.webp" width="1402" height="1122" loading="lazy" decoding="async" alt="White Fiat Doblò Cargo L1H1, front view">
+              <span class="rental-format">L1H1</span>
+            </figure>
+            <div class="rental-card-body">
+              <div class="rental-card-heading">
+                <div>
+                  <p>Fiat · 2018</p>
+                  <h3>Doblò Cargo</h3>
+                </div>
+                <span class="availability"><i></i> On request</span>
+              </div>
+              <p class="rental-use"><strong>Best for</strong> light deliveries, tradespeople and city-centre routes.</p>
+              <ul class="rental-specs" aria-label="Key features">
+                <li>Compact</li><li>Cargo</li><li>White</li>
+              </ul>
+              <div class="rental-card-footer">
+                <p class="rental-price"><small>From</small><strong>€1,200</strong><span>excl. VAT / month</span></p>
+                <button class="button rental-cta select-vehicle" type="button">Request a quote <span aria-hidden="true">→</span></button>
+              </div>
+            </div>
+          </article>
+
+          <article class="rental-card rental-card-popular">
+            <figure class="rental-card-media rental-card-media-wide">
+              <img src="assets/vehicles/storefront/renault-master-teal-front.webp" width="1672" height="941" loading="lazy" decoding="async" alt="2023 teal Renault Master L2H2, front view">
+              <span class="rental-format">L2H2</span>
+              <span class="rental-popular">Most requested</span>
+            </figure>
+            <div class="rental-card-body">
+              <div class="rental-card-heading">
+                <div>
+                  <p>Renault · 2023</p>
+                  <h3>Master</h3>
+                </div>
+                <span class="availability"><i></i> Available</span>
+              </div>
+              <p class="rental-use"><strong>Best for</strong> daily work with more cargo space and easy handling.</p>
+              <ul class="rental-specs" aria-label="Key features">
+                <li>Standard</li><li>2023 model</li><li>Teal</li>
+              </ul>
+              <div class="rental-card-footer">
+                <p class="rental-price"><small>From</small><strong>€1,950</strong><span>excl. VAT / month</span></p>
+                <button class="button rental-cta select-vehicle" type="button">Request a quote <span aria-hidden="true">→</span></button>
+              </div>
+            </div>
+          </article>
+
+          <article class="rental-card">
+            <figure class="rental-card-media rental-card-media-wide">
+              <img src="assets/vehicles/storefront/citroen-jumper-black-front.webp" width="1672" height="941" loading="lazy" decoding="async" alt="2019 black Citroën Jumper L2H2, front view">
+              <span class="rental-format">L2H2</span>
+            </figure>
+            <div class="rental-card-body">
+              <div class="rental-card-heading">
+                <div>
+                  <p>Citroën · 2019</p>
+                  <h3>Jumper</h3>
+                </div>
+                <span class="availability"><i></i> Available</span>
+              </div>
+              <p class="rental-use"><strong>Best for</strong> regular routes and medium-term professional jobs.</p>
+              <ul class="rental-specs" aria-label="Key features">
+                <li>Best value</li><li>2019 model</li><li>3 colours</li>
+              </ul>
+              <div class="rental-colours" aria-label="Available colours">
+                <span class="colour-dot colour-black" title="Black"></span>
+                <span class="colour-dot colour-silver" title="Silver"></span>
+                <span class="colour-dot colour-white" title="White"></span>
+                <small>Black, silver or white</small>
+              </div>
+              <div class="rental-card-footer">
+                <p class="rental-price"><small>From</small><strong>€1,500</strong><span>excl. VAT / month</span></p>
+                <button class="button rental-cta select-vehicle" type="button">Request a quote <span aria-hidden="true">→</span></button>
+              </div>
+            </div>
+          </article>
+
+          <article class="rental-card">
+            <figure class="rental-card-media rental-card-media-wide">
+              <img src="assets/vehicles/storefront/renault-master-teal-rear.webp" width="1672" height="941" loading="lazy" decoding="async" alt="2023 teal Renault Master L3H2, rear view">
+              <span class="rental-format">L3H2</span>
+            </figure>
+            <div class="rental-card-body">
+              <div class="rental-card-heading">
+                <div>
+                  <p>Renault · 2023</p>
+                  <h3>Master</h3>
+                </div>
+                <span class="availability"><i></i> Available</span>
+              </div>
+              <p class="rental-use"><strong>Best for</strong> large loads, removals and intensive delivery days.</p>
+              <ul class="rental-specs" aria-label="Key features">
+                <li>Large volume</li><li>2023 model</li><li>Teal</li>
+              </ul>
+              <div class="rental-card-footer">
+                <p class="rental-price"><small>From</small><strong>€2,340</strong><span>excl. VAT / month</span></p>
+                <button class="button rental-cta select-vehicle" type="button">Request a quote <span aria-hidden="true">→</span></button>
+              </div>
+            </div>
+          </article>
+
+          <article class="rental-card">
+            <figure class="rental-card-media">
+              <img src="assets/vehicles/storefront/peugeot-boxer-silver-front.webp" width="1448" height="1086" loading="lazy" decoding="async" alt="2019 silver Peugeot Boxer L3H2, front view">
+              <span class="rental-format">L3H2</span>
+            </figure>
+            <div class="rental-card-body">
+              <div class="rental-card-heading">
+                <div>
+                  <p>Peugeot · 2019</p>
+                  <h3>Boxer</h3>
+                </div>
+                <span class="availability"><i></i> Available</span>
+              </div>
+              <p class="rental-use"><strong>Best for</strong> high-volume transport and longer professional assignments.</p>
+              <ul class="rental-specs" aria-label="Key features">
+                <li>Large volume</li><li>2019 model</li><li>Silver</li>
+              </ul>
+              <div class="rental-card-footer">
+                <p class="rental-price"><small>From</small><strong>€2,340</strong><span>excl. VAT / month</span></p>
+                <button class="button rental-cta select-vehicle" type="button">Request a quote <span aria-hidden="true">→</span></button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="fleet-grid" hidden>
           <article class="vehicle-card reveal">
             <div class="vehicle-index">01</div>
             <div class="vehicle-top">
@@ -183,7 +345,7 @@
           </article>
         </div>
 
-        <div class="fleet-gallery-heading reveal">
+        <div class="fleet-gallery-heading reveal" hidden>
           <div>
             <p class="eyebrow"><span></span> View the vehicles</p>
             <h3>The fleet in detail.</h3>
@@ -191,7 +353,7 @@
           <p>Select a model, then use the arrows to see every available angle. These photos match the models and colours presented by YABI Location.</p>
         </div>
 
-        <section class="showroom reveal" data-showroom aria-label="Interactive YABI Location vehicle gallery">
+        <section class="showroom reveal" data-showroom aria-label="Interactive YABI Location vehicle gallery" hidden>
           <div class="showroom-stage">
             <div class="showroom-media">
               <img id="showroom-image" src="assets/vehicles/peugeot-partner-black-client-restored.webp" width="1597" height="985" loading="lazy" decoding="async" alt="Black Peugeot Partner Tepee, front view">

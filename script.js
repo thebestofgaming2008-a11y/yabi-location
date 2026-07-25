@@ -94,68 +94,6 @@ document.querySelectorAll(".select-vehicle").forEach((button) => {
   });
 });
 
-const showroom = document.querySelector("[data-showroom]");
-if (showroom) {
-  const choices = [...showroom.querySelectorAll(".showroom-choice")];
-  const image = showroom.querySelector("#showroom-image");
-  const previous = showroom.querySelector("#showroom-previous");
-  const next = showroom.querySelector("#showroom-next");
-  const count = showroom.querySelector("#showroom-view-count");
-  const name = showroom.querySelector("#showroom-name");
-  const format = showroom.querySelector("#showroom-format");
-  const meta = showroom.querySelector("#showroom-meta");
-  const price = showroom.querySelector("#showroom-price");
-  const quote = showroom.querySelector("#showroom-quote");
-  let activeChoice = choices[0];
-  let activeView = 0;
-
-  const getList = (key) => (activeChoice?.dataset[key] || "").split("|").filter(Boolean);
-
-  const renderView = () => {
-    const sources = getList("gallerySrcs");
-    const alts = getList("galleryAlts");
-    const views = getList("galleryViews");
-    if (!sources.length || !image) return;
-
-    activeView = (activeView + sources.length) % sources.length;
-    image.src = sources[activeView];
-    image.alt = alts[activeView] || activeChoice.dataset.galleryName || "";
-    if (meta) {
-      meta.textContent = [activeChoice.dataset.galleryColor, views[activeView]]
-        .filter(Boolean)
-        .join(" · ");
-    }
-    if (count) count.textContent = `${activeView + 1} / ${sources.length}`;
-    if (previous) previous.disabled = sources.length < 2;
-    if (next) next.disabled = sources.length < 2;
-  };
-
-  const selectChoice = (choice) => {
-    activeChoice = choice;
-    activeView = 0;
-    choices.forEach((item) => {
-      const selected = item === choice;
-      item.classList.toggle("is-active", selected);
-      item.setAttribute("aria-pressed", String(selected));
-    });
-    if (name) name.textContent = choice.dataset.galleryName || "";
-    if (format) format.textContent = choice.dataset.galleryFormat || "";
-    if (price) price.textContent = choice.dataset.galleryPrice || "";
-    if (quote) quote.dataset.vehicle = choice.dataset.galleryVehicle || "";
-    renderView();
-  };
-
-  choices.forEach((choice) => choice.addEventListener("click", () => selectChoice(choice)));
-  previous?.addEventListener("click", () => {
-    activeView -= 1;
-    renderView();
-  });
-  next?.addEventListener("click", () => {
-    activeView += 1;
-    renderView();
-  });
-}
-
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
