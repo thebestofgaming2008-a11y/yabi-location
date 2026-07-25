@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Contactez YABI Location pour une offre de location mensuelle d’un véhicule utilitaire en Belgique.">
+  <meta name="theme-color" content="#072e67">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_BE">
+  <meta property="og:site_name" content="YABI Location">
+  <meta property="og:title" content="Contactez YABI Location">
+  <meta property="og:description" content="Décrivez votre besoin et recevez une offre personnalisée pour votre véhicule utilitaire.">
+  <meta property="og:image" content="https://yabi-location.pages.dev/assets/fleet-social.jpg">
+  <meta property="og:url" content="https://yabi-location.pages.dev/contact">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://yabi-location.pages.dev/contact">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <title>Contact et devis | YABI Location</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20260725-2">
+  <script src="script.js?v=20260725-2" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Aller au contenu</a>
+
+  <div class="site-chrome" id="site-chrome">
+    <div class="offer-bar">
+      <p><strong>–15&nbsp;%</strong> sur votre loyer mensuel dès 4 mois de location</p>
+    </div>
+
+    <header class="site-header" id="accueil">
+      <nav class="nav shell" aria-label="Navigation principale">
+        <a class="brand brand-original" href="index.html" aria-label="YABI Location, accueil">
+          <img class="brand-logo" src="assets/yabi-logo.webp" width="96" height="76" alt="YABI Location">
+        </a>
+
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-links">
+          <span></span><span></span><span></span>
+          <span class="sr-only">Ouvrir le menu</span>
+        </button>
+
+        <div class="nav-links" id="nav-links">
+          <a href="index.html#flotte">La flotte</a>
+          <a href="index.html#tarifs">Tarifs</a>
+          <a href="index.html#services">Services</a>
+          <a href="index.html#cgv">CGV</a>
+          <a class="nav-contact" href="/contact" aria-current="page">Contactez-nous</a>
+          <a class="button button-sm" href="#contact-form">Demander un devis</a>
+        </div>
+      </nav>
+    </header>
+  </div>
+  <button class="menu-backdrop" type="button" aria-label="Fermer le menu" tabindex="-1"></button>
+
+  <main id="main">
+    <section class="contact-hero">
+      <div class="shell contact-hero-grid">
+        <p class="eyebrow eyebrow-light"><span></span> Contact direct · Belgique</p>
+        <h1>Parlons de votre<br><em>prochain véhicule.</em></h1>
+        <p class="contact-hero-copy">Un seul utilitaire ou plusieurs véhicules&nbsp;: décrivez-nous votre mission, votre durée et votre volume. Notre équipe vous répond avec une proposition claire et adaptée.</p>
+      </div>
+    </section>
+
+    <section class="contact-page-section" id="contact-form">
+      <div class="shell contact-page-grid">
+        <div class="contact-panel">
+          <p class="eyebrow"><span></span> Nous contacter</p>
+          <h2>Un interlocuteur,<br>des réponses claires.</h2>
+          <p>Vous préférez échanger directement&nbsp;? Appelez-nous ou écrivez-nous. Nous sommes disponibles tous les jours.</p>
+          <div class="contact-cards">
+            <a href="tel:+32489827677"><small>Téléphone principal</small><strong>0489 82 76 77</strong></a>
+            <a href="tel:+32456564043"><small>Deuxième numéro</small><strong>0456 56 40 43</strong></a>
+            <a href="mailto:contact.yabilocation@gmail.com"><small>E-mail</small><strong>contact.yabilocation@gmail.com</strong></a>
+          </div>
+          <p class="contact-hours"><strong>Horaires</strong><br>Lundi au dimanche · 7h00 à 19h00</p>
+        </div>
+
+        <form class="quote-form" id="quote-form" data-endpoint="https://kindhearted-caiman-242.eu-west-1.convex.site/api/quotes">
+          <div class="form-heading">
+            <span>Votre demande</span>
+            <p>Les champs marqués * sont obligatoires.</p>
+          </div>
+          <div class="form-row">
+            <label>Nom complet *<input type="text" name="name" autocomplete="name" required placeholder="Votre nom"></label>
+            <label>Entreprise<input type="text" name="company" autocomplete="organization" placeholder="Nom de l’entreprise"></label>
+          </div>
+          <div class="form-row">
+            <label>E-mail *<input type="email" name="email" autocomplete="email" required placeholder="vous@entreprise.be"></label>
+            <label>Téléphone *<input type="tel" name="phone" autocomplete="tel" required placeholder="+32 ..."></label>
+          </div>
+          <label>Véhicule souhaité *
+            <select name="vehicle" id="vehicle-select" required>
+              <option value="">Sélectionnez une catégorie</option>
+              <option value="l1h1">L1H1 — 1 200 € HTVA/mois</option>
+              <option value="master_l2h2_2023">Renault Master L2H2 2023 — 1 950 € HTVA/mois</option>
+              <option value="citroen_l2h2_2019">Citroën Jumper L2H2 2019 — 1 500 € HTVA/mois</option>
+              <option value="l3h2">L3H2 — 2 340 € HTVA/mois</option>
+              <option value="fleet">Plusieurs véhicules / flotte</option>
+            </select>
+          </label>
+          <div class="form-row">
+            <label>Durée souhaitée *
+              <select name="duration" id="duration-select" required>
+                <option value="">Sélectionnez une durée</option>
+                <option value="1_month">1 mois</option>
+                <option value="2_months">2 mois</option>
+                <option value="3_months">3 mois</option>
+                <option value="4_6_months">4 à 6 mois — réduction de 15 %</option>
+                <option value="over_6_months">Plus de 6 mois — réduction de 15 %</option>
+              </select>
+            </label>
+            <label>Date de début<input type="date" name="start" id="start-date"></label>
+          </div>
+          <label>Votre besoin<textarea name="message" rows="5" placeholder="Activité, kilométrage estimé, nombre de véhicules..."></textarea></label>
+          <label class="hp-field" aria-hidden="true">Site web<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+          <label class="consent"><input type="checkbox" name="consent" required><span>J’accepte que YABI Location utilise ces informations uniquement pour traiter ma demande et me recontacter. Je peux demander l’accès ou la suppression de mes données à tout moment par e-mail.</span></label>
+          <button class="button button-full" type="submit">Envoyer ma demande <span aria-hidden="true">→</span></button>
+          <p class="form-feedback" id="form-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-grid">
+      <div>
+        <a class="brand brand-footer" href="index.html">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="brand-copy"><strong>YABI</strong><small>LOCATION</small></span>
+        </a>
+        <p>La location d’utilitaires pensée pour les professionnels.</p>
+      </div>
+      <div>
+        <h3>Navigation</h3>
+        <a href="index.html#flotte">Notre flotte</a>
+        <a href="index.html#tarifs">Tarifs</a>
+        <a href="index.html#services">Services</a>
+        <a href="index.html#cgv">CGV</a>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <a href="tel:+32489827677">0489 82 76 77</a>
+        <a href="tel:+32456564043">0456 56 40 43</a>
+        <a href="mailto:contact.yabilocation@gmail.com">contact.yabilocation@gmail.com</a>
+        <span>Belgique · 7j/7, 7h–19h</span>
+      </div>
+      <div class="footer-cta">
+        <p>Voir les véhicules et tarifs&nbsp;?</p>
+        <a class="button button-white" href="index.html#flotte">Découvrir la flotte →</a>
+      </div>
+    </div>
+    <div class="shell footer-bottom">
+      <p>© 2026 YABI Location. Tous droits réservés.</p>
+      <p>Tarifs affichés hors TVA · Sous réserve de disponibilité et d’acceptation du dossier.</p>
+    </div>
+  </footer>
+</body>
+</html>

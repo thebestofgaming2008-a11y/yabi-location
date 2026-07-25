@@ -1,18 +1,63 @@
 const menuToggle = document.querySelector(".menu-toggle");
 const navLinks = document.querySelector(".nav-links");
+const menuBackdrop = document.querySelector(".menu-backdrop");
+const siteChrome = document.querySelector("#site-chrome");
+
+function setMenuState(isOpen) {
+  menuToggle?.setAttribute("aria-expanded", String(isOpen));
+  navLinks?.classList.toggle("open", isOpen);
+  menuBackdrop?.classList.toggle("is-visible", isOpen);
+  document.body.classList.toggle("menu-open", isOpen);
+  siteChrome?.classList.remove("notice-hidden");
+}
 
 menuToggle?.addEventListener("click", () => {
-  const isOpen = menuToggle.getAttribute("aria-expanded") === "true";
-  menuToggle.setAttribute("aria-expanded", String(!isOpen));
-  navLinks?.classList.toggle("open", !isOpen);
+  setMenuState(menuToggle.getAttribute("aria-expanded") !== "true");
 });
 
 navLinks?.querySelectorAll("a").forEach((link) => {
-  link.addEventListener("click", () => {
-    navLinks.classList.remove("open");
-    menuToggle?.setAttribute("aria-expanded", "false");
-  });
+  link.addEventListener("click", () => setMenuState(false));
 });
+
+menuBackdrop?.addEventListener("click", () => setMenuState(false));
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && menuToggle?.getAttribute("aria-expanded") === "true") {
+    setMenuState(false);
+    menuToggle.focus();
+  }
+});
+
+window.addEventListener("resize", () => {
+  if (window.innerWidth > 980) setMenuState(false);
+});
+
+let previousScrollY = window.scrollY;
+let scrollFrameRequested = false;
+
+function updateHeaderOnScroll() {
+  const currentScrollY = Math.max(window.scrollY, 0);
+  const movement = currentScrollY - previousScrollY;
+  const menuIsOpen = menuToggle?.getAttribute("aria-expanded") === "true";
+
+  if (!menuIsOpen) {
+    if (currentScrollY < 20 || movement < -5) {
+      siteChrome?.classList.remove("notice-hidden");
+    } else if (movement > 5 && currentScrollY > 80) {
+      siteChrome?.classList.add("notice-hidden");
+    }
+  }
+
+  previousScrollY = currentScrollY;
+  scrollFrameRequested = false;
+}
+
+window.addEventListener("scroll", () => {
+  if (!scrollFrameRequested) {
+    scrollFrameRequested = true;
+    window.requestAnimationFrame(updateHeaderOnScroll);
+  }
+}, { passive: true });
 
 const startDate = document.querySelector("#start-date");
 if (startDate) {
