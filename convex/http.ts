@@ -1,6 +1,19 @@
 import { httpRouter } from "convex/server";
 import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
+import {
+  portalAdmin,
+  portalBootstrap,
+  portalData,
+  portalLogin,
+  portalLogout,
+  portalMediaCallback,
+  portalOptions,
+  portalProfile,
+  portalRecordMedia,
+  portalUpload,
+  portalWorkflow,
+} from "./portalHttp";
 
 const http = httpRouter();
 
@@ -249,5 +262,54 @@ http.route({
     jsonResponse({ ok: true, service: "yabi-location-api" }, 200, null),
   ),
 });
+
+http.route({ path: "/api/portal/login", method: "POST", handler: portalLogin });
+http.route({ path: "/api/portal/logout", method: "POST", handler: portalLogout });
+http.route({ path: "/api/portal/data", method: "GET", handler: portalData });
+http.route({ path: "/api/portal/admin", method: "POST", handler: portalAdmin });
+http.route({
+  path: "/api/portal/profile",
+  method: "POST",
+  handler: portalProfile,
+});
+http.route({
+  path: "/api/portal/workflows",
+  method: "POST",
+  handler: portalWorkflow,
+});
+http.route({
+  path: "/api/portal/uploads",
+  method: "POST",
+  handler: portalUpload,
+});
+http.route({
+  path: "/api/portal/record-media",
+  method: "POST",
+  handler: portalRecordMedia,
+});
+http.route({
+  path: "/api/portal/bootstrap",
+  method: "POST",
+  handler: portalBootstrap,
+});
+http.route({
+  path: "/api/portal/media-callback",
+  method: "POST",
+  handler: portalMediaCallback,
+});
+
+for (const path of [
+  "/api/portal/login",
+  "/api/portal/logout",
+  "/api/portal/data",
+  "/api/portal/admin",
+  "/api/portal/profile",
+  "/api/portal/workflows",
+  "/api/portal/uploads",
+  "/api/portal/record-media",
+  "/api/portal/bootstrap",
+]) {
+  http.route({ path, method: "OPTIONS", handler: portalOptions });
+}
 
 export default http;

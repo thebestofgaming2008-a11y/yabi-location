@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "yabi-ops-media",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-28",
+  "workers_dev": true,
+  "vars": {
+    "CONVEX_CALLBACK_URL": "https://kindhearted-caiman-242.eu-west-1.convex.site/api/portal/media-callback",
+    "ALLOWED_ORIGINS": "https://yabi-location.pages.dev,http://localhost:4173,http://127.0.0.1:4173"
+  },
+  "r2_buckets": [
+    {
+      "binding": "MEDIA_BUCKET",
+      "bucket_name": "yabi-ops-media-dev"
+    }
+  ]
+}

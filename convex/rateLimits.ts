@@ -22,3 +22,19 @@ export const quoteRateLimiter = new RateLimiter(components.rateLimiter, {
     capacity: 3,
   },
 });
+
+export const portalRateLimiter = new RateLimiter(components.rateLimiter, {
+  portalLoginGlobal: {
+    kind: "token bucket",
+    rate: 200,
+    period: MINUTE,
+    capacity: 300,
+    shards: 10,
+  },
+  portalLoginByFingerprint: {
+    kind: "fixed window",
+    rate: 8,
+    period: 15 * MINUTE,
+    capacity: 8,
+  },
+});

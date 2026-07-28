@@ -10,6 +10,8 @@
 
 import type * as emails from "../emails.js";
 import type * as http from "../http.js";
+import type * as portal from "../portal.js";
+import type * as portalHttp from "../portalHttp.js";
 import type * as quoteRequests from "../quoteRequests.js";
 import type * as rateLimits from "../rateLimits.js";
 
@@ -22,6 +24,8 @@ import type {
 declare const fullApi: ApiFromModules<{
   emails: typeof emails;
   http: typeof http;
+  portal: typeof portal;
+  portalHttp: typeof portalHttp;
   quoteRequests: typeof quoteRequests;
   rateLimits: typeof rateLimits;
 }>;
