@@ -1,5 +1,415 @@
 const API_BASE = document.body.dataset.apiBase.replace(/\/$/, "");
 const TOKEN_KEY = "yabi_portal_session";
+const LANGUAGE_KEY = "yabi_portal_language";
+const supportedLanguages = ["en", "fr", "nl"];
+const languageLocales = { en: "en-BE", fr: "fr-BE", nl: "nl-BE" };
+
+const translations = {
+  fr: {
+    "Skip to content": "Aller au contenu",
+    "Sign in": "Connexion",
+    "Use your personal access code.": "Utilisez votre code d’accès personnel.",
+    "Access code": "Code d’accès",
+    Continue: "Continuer",
+    "Public website": "Site public",
+    "Sign out": "Déconnexion",
+    Loading: "Chargement",
+    "Loading…": "Chargement…",
+    Language: "Langue",
+    "Open navigation": "Ouvrir le menu",
+    "Close navigation": "Fermer le menu",
+    Close: "Fermer",
+    Administrator: "Administrateur",
+    Employee: "Employé",
+    Customer: "Client",
+    Mechanic: "Mécanicien",
+    "External worker": "Prestataire externe",
+    "Customer space": "Espace client",
+    Operations: "Opérations",
+    Overview: "Vue d’ensemble",
+    "Access & roles": "Accès et rôles",
+    Customers: "Clients",
+    Fleet: "Flotte",
+    Rentals: "Locations",
+    "Audit trail": "Journal d’audit",
+    "My details": "Mes données",
+    Available: "Disponible",
+    Reserved: "Réservé",
+    Rented: "Loué",
+    Cleaning: "Nettoyage",
+    Inactive: "Inactif",
+    "Active rentals": "Locations actives",
+    "Open reports": "Signalements ouverts",
+    Today: "Aujourd’hui",
+    "My rentals": "Mes locations",
+    Active: "Actif",
+    "Recent operations": "Opérations récentes",
+    "View all": "Tout voir",
+    "Quick actions": "Actions rapides",
+    Access: "Accès",
+    Rental: "Location",
+    Report: "Signalement",
+    "Check in": "Entrée",
+    "Check out": "Sortie",
+    Wash: "Lavage",
+    Maintenance: "Entretien",
+    "Take vehicle": "Prendre le véhicule",
+    "Return vehicle": "Restituer le véhicule",
+    "Customer details": "Informations client",
+    "Vehicle check-in": "Entrée du véhicule",
+    "Vehicle check-out": "Sortie du véhicule",
+    "Wash vehicle": "Laver le véhicule",
+    "Vehicle taken": "Véhicule pris",
+    "Vehicle returned": "Véhicule restitué",
+    "Report an issue": "Signaler un problème",
+    "Recorded operations": "Opérations enregistrées",
+    Person: "Personne",
+    Role: "Rôle",
+    Status: "Statut",
+    "Last sign-in": "Dernière connexion",
+    "New code": "Nouveau code",
+    Disable: "Désactiver",
+    Enable: "Activer",
+    Email: "E-mail",
+    Phone: "Téléphone",
+    Address: "Adresse",
+    Vehicle: "Véhicule",
+    Format: "Format",
+    Year: "Année",
+    Colour: "Couleur",
+    Mileage: "Kilométrage",
+    Update: "Modifier",
+    Reference: "Référence",
+    Period: "Période",
+    Price: "Prix",
+    Operation: "Opération",
+    Date: "Date",
+    View: "Voir",
+    Resolve: "Résoudre",
+    "Create access": "Créer l’accès",
+    "Add customer": "Ajouter un client",
+    "Add vehicle": "Ajouter un véhicule",
+    "Create rental": "Créer la location",
+    "No accounts": "Aucun compte",
+    "No customers": "Aucun client",
+    "No vehicles": "Aucun véhicule",
+    "No rentals": "Aucune location",
+    "No operations recorded": "Aucune opération enregistrée",
+    "No audit events": "Aucun événement d’audit",
+    "Profile not linked": "Profil non lié",
+    Save: "Enregistrer",
+    Cancel: "Annuler",
+    Done: "Terminé",
+    "Display name": "Nom affiché",
+    "Linked customer": "Client lié",
+    "Choose…": "Choisir…",
+    "Choose a value.": "Sélectionnez une valeur.",
+    "Full name": "Nom complet",
+    Company: "Entreprise",
+    "Internal notes": "Notes internes",
+    "Licence plate": "Plaque d’immatriculation",
+    Make: "Marque",
+    Model: "Modèle",
+    "Current mileage": "Kilométrage actuel",
+    "Fuel level (%)": "Niveau de carburant (%)",
+    "Start date": "Date de début",
+    "Expected end date": "Date de fin prévue",
+    "Monthly price excl. VAT (€)": "Prix mensuel hors TVA (€)",
+    "Deposit (€)": "Caution (€)",
+    "Mileage allowance": "Kilométrage inclus",
+    "Update status": "Modifier le statut",
+    "Operational status": "Statut opérationnel",
+    "Vehicle (optional)": "Véhicule (facultatif)",
+    "Rental (optional)": "Location (facultatif)",
+    Category: "Catégorie",
+    Priority: "Priorité",
+    Damage: "Dommage",
+    Mechanical: "Mécanique",
+    Administrative: "Administratif",
+    Request: "Demande",
+    Other: "Autre",
+    Low: "Faible",
+    Normal: "Normale",
+    Urgent: "Urgente",
+    "What happened?": "Que s’est-il passé ?",
+    "Photos or evidence": "Photos ou preuves",
+    "Customer signature": "Signature du client",
+    Clear: "Effacer",
+    "Work completed": "Travaux effectués",
+    "Parts or settings changed": "Pièces ou réglages modifiés",
+    Evidence: "Preuves",
+    "Person's full name": "Nom complet de la personne",
+    "Vehicle condition photos": "Photos de l’état du véhicule",
+    "Customer selfie (optional)": "Photo du client (facultatif)",
+    "Before washing": "Avant le lavage",
+    "After washing": "Après le lavage",
+    "Mileage after": "Kilométrage après",
+    "Mileage (km)": "Kilométrage (km)",
+    "Choose or take photos": "Choisir ou prendre des photos",
+    "No photos selected": "Aucune photo sélectionnée",
+    "Complete operation": "Terminer l’opération",
+    Resolution: "Résolution",
+    "Resolve report": "Résoudre le signalement",
+    "Mark resolved": "Marquer comme résolu",
+    Fuel: "Carburant",
+    Changes: "Modifications",
+    Description: "Description",
+    "No media attached.": "Aucun média joint.",
+    "Save my details": "Enregistrer mes données",
+    "Postal code": "Code postal",
+    City: "Ville",
+    "Driving licence number": "Numéro de permis",
+    "Emergency contact": "Contact d’urgence",
+    inactive: "inactif",
+    active: "actif",
+    available: "disponible",
+    reserved: "réservé",
+    rented: "loué",
+    maintenance: "entretien",
+    cleaning: "nettoyage",
+    draft: "brouillon",
+    scheduled: "planifié",
+    returned: "restitué",
+    closed: "clôturé",
+    cancelled: "annulé",
+    submitted: "envoyé",
+    resolved: "résolu",
+    lead: "prospect",
+    uploaded: "téléchargé",
+    "Not completed": "Non complété",
+    "Portal user": "Utilisateur du portail",
+    System: "Système",
+    "excl. VAT / month": "hors TVA / mois",
+    "Access for": "Accès de",
+    "Update account": "Modifier le compte",
+    "This code is shown only once.": "Ce code n’est affiché qu’une fois.",
+    "Share it privately. Anyone with this code can sign in.": "Partagez-le de façon privée.",
+    "Copy code": "Copier le code",
+    "Create personal access": "Créer un accès personnel",
+    "Add a customer": "Ajouter un client",
+    "Add a vehicle": "Ajouter un véhicule",
+    "Create a rental": "Créer une location",
+    "Update rental": "Modifier la location",
+    "Update vehicle": "Modifier le véhicule",
+    "Working…": "Traitement…",
+    "Signing in…": "Connexion…",
+    "Preparing evidence…": "Préparation des preuves…",
+    "Saving record…": "Enregistrement…",
+    "The latest records visible to your role.": "Derniers enregistrements accessibles.",
+    "Choose one clear next step.": "Choisissez l’action suivante.",
+    "That access code is not valid.": "Ce code d’accès n’est pas valide.",
+    "This account has been disabled.": "Ce compte a été désactivé.",
+    "Too many attempts. Please wait and try again.": "Trop de tentatives. Veuillez patienter.",
+    "Your session expired. Sign in again.": "Votre session a expiré. Reconnectez-vous.",
+    "Your role does not allow this action.": "Votre rôle ne permet pas cette action.",
+    "Check the required information and try again.": "Vérifiez les champs obligatoires.",
+    "Add the required photos and signature.": "Ajoutez les photos et la signature requises.",
+    "Photo storage is temporarily unavailable.": "Le stockage des photos est temporairement indisponible.",
+    "Something went wrong. Please try again.": "Une erreur s’est produite. Réessayez.",
+  },
+  nl: {
+    "Skip to content": "Ga naar inhoud",
+    "Sign in": "Aanmelden",
+    "Use your personal access code.": "Gebruik uw persoonlijke toegangscode.",
+    "Access code": "Toegangscode",
+    Continue: "Doorgaan",
+    "Public website": "Publieke website",
+    "Sign out": "Afmelden",
+    Loading: "Laden",
+    "Loading…": "Laden…",
+    Language: "Taal",
+    "Open navigation": "Menu openen",
+    "Close navigation": "Menu sluiten",
+    Close: "Sluiten",
+    Administrator: "Beheerder",
+    Employee: "Medewerker",
+    Customer: "Klant",
+    Mechanic: "Mecanicien",
+    "External worker": "Externe medewerker",
+    "Customer space": "Klantenruimte",
+    Operations: "Werkzaamheden",
+    Overview: "Overzicht",
+    "Access & roles": "Toegang en rollen",
+    Customers: "Klanten",
+    Fleet: "Wagenpark",
+    Rentals: "Verhuur",
+    "Audit trail": "Auditlog",
+    "My details": "Mijn gegevens",
+    Available: "Beschikbaar",
+    Reserved: "Gereserveerd",
+    Rented: "Verhuurd",
+    Cleaning: "Reiniging",
+    Inactive: "Inactief",
+    "Active rentals": "Actieve verhuringen",
+    "Open reports": "Open meldingen",
+    Today: "Vandaag",
+    "My rentals": "Mijn verhuringen",
+    Active: "Actief",
+    "Recent operations": "Recente werkzaamheden",
+    "View all": "Alles bekijken",
+    "Quick actions": "Snelle acties",
+    Access: "Toegang",
+    Rental: "Verhuur",
+    Report: "Melding",
+    "Check in": "Inchecken",
+    "Check out": "Uitchecken",
+    Wash: "Wassen",
+    Maintenance: "Onderhoud",
+    "Take vehicle": "Voertuig meenemen",
+    "Return vehicle": "Voertuig terugbrengen",
+    "Customer details": "Klantgegevens",
+    "Vehicle check-in": "Voertuig inchecken",
+    "Vehicle check-out": "Voertuig uitchecken",
+    "Wash vehicle": "Voertuig wassen",
+    "Vehicle taken": "Voertuig meegenomen",
+    "Vehicle returned": "Voertuig teruggebracht",
+    "Report an issue": "Probleem melden",
+    "Recorded operations": "Geregistreerde werkzaamheden",
+    Person: "Persoon",
+    Role: "Rol",
+    Status: "Status",
+    "Last sign-in": "Laatste aanmelding",
+    "New code": "Nieuwe code",
+    Disable: "Deactiveren",
+    Enable: "Activeren",
+    Email: "E-mail",
+    Phone: "Telefoon",
+    Address: "Adres",
+    Vehicle: "Voertuig",
+    Format: "Formaat",
+    Year: "Jaar",
+    Colour: "Kleur",
+    Mileage: "Kilometerstand",
+    Update: "Wijzigen",
+    Reference: "Referentie",
+    Period: "Periode",
+    Price: "Prijs",
+    Operation: "Werkzaamheid",
+    Date: "Datum",
+    View: "Bekijken",
+    Resolve: "Oplossen",
+    "Create access": "Toegang aanmaken",
+    "Add customer": "Klant toevoegen",
+    "Add vehicle": "Voertuig toevoegen",
+    "Create rental": "Verhuur aanmaken",
+    "No accounts": "Geen accounts",
+    "No customers": "Geen klanten",
+    "No vehicles": "Geen voertuigen",
+    "No rentals": "Geen verhuringen",
+    "No operations recorded": "Geen werkzaamheden geregistreerd",
+    "No audit events": "Geen auditgebeurtenissen",
+    "Profile not linked": "Profiel niet gekoppeld",
+    Save: "Opslaan",
+    Cancel: "Annuleren",
+    Done: "Klaar",
+    "Display name": "Weergavenaam",
+    "Linked customer": "Gekoppelde klant",
+    "Choose…": "Kiezen…",
+    "Choose a value.": "Kies een waarde.",
+    "Full name": "Volledige naam",
+    Company: "Bedrijf",
+    "Internal notes": "Interne notities",
+    "Licence plate": "Nummerplaat",
+    Make: "Merk",
+    Model: "Model",
+    "Current mileage": "Huidige kilometerstand",
+    "Fuel level (%)": "Brandstofniveau (%)",
+    "Start date": "Startdatum",
+    "Expected end date": "Verwachte einddatum",
+    "Monthly price excl. VAT (€)": "Maandprijs excl. btw (€)",
+    "Deposit (€)": "Waarborg (€)",
+    "Mileage allowance": "Kilometerlimiet",
+    "Update status": "Status wijzigen",
+    "Operational status": "Operationele status",
+    "Vehicle (optional)": "Voertuig (optioneel)",
+    "Rental (optional)": "Verhuur (optioneel)",
+    Category: "Categorie",
+    Priority: "Prioriteit",
+    Damage: "Schade",
+    Mechanical: "Mechanisch",
+    Administrative: "Administratief",
+    Request: "Verzoek",
+    Other: "Overig",
+    Low: "Laag",
+    Normal: "Normaal",
+    Urgent: "Dringend",
+    "What happened?": "Wat is er gebeurd?",
+    "Photos or evidence": "Foto’s of bewijs",
+    "Customer signature": "Handtekening klant",
+    Clear: "Wissen",
+    "Work completed": "Uitgevoerde werkzaamheden",
+    "Parts or settings changed": "Gewijzigde onderdelen of instellingen",
+    Evidence: "Bewijs",
+    "Person's full name": "Volledige naam persoon",
+    "Vehicle condition photos": "Foto’s voertuigstaat",
+    "Customer selfie (optional)": "Foto van klant (optioneel)",
+    "Before washing": "Voor het wassen",
+    "After washing": "Na het wassen",
+    "Mileage after": "Kilometerstand nadien",
+    "Mileage (km)": "Kilometerstand (km)",
+    "Choose or take photos": "Foto’s kiezen of nemen",
+    "No photos selected": "Geen foto’s geselecteerd",
+    "Complete operation": "Werkzaamheid voltooien",
+    Resolution: "Oplossing",
+    "Resolve report": "Melding oplossen",
+    "Mark resolved": "Markeren als opgelost",
+    Fuel: "Brandstof",
+    Changes: "Wijzigingen",
+    Description: "Beschrijving",
+    "No media attached.": "Geen media toegevoegd.",
+    "Save my details": "Mijn gegevens opslaan",
+    "Postal code": "Postcode",
+    City: "Plaats",
+    "Driving licence number": "Rijbewijsnummer",
+    "Emergency contact": "Noodcontact",
+    inactive: "inactief",
+    active: "actief",
+    available: "beschikbaar",
+    reserved: "gereserveerd",
+    rented: "verhuurd",
+    maintenance: "onderhoud",
+    cleaning: "reiniging",
+    draft: "concept",
+    scheduled: "gepland",
+    returned: "teruggebracht",
+    closed: "gesloten",
+    cancelled: "geannuleerd",
+    submitted: "ingediend",
+    resolved: "opgelost",
+    lead: "lead",
+    uploaded: "geüpload",
+    "Not completed": "Niet ingevuld",
+    "Portal user": "Portaalgebruiker",
+    System: "Systeem",
+    "excl. VAT / month": "excl. btw / maand",
+    "Access for": "Toegang voor",
+    "Update account": "Account wijzigen",
+    "This code is shown only once.": "Deze code wordt maar één keer getoond.",
+    "Share it privately. Anyone with this code can sign in.": "Deel de code uitsluitend privé.",
+    "Copy code": "Code kopiëren",
+    "Create personal access": "Persoonlijke toegang aanmaken",
+    "Add a customer": "Klant toevoegen",
+    "Add a vehicle": "Voertuig toevoegen",
+    "Create a rental": "Verhuur aanmaken",
+    "Update rental": "Verhuur wijzigen",
+    "Update vehicle": "Voertuig wijzigen",
+    "Working…": "Bezig…",
+    "Signing in…": "Aanmelden…",
+    "Preparing evidence…": "Bewijs voorbereiden…",
+    "Saving record…": "Registratie opslaan…",
+    "The latest records visible to your role.": "Laatste registraties voor uw rol.",
+    "Choose one clear next step.": "Kies de volgende actie.",
+    "That access code is not valid.": "Deze toegangscode is niet geldig.",
+    "This account has been disabled.": "Dit account is gedeactiveerd.",
+    "Too many attempts. Please wait and try again.": "Te veel pogingen. Wacht even en probeer opnieuw.",
+    "Your session expired. Sign in again.": "Uw sessie is verlopen. Meld u opnieuw aan.",
+    "Your role does not allow this action.": "Uw rol staat deze actie niet toe.",
+    "Check the required information and try again.": "Controleer de verplichte gegevens.",
+    "Add the required photos and signature.": "Voeg de vereiste foto’s en handtekening toe.",
+    "Photo storage is temporarily unavailable.": "Foto-opslag is tijdelijk niet beschikbaar.",
+    "Something went wrong. Please try again.": "Er is iets misgegaan. Probeer opnieuw.",
+  },
+};
 
 const roles = {
   admin: "Administrator",
@@ -51,6 +461,9 @@ const state = {
   token: localStorage.getItem(TOKEN_KEY) || "",
   data: null,
   view: location.hash.slice(1) || "overview",
+  language: supportedLanguages.includes(localStorage.getItem(LANGUAGE_KEY))
+    ? localStorage.getItem(LANGUAGE_KEY)
+    : "en",
 };
 
 const mobileNavigation = window.matchMedia("(max-width: 820px)");
@@ -87,6 +500,46 @@ const clean = (value = "") =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 
+function tr(value = "") {
+  return translations[state.language]?.[String(value)] || String(value);
+}
+
+function translateTree(root) {
+  if (!root || state.language === "en") return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach((node) => {
+    if (node.parentElement?.closest("script, style")) return;
+    const original = node.nodeValue;
+    const trimmed = original.trim();
+    if (!trimmed) return;
+    const translated = tr(trimmed);
+    if (translated !== trimmed) node.nodeValue = original.replace(trimmed, translated);
+  });
+}
+
+function applyLanguage(language, rerender = true) {
+  state.language = supportedLanguages.includes(language) ? language : "en";
+  localStorage.setItem(LANGUAGE_KEY, state.language);
+  document.documentElement.lang = state.language;
+  document.querySelectorAll("[data-language]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.language === state.language));
+  });
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    node.textContent = tr(node.dataset.i18n);
+  });
+  document.querySelectorAll('[aria-label="Language"]').forEach((node) => node.setAttribute("aria-label", tr("Language")));
+  el.menu.setAttribute("aria-label", tr("Open navigation"));
+  el.backdrop.setAttribute("aria-label", tr("Close navigation"));
+  el.modalClose.setAttribute("aria-label", tr("Close"));
+  if (rerender && state.data) {
+    closeModal();
+    renderNavigation();
+    render();
+  }
+}
+
 function initials(name) {
   return String(name || "Y")
     .split(/\s+/)
@@ -100,7 +553,7 @@ function date(value, time = false) {
   if (!value) return "—";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "—";
-  return new Intl.DateTimeFormat("en-BE", {
+  return new Intl.DateTimeFormat(languageLocales[state.language], {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -109,20 +562,20 @@ function date(value, time = false) {
 }
 
 function money(cents) {
-  return new Intl.NumberFormat("en-BE", {
+  return new Intl.NumberFormat(languageLocales[state.language], {
     style: "currency",
     currency: "EUR",
   }).format((Number(cents) || 0) / 100);
 }
 
 function badge(status) {
-  return `<span class="status-badge ${clean(status)}">${clean(status || "unknown")}</span>`;
+  return `<span class="status-badge ${clean(status)}">${clean(tr(status || "unknown"))}</span>`;
 }
 
 function toast(message, type = "success") {
   const node = document.createElement("div");
   node.className = `toast ${type}`;
-  node.innerHTML = `<span>${type === "error" ? "!" : "✓"}</span><span>${clean(message)}</span>`;
+  node.innerHTML = `<span>${type === "error" ? "!" : "✓"}</span><span>${clean(tr(message))}</span>`;
   el.toasts.append(node);
   setTimeout(() => node.remove(), 4500);
 }
@@ -142,7 +595,7 @@ function messageFor(error) {
     vehicle_unavailable: "That vehicle is not available for a new rental.",
     vehicle_has_open_rental: "This vehicle still has a scheduled or active rental.",
   };
-  return messages[error?.message] || "Something went wrong. Please try again.";
+  return tr(messages[error?.message] || "Something went wrong. Please try again.");
 }
 
 async function api(path, { method = "GET", body, headers = {} } = {}) {
@@ -168,7 +621,7 @@ function busy(button, active, text = "Working…") {
   if (active) {
     button.dataset.label = button.innerHTML;
     button.disabled = true;
-    button.textContent = text;
+    button.textContent = tr(text);
   } else {
     button.disabled = false;
     button.innerHTML = button.dataset.label || button.innerHTML;
@@ -219,18 +672,19 @@ function renderNavigation() {
       </button>`,
     )
     .join("");
+  translateTree(el.sidebar);
 }
 
 function header(actions = "") {
-  const [title, description] = viewCopy[state.view];
+  const [title] = viewCopy[state.view];
   return `<header class="view-header">
-    <div><p class="kicker">YABI operations</p><h1>${clean(title)}</h1><p>${clean(description)}</p></div>
+    <div><h1>${clean(title)}</h1></div>
     ${actions ? `<div class="view-actions">${actions}</div>` : ""}
   </header>`;
 }
 
 function empty(title, description, action = "") {
-  return `<div class="empty-state"><span>YB</span><h3>${clean(title)}</h3><p>${clean(description)}</p>${action}</div>`;
+  return `<div class="empty-state"><span>YB</span><h3>${clean(title)}</h3>${action}</div>`;
 }
 
 function table(head, rows) {
@@ -261,6 +715,7 @@ function render() {
     profile: renderProfile,
   };
   (views[state.view] || renderOverview)();
+  translateTree(el.view);
 }
 
 function quickActions() {
@@ -305,31 +760,31 @@ function renderOverview() {
   const metrics =
     role === "customer"
       ? [
-          ["My rentals", rentals.length, "Connected to your account"],
-          ["Active", rentals.filter((r) => ["scheduled", "active"].includes(r.status)).length, "Scheduled or on the road"],
-          ["Open reports", openReports.length, "Waiting for follow-up"],
+          ["My rentals", rentals.length],
+          ["Active", rentals.filter((r) => ["scheduled", "active"].includes(r.status)).length],
+          ["Open reports", openReports.length],
         ]
       : [
-          ["Available", vehicles.filter((v) => v.status === "available").length, "Vehicles ready"],
-          ["Active rentals", rentals.filter((r) => ["scheduled", "active"].includes(r.status)).length, "Scheduled or active"],
-          ["Open reports", openReports.length, "Require attention"],
-          ["Today", records.filter((r) => new Date(r.occurredAt).toDateString() === new Date().toDateString()).length, "Operations recorded"],
+          ["Available", vehicles.filter((v) => v.status === "available").length],
+          ["Active rentals", rentals.filter((r) => ["scheduled", "active"].includes(r.status)).length],
+          ["Open reports", openReports.length],
+          ["Today", records.filter((r) => new Date(r.occurredAt).toDateString() === new Date().toDateString()).length],
         ];
   const actions = quickActions();
   el.view.innerHTML = `${header()}
     <section class="metric-grid">${metrics
-      .map(([label, value, hint]) => `<article class="metric-card"><span>${clean(label)}</span><strong>${value}</strong><small>${clean(hint)}</small></article>`)
+      .map(([label, value]) => `<article class="metric-card"><span>${clean(label)}</span><strong>${value}</strong></article>`)
       .join("")}</section>
     <div class="content-grid">
       <section class="panel">
-        <div class="panel-head"><div><h2>Recent operations</h2><p>The latest records visible to your role.</p></div><button class="text-button" data-view="operations">View all</button></div>
+        <div class="panel-head"><div><h2>Recent operations</h2></div><button class="text-button" data-view="operations">View all</button></div>
         ${recordTable(records.slice(0, 5), true)}
       </section>
       <section class="panel">
-        <div class="panel-head"><div><h2>Quick actions</h2><p>Choose one clear next step.</p></div></div>
+        <div class="panel-head"><div><h2>Quick actions</h2></div></div>
         <div class="quick-actions">${actions
-          .map(([title, description, target], index) => `<button class="quick-action" ${workflows[target] ? `data-workflow="${target}"` : `data-view="${target}"`}>
-            <span>${String(index + 1).padStart(2, "0")}</span><span><strong>${clean(title)}</strong><small>${clean(description)}</small></span><span>→</span>
+          .map(([title, , target], index) => `<button class="quick-action" ${workflows[target] ? `data-workflow="${target}"` : `data-view="${target}"`}>
+            <span>${String(index + 1).padStart(2, "0")}</span><span><strong>${clean(title)}</strong></span><span>→</span>
           </button>`)
           .join("")}</div>
       </section>
@@ -373,7 +828,7 @@ function renderFleet() {
     .map(
       (vehicle) => `<tr><td><strong>${clean(vehicle.registrationPlate)}</strong><small>${clean(vehicle.make)} ${clean(vehicle.model)}</small></td>
       <td>${clean(vehicle.format.toUpperCase())}</td><td>${clean(vehicle.year)}</td><td>${clean(vehicle.color)}</td>
-      <td>${vehicle.currentMileage.toLocaleString("en-BE")} km</td><td>${badge(vehicle.status)}</td>
+      <td>${vehicle.currentMileage.toLocaleString(languageLocales[state.language])} km</td><td>${badge(vehicle.status)}</td>
       ${canUpdate ? `<td><button class="icon-button" data-action="vehicle-status" data-id="${vehicle.id}">Update</button></td>` : ""}</tr>`,
     )
     .join("");
@@ -404,9 +859,9 @@ function renderOperations() {
   const allowed = roleWorkflows[state.data.account.role] || [];
   el.view.innerHTML = `${header()}
     <section class="workflow-grid">${allowed
-      .map((type) => `<button class="workflow-card" data-workflow="${type}"><span>${workflows[type][0]}</span><strong>${clean(workflows[type][1])}</strong><small>${clean(workflows[type][2])}</small></button>`)
+      .map((type) => `<button class="workflow-card" data-workflow="${type}"><span>${workflows[type][0]}</span><strong>${clean(workflows[type][1])}</strong></button>`)
       .join("")}</section>
-    <section class="panel"><div class="panel-head"><div><h2>Recorded operations</h2><p>Time-stamped and attributable records.</p></div></div>${recordTable(state.data.workflows)}</section>`;
+    <section class="panel"><div class="panel-head"><div><h2>Recorded operations</h2></div></div>${recordTable(state.data.workflows)}</section>`;
 }
 
 function recordTable(records, compact = false) {
@@ -458,24 +913,141 @@ function renderProfile() {
 }
 
 function field(label, name, value = "", required = false, type = "text", attributes = "") {
-  return `<div class="field"><label for="field-${clean(name)}">${clean(label)}${required ? " *" : ""}</label>
+  return `<div class="field"><label for="field-${clean(name)}">${clean(tr(label))}${required ? " *" : ""}</label>
     <input id="field-${clean(name)}" type="${clean(type)}" name="${clean(name)}" value="${clean(value)}" ${required ? "required" : ""} ${attributes}></div>`;
 }
 
+let selectSequence = 0;
+
 function select(label, name, options, required = false) {
-  return `<div class="field"><label>${clean(label)}${required ? " *" : ""}</label><select name="${clean(name)}" ${required ? "required" : ""}>
-    <option value="">Choose…</option>${options.map(([value, text]) => `<option value="${clean(value)}">${clean(text)}</option>`).join("")}</select></div>`;
+  const id = `custom-select-${selectSequence += 1}`;
+  return `<div class="field custom-select-field">
+    <label id="${id}-label">${clean(tr(label))}${required ? " *" : ""}</label>
+    <div class="custom-select" data-custom-select data-required="${required}">
+      <input type="hidden" name="${clean(name)}" value="">
+      <button class="custom-select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="${id}-label ${id}-value">
+        <span class="custom-select-value placeholder" id="${id}-value">${clean(tr("Choose…"))}</span>
+        <span class="custom-select-chevron" aria-hidden="true"></span>
+      </button>
+      <div class="custom-select-menu" role="listbox" aria-labelledby="${id}-label" hidden>
+        ${options.map(([value, text]) => `<button class="custom-select-option" type="button" role="option" data-value="${clean(value)}" aria-selected="false">${clean(tr(text))}</button>`).join("")}
+      </div>
+    </div>
+  </div>`;
 }
 
-function modal({ kicker = "YABI operations", title, content, submit = "Save", handler }) {
-  el.modalKicker.textContent = kicker;
-  el.modalTitle.textContent = title;
+function closeCustomSelect(customSelect, returnFocus = false) {
+  if (!customSelect) return;
+  customSelect.classList.remove("open");
+  const trigger = customSelect.querySelector(".custom-select-trigger");
+  const menu = customSelect.querySelector(".custom-select-menu");
+  trigger.setAttribute("aria-expanded", "false");
+  menu.hidden = true;
+  if (returnFocus) trigger.focus();
+}
+
+function closeAllCustomSelects(except = null) {
+  document.querySelectorAll("[data-custom-select].open").forEach((customSelect) => {
+    if (customSelect !== except) closeCustomSelect(customSelect);
+  });
+}
+
+function chooseCustomOption(customSelect, option, notify = true) {
+  if (!customSelect || !option) return;
+  const input = customSelect.querySelector('input[type="hidden"]');
+  const value = customSelect.querySelector(".custom-select-value");
+  customSelect.querySelectorAll(".custom-select-option").forEach((item) => {
+    item.setAttribute("aria-selected", String(item === option));
+  });
+  input.value = option.dataset.value;
+  value.textContent = option.textContent;
+  value.classList.remove("placeholder");
+  customSelect.classList.remove("invalid");
+  closeCustomSelect(customSelect, true);
+  if (notify) input.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+function openCustomSelect(customSelect) {
+  closeAllCustomSelects(customSelect);
+  const trigger = customSelect.querySelector(".custom-select-trigger");
+  const menu = customSelect.querySelector(".custom-select-menu");
+  customSelect.classList.add("open");
+  trigger.setAttribute("aria-expanded", "true");
+  menu.hidden = false;
+  requestAnimationFrame(() => {
+    (menu.querySelector('[aria-selected="true"]') || menu.querySelector(".custom-select-option"))?.focus();
+  });
+}
+
+function setupCustomSelects(root) {
+  root.querySelectorAll("[data-custom-select]").forEach((customSelect) => {
+    const trigger = customSelect.querySelector(".custom-select-trigger");
+    const options = [...customSelect.querySelectorAll(".custom-select-option")];
+    trigger.addEventListener("click", () => {
+      if (customSelect.classList.contains("open")) closeCustomSelect(customSelect);
+      else openCustomSelect(customSelect);
+    });
+    trigger.addEventListener("keydown", (event) => {
+      if (["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key)) {
+        event.preventDefault();
+        openCustomSelect(customSelect);
+      }
+    });
+    options.forEach((option, index) => {
+      option.addEventListener("click", () => chooseCustomOption(customSelect, option));
+      option.addEventListener("keydown", (event) => {
+        let target = null;
+        if (event.key === "ArrowDown") target = options[(index + 1) % options.length];
+        if (event.key === "ArrowUp") target = options[(index - 1 + options.length) % options.length];
+        if (event.key === "Home") target = options[0];
+        if (event.key === "End") target = options.at(-1);
+        if (target) {
+          event.preventDefault();
+          target.focus();
+        }
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeCustomSelect(customSelect, true);
+        }
+      });
+    });
+  });
+}
+
+function setCustomValue(root, name, selectedValue) {
+  const input = root.querySelector(`input[type="hidden"][name="${CSS.escape(name)}"]`);
+  if (!input) return;
+  const customSelect = input.closest("[data-custom-select]");
+  if (!selectedValue) {
+    input.value = "";
+    customSelect.querySelectorAll(".custom-select-option").forEach((item) => item.setAttribute("aria-selected", "false"));
+    const value = customSelect.querySelector(".custom-select-value");
+    value.textContent = tr("Choose…");
+    value.classList.add("placeholder");
+    return;
+  }
+  const option = [...customSelect.querySelectorAll(".custom-select-option")].find((item) => item.dataset.value === selectedValue);
+  if (option) chooseCustomOption(customSelect, option, false);
+}
+
+function modal({ kicker = "YABI", title, content, submit = "Save", handler }) {
+  el.modalKicker.textContent = tr(kicker);
+  el.modalTitle.textContent = tr(title);
   el.modalBody.innerHTML = content;
   const form = el.modalBody.querySelector("form");
   if (form && handler) {
-    form.insertAdjacentHTML("beforeend", `<div class="form-submit-row"><button class="ghost-button" type="button" data-close>Cancel</button><button class="primary-button" type="submit">${clean(submit)}</button></div>`);
+    form.insertAdjacentHTML("beforeend", `<div class="form-submit-row"><button class="ghost-button" type="button" data-close>${clean(tr("Cancel"))}</button><button class="primary-button" type="submit">${clean(tr(submit))}</button></div>`);
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      const missing = [...form.querySelectorAll('[data-custom-select][data-required="true"]')].find(
+        (customSelect) => !customSelect.querySelector('input[type="hidden"]').value,
+      );
+      if (missing) {
+        missing.classList.add("invalid");
+        missing.querySelector(".custom-select-trigger").focus();
+        toast("Choose a value.", "error");
+        return;
+      }
       const button = form.querySelector('[type="submit"]');
       busy(button, true);
       try {
@@ -487,6 +1059,8 @@ function modal({ kicker = "YABI operations", title, content, submit = "Save", ha
       }
     });
   }
+  translateTree(el.modalBody);
+  setupCustomSelects(el.modalBody);
   el.modalBody.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", closeModal));
   el.modal.showModal();
 }
@@ -515,8 +1089,7 @@ function createAccount() {
     submit: "Create access",
     content: `<form class="portal-form">${field("Display name", "displayName", "", true)}
       ${select("Role", "role", Object.entries(roles), true)}
-      <div id="customer-link" hidden>${select("Linked customer", "linkedCustomerId", state.data.customers.map((c) => [c.id, c.fullName]), true)}</div>
-      <div class="security-note"><span>◆</span><p>The assigned role controls every screen and action this person can use.</p></div></form>`,
+      <div id="customer-link" hidden>${select("Linked customer", "linkedCustomerId", state.data.customers.map((c) => [c.id, c.fullName]), true)}</div></form>`,
     handler: async (data) => {
       const body = { operation: "create_account", displayName: data.get("displayName"), role: data.get("role") };
       if (body.role === "customer") body.linkedCustomerId = data.get("linkedCustomerId");
@@ -528,10 +1101,11 @@ function createAccount() {
   });
   const role = el.modalBody.querySelector('[name="role"]');
   const wrapper = el.modalBody.querySelector("#customer-link");
-  const customer = wrapper.querySelector("select");
+  const customerSelect = wrapper.querySelector("[data-custom-select]");
   role.addEventListener("change", () => {
     wrapper.hidden = role.value !== "customer";
-    customer.required = role.value === "customer";
+    customerSelect.dataset.required = String(role.value === "customer");
+    if (role.value !== "customer") setCustomValue(wrapper, "linkedCustomerId", "");
   });
 }
 
@@ -618,7 +1192,7 @@ function updateRental(id) {
       await refresh();
     },
   });
-  el.modalBody.querySelector('[name="status"]').value = rental.status;
+  setCustomValue(el.modalBody, "status", rental.status);
 }
 
 function updateVehicle(id) {
@@ -638,7 +1212,7 @@ function updateVehicle(id) {
         ["inactive", "Inactive"],
       ],
       true,
-    )}<div class="security-note"><span>◆</span><p>Use “rented” and “reserved” only when they match the rental record.</p></div></form>`,
+    )}</form>`,
     handler: async (data) => {
       await api("/api/portal/admin", {
         method: "POST",
@@ -653,17 +1227,17 @@ function updateVehicle(id) {
       await refresh();
     },
   });
-  el.modalBody.querySelector('[name="status"]').value = vehicle.status;
+  setCustomValue(el.modalBody, "status", vehicle.status);
 }
 
 function uploadField(label, name, category, required = false) {
-  return `<div class="upload-field"><label>${clean(label)}${required ? " *" : ""}</label><label class="upload-drop">
+  return `<div class="upload-field"><label>${clean(tr(label))}${required ? " *" : ""}</label><label class="upload-drop">
     <input type="file" name="${clean(name)}" accept="image/jpeg,image/png,image/webp" data-category="${clean(category)}" multiple ${required ? "required" : ""}>
-    <strong>Choose or take photos</strong><span>JPG, PNG or WebP · up to 8 MB after optimisation</span></label><div class="file-summary">No photos selected</div></div>`;
+    <strong>${clean(tr("Choose or take photos"))}</strong><span>JPG, PNG or WebP · 8 MB</span></label><div class="file-summary">${clean(tr("No photos selected"))}</div></div>`;
 }
 
 function signature() {
-  return `<div class="signature-wrap"><div class="signature-controls"><span>Customer signature *</span><button type="button" data-clear-signature>Clear</button></div>
+  return `<div class="signature-wrap"><div class="signature-controls"><span>${clean(tr("Customer signature"))} *</span><button type="button" data-clear-signature>${clean(tr("Clear"))}</button></div>
     <canvas class="signature-canvas" id="signature-canvas"></canvas></div>`;
 }
 
@@ -685,8 +1259,8 @@ function workflowForm(type) {
       <div class="upload-grid">${uploadField("Before washing", "before", "before", true)}${uploadField("After washing", "after", "after", true)}</div></form>`;
   }
   if (type === "maintenance") {
-    return `<form class="portal-form">${vehicle}${mileage}<div class="field"><label>Work completed *</label><textarea name="maintenanceWork" required></textarea></div>
-      <div class="field"><label>Parts or settings changed</label><textarea name="changesMade"></textarea></div>${uploadField("Evidence", "evidence", "maintenance")}</form>`;
+    return `<form class="portal-form">${vehicle}${mileage}<div class="field"><label>${clean(tr("Work completed"))} *</label><textarea name="maintenanceWork" required></textarea></div>
+      <div class="field"><label>${clean(tr("Parts or settings changed"))}</label><textarea name="changesMade"></textarea></div>${uploadField("Evidence", "evidence", "maintenance")}</form>`;
   }
   if (["handover_take", "handover_return"].includes(type)) {
     return `<form class="portal-form">${vehicle}<div class="form-grid">${field("Person's full name", "personName", state.data.account.displayName, true)}${mileage}</div>
@@ -695,7 +1269,7 @@ function workflowForm(type) {
   return `<form class="portal-form">${select("Vehicle (optional)", "vehicleId", vehicles)}${select("Rental (optional)", "rentalId", rentals)}
     <div class="form-grid">${select("Category", "reportCategory", [["damage", "Damage"], ["mechanical", "Mechanical"], ["administrative", "Administrative"], ["request", "Request"], ["other", "Other"]], true)}
     ${select("Priority", "reportPriority", [["low", "Low"], ["normal", "Normal"], ["urgent", "Urgent"]], true)}</div>
-    <div class="field"><label>What happened? *</label><textarea name="description" required></textarea></div>${uploadField("Photos or evidence", "report", "damage")}</form>`;
+    <div class="field"><label>${clean(tr("What happened?"))} *</label><textarea name="description" required></textarea></div>${uploadField("Photos or evidence", "report", "damage")}</form>`;
 }
 
 function openWorkflow(type) {
@@ -871,7 +1445,7 @@ function resolveReport(id) {
   modal({
     title: "Resolve report",
     submit: "Mark resolved",
-    content: '<form class="portal-form"><div class="field"><label>Resolution *</label><textarea name="resolution" required></textarea></div></form>',
+    content: `<form class="portal-form"><div class="field"><label>${clean(tr("Resolution"))} *</label><textarea name="resolution" required></textarea></div></form>`,
     handler: async (data) => {
       await api("/api/portal/admin", { method: "POST", body: { operation: "resolve_report", recordId: id, resolution: data.get("resolution") } });
       closeModal();
@@ -1010,16 +1584,22 @@ el.logout.addEventListener("click", async () => {
   showLogin();
 });
 
+document.addEventListener("click", (event) => {
+  const languageButton = event.target.closest("[data-language]");
+  if (languageButton) {
+    applyLanguage(languageButton.dataset.language);
+    return;
+  }
+  if (!event.target.closest("[data-custom-select]")) closeAllCustomSelects();
+});
+
 el.menu.addEventListener("click", () => (el.sidebar.classList.contains("open") ? closeMenu() : openMenu()));
 el.backdrop.addEventListener("click", closeMenu);
 el.modalClose.addEventListener("click", closeModal);
-el.modal.addEventListener("click", (event) => {
-  const box = el.modal.getBoundingClientRect();
-  if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) closeModal();
-});
 window.addEventListener("hashchange", () => state.data && navigate(location.hash.slice(1) || "overview"));
 mobileNavigation.addEventListener("change", syncNavigationMode);
 syncNavigationMode();
+applyLanguage(state.language, false);
 
 if (state.token) refresh().catch(() => {});
 else showLogin();
