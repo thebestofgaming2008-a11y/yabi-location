@@ -1,0 +1,657 @@
+import { v } from "convex/values";
+import type { Doc, Id } from "./_generated/dataModel";
+import {
+  internalMutation,
+  internalQuery,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
+import {
+  applicationDocumentCategoryValidator,
+  applicationDriverKindValidator,
+  applicationStatusValidator,
+} from "./schema";
+import { portalRateLimiter } from "./rateLimits";
+
+const localeValidator = v.union(
+  v.literal("en"),
+  v.literal("fr"),
+  v.literal("nl"),
+);
+
+const driverInputValidator = v.object({
+  clientKey: v.string(),
+  kind: applicationDriverKindValidator,
+  sortOrder: v.number(),
+  fullName: v.string(),
+  phone: v.string(),
+  identityCardNumber: v.string(),
+  drivingLicenceNumber: v.string(),
+  licenceIssueDate: v.string(),
+  licenceValidSince: v.string(),
+  ageConfirmed: v.boolean(),
+});
+
+const applicationSummaryValidator = v.object({
+  id: v.id("rentalApplications"),
+  reference: v.string(),
+  status: applicationStatusValidator,
+  holderNameOrCompany: v.optional(v.string()),
+  holderEmail: v.optional(v.string()),
+  holderPhone: v.optional(v.string()),
+  submittedAt: v.optional(v.number()),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
+
+const driverPublicValidator = v.object({
+  id: v.id("applicationDrivers"),
+  clientKey: v.string(),
+  kind: applicationDriverKindValidator,
+  sortOrder: v.number(),
+  fullName: v.string(),
+  phone: v.string(),
+  identityCardNumber: v.string(),
+  drivingLicenceNumber: v.string(),
+  licenceIssueDate: v.string(),
+  licenceValidSince: v.string(),
+  ageConfirmed: v.boolean(),
+});
+
+const documentPublicValidator = v.object({
+  id: v.id("applicationMedia"),
+  driverClientKey: v.string(),
+  r2Key: v.string(),
+  category: applicationDocumentCategoryValidator,
+  contentType: v.string(),
+  size: v.number(),
+  width: v.number(),
+  height: v.number(),
+  capturedAt: v.number(),
+});
+
+async function requireAdmin(
+  ctx: QueryCtx | MutationCtx,
+  actorAccountId: Id<"portalAccounts">,
+) {
+  const actor = await ctx.db.get(actorAccountId);
+  if (!actor || !actor.active) throw new Error("unauthorized");
+  if (actor.role !== "admin") throw new Error("forbidden");
+  return actor;
+}
+
+async function audit(
+  ctx: MutationCtx,
+  actorAccountId: Id<"portalAccounts"> | undefined,
+  action: string,
+  entityId: string,
+  summary: string,
+) {
+  await ctx.db.insert("auditEvents", {
+    actorAccountId,
+    action,
+    entityType: "rentalApplication",
+    entityId,
+    summary,
+    createdAt: Date.now(),
+  });
+}
+
+export const startApplication = internalMutation({
+  args: {
+    tokenHash: v.string(),
+    reference: v.string(),
+    locale: localeValidator,
+    fingerprint: v.string(),
+  },
+  returns: v.object({
+    ok: v.boolean(),
+    applicationId: v.optional(v.id("rentalApplications")),
+    retryAfter: v.optional(v.number()),
+  }),
+  handler: async (ctx, args) => {
+    const limit = await portalRateLimiter.limit(
+      ctx,
+      "applicationStartByFingerprint",
+      { key: args.fingerprint },
+    );
+    if (!limit.ok) {
+      return { ok: false, retryAfter: limit.retryAfter };
+    }
+    const now = Date.now();
+    const applicationId = await ctx.db.insert("rentalApplications", {
+      reference: args.reference,
+      tokenHash: args.tokenHash,
+      locale: args.locale,
+      status: "draft",
+      expiresAt: now + 24 * 60 * 60 * 1000,
+      createdAt: now,
+      updatedAt: now,
+    });
+    return { ok: true, applicationId };
+  },
+});
+
+export const getApplicationSession = internalQuery({
+  args: { tokenHash: v.string(), now: v.number() },
+  returns: v.union(
+    v.null(),
+    v.object({
+      applicationId: v.id("rentalApplications"),
+      reference: v.string(),
+      status: applicationStatusValidator,
+      expiresAt: v.number(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const application = await ctx.db
+      .query("rentalApplications")
+      .withIndex("by_token_hash", (query) => query.eq("tokenHash", args.tokenHash))
+      .unique();
+    if (
+      !application ||
+      application.expiresAt <= args.now ||
+      application.status !== "draft"
+    ) {
+      return null;
+    }
+    return {
+      applicationId: application._id,
+      reference: application.reference,
+      status: application.status,
+      expiresAt: application.expiresAt,
+    };
+  },
+});
+
+export const createPendingDocument = internalMutation({
+  args: {
+    applicationId: v.id("rentalApplications"),
+    tokenHash: v.string(),
+    driverClientKey: v.string(),
+    r2Key: v.string(),
+    category: applicationDocumentCategoryValidator,
+    contentType: v.string(),
+    size: v.number(),
+    width: v.number(),
+    height: v.number(),
+    capturedAt: v.number(),
+    expiresAt: v.number(),
+  },
+  returns: v.id("applicationMedia"),
+  handler: async (ctx, args) => {
+    const application = await ctx.db.get(args.applicationId);
+    if (
+      !application ||
+      application.tokenHash !== args.tokenHash ||
+      application.status !== "draft" ||
+      application.expiresAt <= Date.now()
+    ) {
+      throw new Error("application_unauthorized");
+    }
+    const limit = await portalRateLimiter.limit(
+      ctx,
+      "applicationUploadsByApplication",
+      { key: String(application._id) },
+    );
+    if (!limit.ok) throw new Error("application_upload_rate_limited");
+    if (
+      args.size <= 0 ||
+      args.size > 8_000_000 ||
+      args.width < 640 ||
+      args.height < 480 ||
+      args.width > 10_000 ||
+      args.height > 10_000
+    ) {
+      throw new Error("invalid_capture");
+    }
+    if (!["image/jpeg", "image/webp"].includes(args.contentType)) {
+      throw new Error("invalid_file_type");
+    }
+    const previous = await ctx.db
+      .query("applicationMedia")
+      .withIndex("by_application_id_and_driver_key", (query) =>
+        query
+          .eq("applicationId", application._id)
+          .eq("driverClientKey", args.driverClientKey),
+      )
+      .take(12);
+    await Promise.all(
+      previous
+        .filter(
+          (item) =>
+            item.category === args.category && item.status !== "deleted",
+        )
+        .map((item) => ctx.db.patch(item._id, { status: "deleted" as const })),
+    );
+    return await ctx.db.insert("applicationMedia", {
+      applicationId: application._id,
+      driverClientKey: args.driverClientKey,
+      r2Key: args.r2Key,
+      category: args.category,
+      contentType: args.contentType,
+      size: args.size,
+      width: args.width,
+      height: args.height,
+      capturedAt: args.capturedAt,
+      status: "pending",
+      createdAt: Date.now(),
+      expiresAt: args.expiresAt,
+    });
+  },
+});
+
+export const markDocumentUploaded = internalMutation({
+  args: {
+    r2Key: v.string(),
+    etag: v.optional(v.string()),
+    size: v.number(),
+  },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const media = await ctx.db
+      .query("applicationMedia")
+      .withIndex("by_r2_key", (query) => query.eq("r2Key", args.r2Key))
+      .unique();
+    if (
+      !media ||
+      media.status !== "pending" ||
+      media.expiresAt < Date.now() ||
+      media.size !== args.size
+    ) {
+      return false;
+    }
+    await ctx.db.patch(media._id, {
+      status: "uploaded",
+      etag: args.etag,
+      uploadedAt: Date.now(),
+    });
+    return true;
+  },
+});
+
+export const submitApplication = internalMutation({
+  args: {
+    applicationId: v.id("rentalApplications"),
+    tokenHash: v.string(),
+    holderNameOrCompany: v.string(),
+    holderAddress: v.string(),
+    holderPhone: v.string(),
+    holderIdentityCardNumber: v.string(),
+    holderEmail: v.string(),
+    privacyVersion: v.string(),
+    drivers: v.array(driverInputValidator),
+  },
+  returns: v.object({ reference: v.string() }),
+  handler: async (ctx, args) => {
+    const application = await ctx.db.get(args.applicationId);
+    if (
+      !application ||
+      application.tokenHash !== args.tokenHash ||
+      application.status !== "draft" ||
+      application.expiresAt <= Date.now()
+    ) {
+      throw new Error("application_unauthorized");
+    }
+    if (
+      args.drivers.length < 1 ||
+      args.drivers.length > 6 ||
+      args.drivers.filter((driver) => driver.kind === "main").length !== 1 ||
+      new Set(args.drivers.map((driver) => driver.clientKey)).size !==
+        args.drivers.length ||
+      args.drivers.some((driver) => !driver.ageConfirmed)
+    ) {
+      throw new Error("application_validation_failed");
+    }
+    const documents = await ctx.db
+      .query("applicationMedia")
+      .withIndex("by_application_id", (query) =>
+        query.eq("applicationId", application._id),
+      )
+      .take(48);
+    const required = [
+      "identity_front",
+      "identity_back",
+      "licence_front",
+      "licence_back",
+    ];
+    for (const driver of args.drivers) {
+      const categories = new Set(
+        documents
+          .filter(
+            (media) =>
+              media.driverClientKey === driver.clientKey &&
+              media.status === "uploaded",
+          )
+          .map((media) => media.category),
+      );
+      if (!required.every((category) => categories.has(category as never))) {
+        throw new Error("application_documents_missing");
+      }
+    }
+    const now = Date.now();
+    for (const driver of args.drivers) {
+      await ctx.db.insert("applicationDrivers", {
+        applicationId: application._id,
+        ...driver,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+    await ctx.db.patch(application._id, {
+      holderNameOrCompany: args.holderNameOrCompany,
+      holderAddress: args.holderAddress,
+      holderPhone: args.holderPhone,
+      holderIdentityCardNumber: args.holderIdentityCardNumber,
+      holderEmail: args.holderEmail,
+      consentAt: now,
+      privacyVersion: args.privacyVersion,
+      status: "submitted",
+      submittedAt: now,
+      updatedAt: now,
+      expiresAt: now,
+    });
+    await audit(
+      ctx,
+      undefined,
+      "application.submitted",
+      String(application._id),
+      `${application.reference} submitted`,
+    );
+    return { reference: application.reference };
+  },
+});
+
+export const listApplicationsForAdmin = internalQuery({
+  args: { actorAccountId: v.id("portalAccounts") },
+  returns: v.array(applicationSummaryValidator),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.actorAccountId);
+    const applications = await ctx.db
+      .query("rentalApplications")
+      .withIndex("by_created_at")
+      .order("desc")
+      .take(100);
+    return applications
+      .filter((application) => application.status !== "draft")
+      .map((application) => ({
+        id: application._id,
+        reference: application.reference,
+        status: application.status,
+        holderNameOrCompany: application.holderNameOrCompany,
+        holderEmail: application.holderEmail,
+        holderPhone: application.holderPhone,
+        submittedAt: application.submittedAt,
+        createdAt: application.createdAt,
+        updatedAt: application.updatedAt,
+      }));
+  },
+});
+
+export const getApplicationForAdmin = internalQuery({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    applicationId: v.id("rentalApplications"),
+  },
+  returns: v.object({
+    application: v.object({
+      id: v.id("rentalApplications"),
+      reference: v.string(),
+      locale: localeValidator,
+      status: applicationStatusValidator,
+      holderNameOrCompany: v.optional(v.string()),
+      holderAddress: v.optional(v.string()),
+      holderPhone: v.optional(v.string()),
+      holderIdentityCardNumber: v.optional(v.string()),
+      holderEmail: v.optional(v.string()),
+      consentAt: v.optional(v.number()),
+      submittedAt: v.optional(v.number()),
+      adminNotes: v.optional(v.string()),
+      customerId: v.optional(v.id("customers")),
+      portalAccountId: v.optional(v.id("portalAccounts")),
+    }),
+    drivers: v.array(driverPublicValidator),
+    documents: v.array(documentPublicValidator),
+  }),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.actorAccountId);
+    const application = await ctx.db.get(args.applicationId);
+    if (!application) throw new Error("application_not_found");
+    const [drivers, documents] = await Promise.all([
+      ctx.db
+        .query("applicationDrivers")
+        .withIndex("by_application_id", (query) =>
+          query.eq("applicationId", application._id),
+        )
+        .take(6),
+      ctx.db
+        .query("applicationMedia")
+        .withIndex("by_application_id", (query) =>
+          query.eq("applicationId", application._id),
+        )
+        .take(48),
+    ]);
+    return {
+      application: {
+        id: application._id,
+        reference: application.reference,
+        locale: application.locale,
+        status: application.status,
+        holderNameOrCompany: application.holderNameOrCompany,
+        holderAddress: application.holderAddress,
+        holderPhone: application.holderPhone,
+        holderIdentityCardNumber: application.holderIdentityCardNumber,
+        holderEmail: application.holderEmail,
+        consentAt: application.consentAt,
+        submittedAt: application.submittedAt,
+        adminNotes: application.adminNotes,
+        customerId: application.customerId,
+        portalAccountId: application.portalAccountId,
+      },
+      drivers: drivers
+        .sort((left, right) => left.sortOrder - right.sortOrder)
+        .map((driver) => ({
+          id: driver._id,
+          clientKey: driver.clientKey,
+          kind: driver.kind,
+          sortOrder: driver.sortOrder,
+          fullName: driver.fullName,
+          phone: driver.phone,
+          identityCardNumber: driver.identityCardNumber,
+          drivingLicenceNumber: driver.drivingLicenceNumber,
+          licenceIssueDate: driver.licenceIssueDate,
+          licenceValidSince: driver.licenceValidSince,
+          ageConfirmed: driver.ageConfirmed,
+        })),
+      documents: documents
+        .filter((media) => media.status === "uploaded")
+        .map((media) => ({
+          id: media._id,
+          driverClientKey: media.driverClientKey,
+          r2Key: media.r2Key,
+          category: media.category,
+          contentType: media.contentType,
+          size: media.size,
+          width: media.width,
+          height: media.height,
+          capturedAt: media.capturedAt,
+        })),
+    };
+  },
+});
+
+export const updateApplicationStatus = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    applicationId: v.id("rentalApplications"),
+    status: v.union(
+      v.literal("contacted"),
+      v.literal("agreed"),
+      v.literal("rejected"),
+    ),
+    adminNotes: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireAdmin(ctx, args.actorAccountId);
+    const application = await ctx.db.get(args.applicationId);
+    if (!application) throw new Error("application_not_found");
+    if (application.status === "activated" || application.status === "draft") {
+      throw new Error("application_status_locked");
+    }
+    const now = Date.now();
+    await ctx.db.patch(application._id, {
+      status: args.status,
+      adminNotes: args.adminNotes,
+      reviewedBy: actor._id,
+      reviewedAt: now,
+      updatedAt: now,
+    });
+    await audit(
+      ctx,
+      actor._id,
+      "application.status_updated",
+      String(application._id),
+      `${application.reference} changed to ${args.status}`,
+    );
+    return null;
+  },
+});
+
+export const activateApplication = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    applicationId: v.id("rentalApplications"),
+    codeHash: v.string(),
+    codeHint: v.string(),
+  },
+  returns: v.object({
+    customerId: v.id("customers"),
+    portalAccountId: v.id("portalAccounts"),
+  }),
+  handler: async (ctx, args) => {
+    const actor = await requireAdmin(ctx, args.actorAccountId);
+    const application = await ctx.db.get(args.applicationId);
+    if (!application) throw new Error("application_not_found");
+    if (application.status !== "agreed") {
+      throw new Error("application_must_be_agreed");
+    }
+    if (
+      !application.holderNameOrCompany ||
+      !application.holderEmail ||
+      !application.holderPhone
+    ) {
+      throw new Error("application_validation_failed");
+    }
+    const collision = await ctx.db
+      .query("portalAccounts")
+      .withIndex("by_code_hash", (query) => query.eq("codeHash", args.codeHash))
+      .unique();
+    if (collision) throw new Error("code_collision");
+    const drivers = await ctx.db
+      .query("applicationDrivers")
+      .withIndex("by_application_id", (query) =>
+        query.eq("applicationId", application._id),
+      )
+      .take(6);
+    if (drivers.length < 1) throw new Error("application_validation_failed");
+    const now = Date.now();
+    const customerId = await ctx.db.insert("customers", {
+      fullName: application.holderNameOrCompany,
+      email: application.holderEmail,
+      phone: application.holderPhone,
+      address: application.holderAddress,
+      status: "active",
+      createdAt: now,
+      updatedAt: now,
+    });
+    const portalAccountId = await ctx.db.insert("portalAccounts", {
+      displayName: application.holderNameOrCompany,
+      role: "customer",
+      codeHash: args.codeHash,
+      codeHint: args.codeHint,
+      active: true,
+      linkedCustomerId: customerId,
+      createdBy: actor._id,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await ctx.db.patch(customerId, { portalAccountId, updatedAt: now });
+    for (const driver of drivers) {
+      await ctx.db.insert("customerDrivers", {
+        customerId,
+        sourceApplicationDriverId: driver._id,
+        kind: driver.kind,
+        sortOrder: driver.sortOrder,
+        fullName: driver.fullName,
+        phone: driver.phone,
+        identityCardNumber: driver.identityCardNumber,
+        drivingLicenceNumber: driver.drivingLicenceNumber,
+        licenceIssueDate: driver.licenceIssueDate,
+        licenceValidSince: driver.licenceValidSince,
+        active: true,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+    await ctx.db.patch(application._id, {
+      status: "activated",
+      customerId,
+      portalAccountId,
+      reviewedBy: actor._id,
+      reviewedAt: now,
+      updatedAt: now,
+    });
+    await audit(
+      ctx,
+      actor._id,
+      "application.activated",
+      String(application._id),
+      `${application.reference} activated as a customer account`,
+    );
+    return { customerId, portalAccountId };
+  },
+});
+
+export const purgeApplication = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    applicationId: v.id("rentalApplications"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireAdmin(ctx, args.actorAccountId);
+    const application = await ctx.db.get(args.applicationId);
+    if (!application) return null;
+    if (!["draft", "rejected"].includes(application.status)) {
+      throw new Error("application_status_locked");
+    }
+    const [drivers, documents] = await Promise.all([
+      ctx.db
+        .query("applicationDrivers")
+        .withIndex("by_application_id", (query) =>
+          query.eq("applicationId", application._id),
+        )
+        .take(6),
+      ctx.db
+        .query("applicationMedia")
+        .withIndex("by_application_id", (query) =>
+          query.eq("applicationId", application._id),
+        )
+        .take(48),
+    ]);
+    await Promise.all([
+      ...drivers.map((driver) => ctx.db.delete(driver._id)),
+      ...documents.map((document) => ctx.db.delete(document._id)),
+    ]);
+    await ctx.db.delete(application._id);
+    await audit(
+      ctx,
+      actor._id,
+      "application.purged",
+      String(application._id),
+      `${application.reference} purged`,
+    );
+    return null;
+  },
+});

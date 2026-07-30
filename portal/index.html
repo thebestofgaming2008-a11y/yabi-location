@@ -10,8 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="portal.css?v=20260728-3">
-  <script src="portal.js?v=20260728-3" defer></script>
+  <link rel="stylesheet" href="portal.css?v=20260730-1">
+  <script src="portal.js?v=20260730-1" defer></script>
+  <script src="applications.js?v=20260730-1" defer></script>
 </head>
 <body data-api-base="https://kindhearted-caiman-242.eu-west-1.convex.site">
   <a class="skip-link" href="#portal-main" data-i18n="Skip to content">Skip to content</a>
@@ -27,17 +28,99 @@
             <button type="button" data-language="nl" aria-pressed="false">NL</button>
           </div>
         </div>
-        <h1 id="login-title" data-i18n="Sign in">Sign in</h1>
-        <p data-i18n="Use your personal access code.">Use your personal access code.</p>
-        <form id="login-form">
-          <label for="access-code" data-i18n="Access code">Access code</label>
-          <input id="access-code" name="code" type="text" inputmode="text" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="YABI-XXXX-XXXX-XXXX" maxlength="24" required>
-          <button class="primary-button" type="submit">
-            <span data-i18n="Continue">Continue</span>
-          </button>
-          <p class="form-message" id="login-message" role="status" aria-live="polite"></p>
-        </form>
-        <a class="back-link" href="../index.html" data-i18n="Public website">Public website</a>
+        <div id="portal-entry">
+          <h1 id="login-title" data-app-i18n="Portal">Portal</h1>
+          <p data-app-i18n="Choose how you want to continue.">Choose how you want to continue.</p>
+          <div class="entry-options">
+            <button class="entry-option" type="button" data-entry-mode="login">
+              <span>01</span>
+              <strong data-app-i18n="Log in">Log in</strong>
+              <small data-app-i18n="I already have an access code">I already have an access code</small>
+            </button>
+            <button class="entry-option" type="button" data-entry-mode="signup">
+              <span>02</span>
+              <strong data-app-i18n="New account">New account</strong>
+              <small data-app-i18n="I want to submit a rental application">I want to submit a rental application</small>
+            </button>
+          </div>
+          <a class="back-link" href="../index.html" data-i18n="Public website">Public website</a>
+        </div>
+
+        <div id="login-flow" hidden>
+          <button class="flow-back" type="button" data-entry-back aria-label="Back">←</button>
+          <h1 data-i18n="Sign in">Sign in</h1>
+          <p data-i18n="Use your personal access code.">Use your personal access code.</p>
+          <form id="login-form">
+            <label for="access-code" data-i18n="Access code">Access code</label>
+            <input id="access-code" name="code" type="text" inputmode="text" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="YABI-XXXX-XXXX-XXXX" maxlength="24" required>
+            <button class="primary-button" type="submit">
+              <span data-i18n="Continue">Continue</span>
+            </button>
+            <p class="form-message" id="login-message" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+
+        <div id="application-flow" hidden>
+          <button class="flow-back" type="button" data-entry-back aria-label="Back">←</button>
+          <div class="application-heading">
+            <div>
+              <p class="application-step" id="application-step">1 / 3</p>
+              <h1 data-app-i18n="Rental application">Rental application</h1>
+            </div>
+            <p id="application-reference"></p>
+          </div>
+          <form id="application-form" novalidate>
+            <section class="application-page" data-application-page="1">
+              <div class="application-intro">
+                <h2 data-app-i18n="Contract holder">Contract holder</h2>
+                <p data-app-i18n="This information is required to prepare the rental contract.">This information is required to prepare the rental contract.</p>
+              </div>
+              <div class="application-grid">
+                <label class="app-field full"><span data-app-i18n="Full name or company">Full name or company</span><input name="holderNameOrCompany" autocomplete="name" maxlength="160" required></label>
+                <label class="app-field full"><span data-app-i18n="Address">Address</span><input name="holderAddress" autocomplete="street-address" maxlength="300" required></label>
+                <label class="app-field"><span data-app-i18n="Phone">Phone</span><input name="holderPhone" type="tel" autocomplete="tel" maxlength="40" required></label>
+                <label class="app-field"><span data-app-i18n="Identity card number">Identity card number</span><input name="holderIdentityCardNumber" maxlength="80" required></label>
+                <label class="app-field full"><span data-app-i18n="Email">Email</span><input name="holderEmail" type="email" autocomplete="email" maxlength="254" required></label>
+              </div>
+            </section>
+
+            <section class="application-page" data-application-page="2" hidden>
+              <div class="application-intro">
+                <h2 data-app-i18n="Drivers">Drivers</h2>
+                <p data-app-i18n="Every driver must be at least 23. Take clear live photos of both sides of the identity card and driving licence.">Every driver must be at least 23. Take clear live photos of both sides of the identity card and driving licence.</p>
+              </div>
+              <div id="driver-list"></div>
+              <button class="secondary-button add-driver-button" id="add-driver" type="button" data-app-i18n="Add another driver">Add another driver</button>
+            </section>
+
+            <section class="application-page" data-application-page="3" hidden>
+              <div class="application-intro">
+                <h2 data-app-i18n="Check and submit">Check and submit</h2>
+                <p data-app-i18n="The YABI administrator will review the information and prepare the contract outside the portal. Submitting does not confirm a rental.">The YABI administrator will review the information and prepare the contract outside the portal. Submitting does not confirm a rental.</p>
+              </div>
+              <div id="application-summary" class="application-summary"></div>
+              <label class="consent-row">
+                <input name="privacyAccepted" type="checkbox" required>
+                <span data-app-i18n="I confirm the information is correct and allow YABI Location to use it and the document photos to prepare and manage my rental contract.">I confirm the information is correct and allow YABI Location to use it and the document photos to prepare and manage my rental contract.</span>
+              </label>
+            </section>
+
+            <p class="application-message" id="application-message" role="status" aria-live="polite"></p>
+            <div class="application-actions">
+              <button class="ghost-button" id="application-previous" type="button" data-app-i18n="Previous" hidden>Previous</button>
+              <button class="primary-button" id="application-next" type="button" data-app-i18n="Continue">Continue</button>
+              <button class="primary-button" id="application-submit" type="submit" data-app-i18n="Submit application" hidden>Submit application</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="application-success" hidden>
+          <div class="success-mark">✓</div>
+          <h1 data-app-i18n="Application sent">Application sent</h1>
+          <p data-app-i18n="Your information has been sent to YABI Location. The team will contact you after reviewing it.">Your information has been sent to YABI Location. The team will contact you after reviewing it.</p>
+          <strong id="success-reference"></strong>
+          <button class="primary-button" type="button" data-entry-back data-app-i18n="Back to portal">Back to portal</button>
+        </div>
       </div>
     </section>
   </main>
@@ -92,6 +175,28 @@
         <button id="modal-close" class="modal-close" type="button" aria-label="Close">×</button>
       </header>
       <div class="modal-body" id="modal-body"></div>
+    </div>
+  </dialog>
+
+  <dialog class="camera-dialog" id="camera-dialog">
+    <div class="camera-card">
+      <header>
+        <div><small data-app-i18n="Live camera">Live camera</small><h2 id="camera-title">Document photo</h2></div>
+        <button id="camera-close" type="button" aria-label="Close">×</button>
+      </header>
+      <p data-app-i18n="Place the whole document inside the frame. Make sure every detail is sharp and readable.">Place the whole document inside the frame. Make sure every detail is sharp and readable.</p>
+      <div class="camera-stage">
+        <video id="camera-video" autoplay playsinline muted></video>
+        <canvas id="camera-canvas" hidden></canvas>
+        <img id="camera-preview" alt="Captured document preview" hidden>
+        <div class="camera-frame" aria-hidden="true"></div>
+      </div>
+      <p class="camera-status" id="camera-status" role="status"></p>
+      <div class="camera-actions">
+        <button class="ghost-button" id="camera-retake" type="button" data-app-i18n="Retake" hidden>Retake</button>
+        <button class="primary-button" id="camera-capture" type="button" data-app-i18n="Take photo">Take photo</button>
+        <button class="primary-button" id="camera-confirm" type="button" data-app-i18n="Use photo" hidden>Use photo</button>
+      </div>
     </div>
   </dialog>
 

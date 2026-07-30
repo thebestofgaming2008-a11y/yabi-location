@@ -752,11 +752,21 @@ export const portalMediaCallback = httpAction(async (ctx, request) => {
     const r2Key = clean(body.r2Key, 500);
     const size = boundedNumber(body.size, 1, 8_000_000);
     if (!r2Key || size === undefined) throw new Error("validation_failed");
-    const updated = await ctx.runMutation(internal.portal.markMediaUploaded, {
+    let updated = await ctx.runMutation(internal.portal.markMediaUploaded, {
       r2Key,
       size,
       etag: optionalString(body.etag, 200),
     });
+    if (!updated) {
+      updated = await ctx.runMutation(
+        internal.applications.markDocumentUploaded,
+        {
+          r2Key,
+          size,
+          etag: optionalString(body.etag, 200),
+        },
+      );
+    }
     return json({ ok: updated }, updated ? 200 : 409, null);
   } catch (error) {
     const code = safeError(error);

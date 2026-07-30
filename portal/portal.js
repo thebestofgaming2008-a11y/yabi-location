@@ -420,7 +420,7 @@ const roles = {
 };
 
 const roleViews = {
-  admin: ["overview", "access", "customers", "fleet", "rentals", "operations", "audit"],
+  admin: ["overview", "applications", "access", "customers", "fleet", "rentals", "operations", "audit"],
   employee: ["overview", "customers", "fleet", "rentals", "operations"],
   mechanic: ["overview", "fleet", "operations"],
   contractor: ["overview", "rentals", "operations"],
@@ -437,6 +437,7 @@ const roleWorkflows = {
 
 const viewCopy = {
   overview: ["Overview", "A clear view of what needs attention today."],
+  applications: ["Applications", "Review new rental requests and create access after agreement."],
   access: ["Access & roles", "Create personal access codes and control permissions."],
   customers: ["Customers", "Customer records used by rentals and inspections."],
   fleet: ["Fleet", "Availability, mileage, and vehicle status at a glance."],
@@ -631,7 +632,7 @@ function busy(button, active, text = "Working…") {
 function showLogin() {
   el.app.hidden = true;
   el.login.hidden = false;
-  requestAnimationFrame(() => el.code.focus());
+  window.yabiShowPortalEntry?.();
 }
 
 function showApp() {
@@ -706,6 +707,7 @@ function maps() {
 function render() {
   const views = {
     overview: renderOverview,
+    applications: renderApplications,
     access: renderAccess,
     customers: renderCustomers,
     fleet: renderFleet,
@@ -716,6 +718,14 @@ function render() {
   };
   (views[state.view] || renderOverview)();
   translateTree(el.view);
+}
+
+function renderApplications() {
+  if (typeof window.renderApplicationsAdmin === "function") {
+    window.renderApplicationsAdmin(el.view);
+    return;
+  }
+  el.view.innerHTML = `${header()}${empty("No applications", "")}`;
 }
 
 function quickActions() {
@@ -1082,6 +1092,8 @@ function revealCode(person, code) {
   });
   el.modalBody.querySelector("[data-close]").addEventListener("click", closeModal);
 }
+
+window.yabiRevealAccessCode = (code) => revealCode("Customer", code);
 
 function createAccount() {
   modal({

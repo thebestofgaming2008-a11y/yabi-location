@@ -84,6 +84,27 @@ export const mediaCategoryValidator = v.union(
   v.literal("other"),
 );
 
+export const applicationStatusValidator = v.union(
+  v.literal("draft"),
+  v.literal("submitted"),
+  v.literal("contacted"),
+  v.literal("agreed"),
+  v.literal("activated"),
+  v.literal("rejected"),
+);
+
+export const applicationDriverKindValidator = v.union(
+  v.literal("main"),
+  v.literal("additional"),
+);
+
+export const applicationDocumentCategoryValidator = v.union(
+  v.literal("identity_front"),
+  v.literal("identity_back"),
+  v.literal("licence_front"),
+  v.literal("licence_back"),
+);
+
 export default defineSchema({
   quoteRequests: defineTable({
     reference: v.string(),
@@ -169,6 +190,96 @@ export default defineSchema({
     .index("by_email", ["email"])
     .index("by_status", ["status"])
     .index("by_portal_account_id", ["portalAccountId"]),
+
+  customerDrivers: defineTable({
+    customerId: v.id("customers"),
+    sourceApplicationDriverId: v.optional(v.id("applicationDrivers")),
+    kind: applicationDriverKindValidator,
+    sortOrder: v.number(),
+    fullName: v.string(),
+    phone: v.string(),
+    identityCardNumber: v.string(),
+    drivingLicenceNumber: v.string(),
+    licenceIssueDate: v.string(),
+    licenceValidSince: v.string(),
+    active: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_customer_id", ["customerId"])
+    .index("by_source_application_driver_id", ["sourceApplicationDriverId"]),
+
+  rentalApplications: defineTable({
+    reference: v.string(),
+    tokenHash: v.string(),
+    locale: v.union(v.literal("en"), v.literal("fr"), v.literal("nl")),
+    status: applicationStatusValidator,
+    holderNameOrCompany: v.optional(v.string()),
+    holderAddress: v.optional(v.string()),
+    holderPhone: v.optional(v.string()),
+    holderIdentityCardNumber: v.optional(v.string()),
+    holderEmail: v.optional(v.string()),
+    consentAt: v.optional(v.number()),
+    privacyVersion: v.optional(v.string()),
+    submittedAt: v.optional(v.number()),
+    reviewedBy: v.optional(v.id("portalAccounts")),
+    reviewedAt: v.optional(v.number()),
+    adminNotes: v.optional(v.string()),
+    customerId: v.optional(v.id("customers")),
+    portalAccountId: v.optional(v.id("portalAccounts")),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_reference", ["reference"])
+    .index("by_token_hash", ["tokenHash"])
+    .index("by_status", ["status"])
+    .index("by_created_at", ["createdAt"]),
+
+  applicationDrivers: defineTable({
+    applicationId: v.id("rentalApplications"),
+    clientKey: v.string(),
+    kind: applicationDriverKindValidator,
+    sortOrder: v.number(),
+    fullName: v.string(),
+    phone: v.string(),
+    identityCardNumber: v.string(),
+    drivingLicenceNumber: v.string(),
+    licenceIssueDate: v.string(),
+    licenceValidSince: v.string(),
+    ageConfirmed: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_application_id", ["applicationId"])
+    .index("by_application_id_and_client_key", ["applicationId", "clientKey"]),
+
+  applicationMedia: defineTable({
+    applicationId: v.id("rentalApplications"),
+    driverClientKey: v.string(),
+    r2Key: v.string(),
+    category: applicationDocumentCategoryValidator,
+    contentType: v.string(),
+    size: v.number(),
+    width: v.number(),
+    height: v.number(),
+    capturedAt: v.number(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("uploaded"),
+      v.literal("deleted"),
+    ),
+    etag: v.optional(v.string()),
+    createdAt: v.number(),
+    uploadedAt: v.optional(v.number()),
+    expiresAt: v.number(),
+  })
+    .index("by_r2_key", ["r2Key"])
+    .index("by_application_id", ["applicationId"])
+    .index("by_application_id_and_driver_key", [
+      "applicationId",
+      "driverClientKey",
+    ]),
 
   operationalVehicles: defineTable({
     registrationPlate: v.string(),

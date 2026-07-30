@@ -37,4 +37,16 @@ export const portalRateLimiter = new RateLimiter(components.rateLimiter, {
     period: 15 * MINUTE,
     capacity: 8,
   },
+  applicationStartByFingerprint: {
+    kind: "fixed window",
+    rate: 5,
+    period: HOUR,
+    capacity: 5,
+  },
+  applicationUploadsByApplication: {
+    kind: "fixed window",
+    rate: 40,
+    period: HOUR,
+    capacity: 40,
+  },
 });

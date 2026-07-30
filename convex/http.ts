@@ -14,6 +14,12 @@ import {
   portalUpload,
   portalWorkflow,
 } from "./portalHttp";
+import {
+  portalApplicationAdmin,
+  portalApplicationStart,
+  portalApplicationSubmit,
+  portalApplicationUpload,
+} from "./applicationHttp";
 
 const http = httpRouter();
 
@@ -297,6 +303,31 @@ http.route({
   method: "POST",
   handler: portalMediaCallback,
 });
+http.route({
+  path: "/api/portal/applications/start",
+  method: "POST",
+  handler: portalApplicationStart,
+});
+http.route({
+  path: "/api/portal/applications/upload",
+  method: "POST",
+  handler: portalApplicationUpload,
+});
+http.route({
+  path: "/api/portal/applications/submit",
+  method: "POST",
+  handler: portalApplicationSubmit,
+});
+http.route({
+  path: "/api/portal/applications/admin",
+  method: "GET",
+  handler: portalApplicationAdmin,
+});
+http.route({
+  path: "/api/portal/applications/admin",
+  method: "POST",
+  handler: portalApplicationAdmin,
+});
 
 for (const path of [
   "/api/portal/login",
@@ -308,6 +339,10 @@ for (const path of [
   "/api/portal/uploads",
   "/api/portal/record-media",
   "/api/portal/bootstrap",
+  "/api/portal/applications/start",
+  "/api/portal/applications/upload",
+  "/api/portal/applications/submit",
+  "/api/portal/applications/admin",
 ]) {
   http.route({ path, method: "OPTIONS", handler: portalOptions });
 }
