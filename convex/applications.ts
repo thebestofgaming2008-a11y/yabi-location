@@ -26,6 +26,7 @@ const driverInputValidator = v.object({
   fullName: v.string(),
   phone: v.string(),
   identityCardNumber: v.string(),
+  nationalRegisterNumber: v.string(),
   drivingLicenceNumber: v.string(),
   licenceIssueDate: v.string(),
   licenceValidSince: v.string(),
@@ -52,6 +53,7 @@ const driverPublicValidator = v.object({
   fullName: v.string(),
   phone: v.string(),
   identityCardNumber: v.string(),
+  nationalRegisterNumber: v.optional(v.string()),
   drivingLicenceNumber: v.string(),
   licenceIssueDate: v.string(),
   licenceValidSince: v.string(),
@@ -278,6 +280,7 @@ export const submitApplication = internalMutation({
     holderAddress: v.string(),
     holderPhone: v.string(),
     holderIdentityCardNumber: v.string(),
+    holderNationalRegisterNumber: v.string(),
     holderEmail: v.string(),
     privacyVersion: v.string(),
     drivers: v.array(driverInputValidator),
@@ -343,6 +346,7 @@ export const submitApplication = internalMutation({
       holderAddress: args.holderAddress,
       holderPhone: args.holderPhone,
       holderIdentityCardNumber: args.holderIdentityCardNumber,
+      holderNationalRegisterNumber: args.holderNationalRegisterNumber,
       holderEmail: args.holderEmail,
       consentAt: now,
       privacyVersion: args.privacyVersion,
@@ -403,6 +407,7 @@ export const getApplicationForAdmin = internalQuery({
       holderAddress: v.optional(v.string()),
       holderPhone: v.optional(v.string()),
       holderIdentityCardNumber: v.optional(v.string()),
+      holderNationalRegisterNumber: v.optional(v.string()),
       holderEmail: v.optional(v.string()),
       consentAt: v.optional(v.number()),
       submittedAt: v.optional(v.number()),
@@ -441,6 +446,8 @@ export const getApplicationForAdmin = internalQuery({
         holderAddress: application.holderAddress,
         holderPhone: application.holderPhone,
         holderIdentityCardNumber: application.holderIdentityCardNumber,
+        holderNationalRegisterNumber:
+          application.holderNationalRegisterNumber,
         holderEmail: application.holderEmail,
         consentAt: application.consentAt,
         submittedAt: application.submittedAt,
@@ -458,6 +465,7 @@ export const getApplicationForAdmin = internalQuery({
           fullName: driver.fullName,
           phone: driver.phone,
           identityCardNumber: driver.identityCardNumber,
+          nationalRegisterNumber: driver.nationalRegisterNumber,
           drivingLicenceNumber: driver.drivingLicenceNumber,
           licenceIssueDate: driver.licenceIssueDate,
           licenceValidSince: driver.licenceValidSince,
@@ -539,7 +547,8 @@ export const activateApplication = internalMutation({
     if (
       !application.holderNameOrCompany ||
       !application.holderEmail ||
-      !application.holderPhone
+      !application.holderPhone ||
+      !application.holderNationalRegisterNumber
     ) {
       throw new Error("application_validation_failed");
     }
@@ -554,13 +563,19 @@ export const activateApplication = internalMutation({
         query.eq("applicationId", application._id),
       )
       .take(6);
-    if (drivers.length < 1) throw new Error("application_validation_failed");
+    if (
+      drivers.length < 1 ||
+      drivers.some((driver) => !driver.nationalRegisterNumber)
+    ) {
+      throw new Error("application_validation_failed");
+    }
     const now = Date.now();
     const customerId = await ctx.db.insert("customers", {
       fullName: application.holderNameOrCompany,
       email: application.holderEmail,
       phone: application.holderPhone,
       address: application.holderAddress,
+      nationalRegisterNumber: application.holderNationalRegisterNumber,
       status: "active",
       createdAt: now,
       updatedAt: now,
@@ -586,6 +601,7 @@ export const activateApplication = internalMutation({
         fullName: driver.fullName,
         phone: driver.phone,
         identityCardNumber: driver.identityCardNumber,
+        nationalRegisterNumber: driver.nationalRegisterNumber,
         drivingLicenceNumber: driver.drivingLicenceNumber,
         licenceIssueDate: driver.licenceIssueDate,
         licenceValidSince: driver.licenceValidSince,

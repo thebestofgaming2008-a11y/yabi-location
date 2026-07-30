@@ -4,6 +4,7 @@ import { v } from "convex/values";
 export const vehicleValidator = v.union(
   v.literal("unspecified"),
   v.literal("l1h1"),
+  v.literal("l2h2"),
   v.literal("master_l2h2_2023"),
   v.literal("citroen_l2h2_2019"),
   v.literal("l3h2"),
@@ -132,6 +133,9 @@ export default defineSchema({
       v.literal("sent"),
       v.literal("failed"),
     ),
+    emailProviderId: v.optional(v.string()),
+    emailLastError: v.optional(v.string()),
+    emailAttemptedAt: v.optional(v.number()),
   })
     .index("by_idempotency_key", ["idempotencyKey"])
     .index("by_reference", ["reference"])
@@ -173,6 +177,7 @@ export default defineSchema({
     email: v.string(),
     phone: v.string(),
     address: v.optional(v.string()),
+    nationalRegisterNumber: v.optional(v.string()),
     postalCode: v.optional(v.string()),
     city: v.optional(v.string()),
     drivingLicenseNumber: v.optional(v.string()),
@@ -199,6 +204,7 @@ export default defineSchema({
     fullName: v.string(),
     phone: v.string(),
     identityCardNumber: v.string(),
+    nationalRegisterNumber: v.optional(v.string()),
     drivingLicenceNumber: v.string(),
     licenceIssueDate: v.string(),
     licenceValidSince: v.string(),
@@ -218,6 +224,7 @@ export default defineSchema({
     holderAddress: v.optional(v.string()),
     holderPhone: v.optional(v.string()),
     holderIdentityCardNumber: v.optional(v.string()),
+    holderNationalRegisterNumber: v.optional(v.string()),
     holderEmail: v.optional(v.string()),
     consentAt: v.optional(v.number()),
     privacyVersion: v.optional(v.string()),
@@ -244,6 +251,7 @@ export default defineSchema({
     fullName: v.string(),
     phone: v.string(),
     identityCardNumber: v.string(),
+    nationalRegisterNumber: v.optional(v.string()),
     drivingLicenceNumber: v.string(),
     licenceIssueDate: v.string(),
     licenceValidSince: v.string(),

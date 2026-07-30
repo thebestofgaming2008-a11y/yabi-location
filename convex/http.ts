@@ -26,6 +26,7 @@ const http = httpRouter();
 const vehicleValues = new Set([
   "unspecified",
   "l1h1",
+  "l2h2",
   "master_l2h2_2023",
   "citroen_l2h2_2019",
   "l3h2",
@@ -163,7 +164,8 @@ const submitQuote = httpAction(async (ctx, request) => {
   const company = cleanString(body.company, 120);
   const email = cleanString(body.email, 254).toLowerCase();
   const phone = cleanString(body.phone, 32);
-  const vehicle = cleanString(body.vehicle, 40) || "unspecified";
+  const vehicle =
+    cleanString(body.vehicle, 40).toLowerCase() || "unspecified";
   const duration = cleanString(body.duration, 40);
   const startDate = cleanString(body.startDate, 10);
   const message = cleanString(body.message, 2_000);
@@ -207,6 +209,7 @@ const submitQuote = httpAction(async (ctx, request) => {
       vehicle: vehicle as
         | "unspecified"
         | "l1h1"
+        | "l2h2"
         | "master_l2h2_2023"
         | "citroen_l2h2_2019"
         | "l3h2"
@@ -234,6 +237,32 @@ const submitQuote = httpAction(async (ctx, request) => {
         retryAfter: result.retryAfter,
       },
       429,
+      origin,
+    );
+  }
+
+  if (!result.quoteRequestId || !result.reference) {
+    return jsonResponse(
+      { ok: false, error: "request_failed" },
+      500,
+      origin,
+    );
+  }
+
+  const notification = await ctx.runAction(
+    internal.emails.sendQuoteNotification,
+    { quoteRequestId: result.quoteRequestId },
+  );
+  if (!notification.sent) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "email_delivery_failed",
+        reason: notification.reason,
+        reference: result.reference,
+        saved: true,
+      },
+      503,
       origin,
     );
   }

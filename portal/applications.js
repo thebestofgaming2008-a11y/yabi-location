@@ -17,6 +17,7 @@
       Address: "Adresse",
       Phone: "Téléphone",
       "Identity card number": "N° de carte d’identité",
+      "National register number": "N° de registre national",
       Email: "E-mail",
       Drivers: "Conducteurs",
       "Every driver must be at least 23. Take clear live photos of both sides of the identity card and driving licence.": "Chaque conducteur doit avoir au moins 23 ans. Prenez des photos nettes, en direct, du recto et du verso de la carte d’identité et du permis.",
@@ -100,6 +101,7 @@
       Address: "Adres",
       Phone: "Telefoon",
       "Identity card number": "Identiteitskaartnummer",
+      "National register number": "Rijksregisternummer",
       Email: "E-mail",
       Drivers: "Bestuurders",
       "Every driver must be at least 23. Take clear live photos of both sides of the identity card and driving licence.": "Elke bestuurder moet minstens 23 jaar zijn. Maak duidelijke livefoto’s van de voor- en achterkant van identiteitskaart en rijbewijs.",
@@ -233,6 +235,7 @@
       fullName: "",
       phone: "",
       identityCardNumber: "",
+      nationalRegisterNumber: "",
       drivingLicenceNumber: "",
       licenceIssueDate: "",
       licenceValidSince: "",
@@ -252,6 +255,13 @@
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
+  }
+
+  function nationalRegisterNumberValid(value = "") {
+    return (
+      /^[0-9.\s/-]+$/.test(value) &&
+      value.replace(/\D/g, "").length === 11
+    );
   }
 
   async function publicApi(path, body) {
@@ -296,7 +306,13 @@
   }
 
   function field(label, name, value, type = "text") {
-    return `<label class="app-field"><span>${escape(t(label))}</span><input name="${escape(name)}" type="${type}" value="${escape(value)}" ${type === "tel" ? 'inputmode="tel"' : ""} required></label>`;
+    const inputMode =
+      type === "tel"
+        ? 'inputmode="tel"'
+        : name === "nationalRegisterNumber"
+          ? 'inputmode="numeric" autocomplete="off" maxlength="24"'
+          : "";
+    return `<label class="app-field"><span>${escape(t(label))}</span><input name="${escape(name)}" type="${type}" value="${escape(value)}" ${inputMode} required></label>`;
   }
 
   function renderDrivers() {
@@ -311,6 +327,7 @@
             ${field("Full name", "fullName", driver.fullName)}
             ${field("Phone", "phone", driver.phone, "tel")}
             ${field("Identity card number", "identityCardNumber", driver.identityCardNumber)}
+            ${field("National register number", "nationalRegisterNumber", driver.nationalRegisterNumber)}
             ${field("Driving licence number", "drivingLicenceNumber", driver.drivingLicenceNumber)}
             ${field("Licence issue date", "licenceIssueDate", driver.licenceIssueDate, "date")}
             ${field("Licence valid since", "licenceValidSince", driver.licenceValidSince, "date")}
@@ -338,6 +355,7 @@
         "fullName",
         "phone",
         "identityCardNumber",
+        "nationalRegisterNumber",
         "drivingLicenceNumber",
         "licenceIssueDate",
         "licenceValidSince",
@@ -353,7 +371,10 @@
     if (applicationState.page === 1) {
       const fields = [...ui.pages[0].querySelectorAll("input")];
       const valid = fields.every((input) => {
-        const okay = input.checkValidity();
+        const okay =
+          input.checkValidity() &&
+          (input.name !== "holderNationalRegisterNumber" ||
+            nationalRegisterNumberValid(input.value));
         input.setAttribute("aria-invalid", String(!okay));
         return okay;
       });
@@ -367,6 +388,7 @@
           !driver.fullName ||
           !driver.phone ||
           !driver.identityCardNumber ||
+          !nationalRegisterNumberValid(driver.nationalRegisterNumber) ||
           !driver.drivingLicenceNumber ||
           !driver.licenceIssueDate ||
           !driver.licenceValidSince ||
@@ -404,6 +426,10 @@
     const holder = new FormData(ui.form);
     ui.summary.innerHTML = [
       [t("Contract holder"), holder.get("holderNameOrCompany")],
+      [
+        t("National register number"),
+        holder.get("holderNationalRegisterNumber"),
+      ],
       [t("Email"), holder.get("holderEmail")],
       [t("Drivers included"), applicationState.drivers.length],
       [t("Document photos"), `${applicationState.drivers.length * 4} · ${t("Complete")}`],
@@ -605,6 +631,7 @@
       fullName: driver.fullName,
       phone: driver.phone,
       identityCardNumber: driver.identityCardNumber,
+      nationalRegisterNumber: driver.nationalRegisterNumber,
       drivingLicenceNumber: driver.drivingLicenceNumber,
       licenceIssueDate: driver.licenceIssueDate,
       licenceValidSince: driver.licenceValidSince,
@@ -651,6 +678,8 @@
     card.querySelector('[name="phone"]').value = ui.form.elements.holderPhone.value;
     card.querySelector('[name="identityCardNumber"]').value =
       ui.form.elements.holderIdentityCardNumber.value;
+    card.querySelector('[name="nationalRegisterNumber"]').value =
+      ui.form.elements.holderNationalRegisterNumber.value;
     syncDrivers();
   });
 
@@ -708,6 +737,9 @@
         holderAddress: form.get("holderAddress"),
         holderPhone: form.get("holderPhone"),
         holderIdentityCardNumber: form.get("holderIdentityCardNumber"),
+        holderNationalRegisterNumber: form.get(
+          "holderNationalRegisterNumber",
+        ),
         holderEmail: form.get("holderEmail"),
         privacyAccepted: form.get("privacyAccepted") === "on",
         drivers: driverPayload(),
@@ -789,10 +821,12 @@
           <div><dt>${escape(t("Address"))}</dt><dd>${escape(app.holderAddress || "")}</dd></div>
           <div><dt>${escape(t("Phone"))}</dt><dd>${escape(app.holderPhone || "")}</dd></div>
           <div><dt>${escape(t("Email"))}</dt><dd>${escape(app.holderEmail || "")}</dd></div>
-          <div><dt>${escape(t("Identity card"))}</dt><dd>${escape(app.holderIdentityCardNumber || "")}</dd></div></dl>
+          <div><dt>${escape(t("Identity card"))}</dt><dd>${escape(app.holderIdentityCardNumber || "")}</dd></div>
+          <div><dt>${escape(t("National register number"))}</dt><dd>${escape(app.holderNationalRegisterNumber || "")}</dd></div></dl>
         </section>
         ${result.drivers.map((driver) => `<section class="detail-block"><h3>${escape(t(driver.kind === "main" ? "Main driver" : "Additional driver"))} · ${escape(driver.fullName)}</h3>
           <dl><div><dt>${escape(t("Phone"))}</dt><dd>${escape(driver.phone)}</dd></div><div><dt>${escape(t("Identity card"))}</dt><dd>${escape(driver.identityCardNumber)}</dd></div>
+          <div><dt>${escape(t("National register number"))}</dt><dd>${escape(driver.nationalRegisterNumber || "")}</dd></div>
           <div><dt>${escape(t("Driving licence"))}</dt><dd>${escape(driver.drivingLicenceNumber)}</dd></div><div><dt>${escape(t("Issued"))}</dt><dd>${escape(driver.licenceIssueDate)}</dd></div>
           <div><dt>${escape(t("Valid since"))}</dt><dd>${escape(driver.licenceValidSince)}</dd></div></dl>
           <div class="document-review">${(documentsByDriver.get(driver.clientKey) || []).map((document) => `<a href="${escape(document.url)}" target="_blank" rel="noopener"><img src="${escape(document.url)}" alt="${escape(document.category)}"><span>${escape(document.category.replaceAll("_", " "))}</span></a>`).join("")}</div>

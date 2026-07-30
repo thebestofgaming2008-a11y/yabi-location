@@ -58,6 +58,13 @@ function optionalString(value: unknown, maximum = 500): string | undefined {
   return clean(value, maximum) || undefined;
 }
 
+function nationalRegisterNumberValid(value: string): boolean {
+  return (
+    /^[0-9.\s/-]+$/.test(value) &&
+    value.replace(/\D/g, "").length === 11
+  );
+}
+
 function boundedNumber(
   value: unknown,
   minimum: number,
@@ -370,6 +377,10 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
       body.holderIdentityCardNumber,
       80,
     );
+    const holderNationalRegisterNumber = clean(
+      body.holderNationalRegisterNumber,
+      24,
+    );
     const holderEmail = clean(body.holderEmail, 254).toLowerCase();
     const privacyAccepted = body.privacyAccepted === true;
     const rawDrivers = Array.isArray(body.drivers) ? body.drivers.slice(0, 6) : [];
@@ -386,6 +397,7 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
         fullName: clean(driver.fullName, 120),
         phone: clean(driver.phone, 40),
         identityCardNumber: clean(driver.identityCardNumber, 80),
+        nationalRegisterNumber: clean(driver.nationalRegisterNumber, 24),
         drivingLicenceNumber: clean(driver.drivingLicenceNumber, 80),
         licenceIssueDate: clean(driver.licenceIssueDate, 10),
         licenceValidSince: clean(driver.licenceValidSince, 10),
@@ -400,6 +412,7 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
       !holderAddress ||
       !phoneValid(holderPhone) ||
       !holderIdentityCardNumber ||
+      !nationalRegisterNumberValid(holderNationalRegisterNumber) ||
       !emailValid ||
       !privacyAccepted ||
       drivers.length < 1 ||
@@ -410,6 +423,7 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
           !driver.fullName ||
           !phoneValid(driver.phone) ||
           !driver.identityCardNumber ||
+          !nationalRegisterNumberValid(driver.nationalRegisterNumber) ||
           !driver.drivingLicenceNumber ||
           !datePattern.test(driver.licenceIssueDate) ||
           !datePattern.test(driver.licenceValidSince) ||
@@ -427,6 +441,7 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
         holderAddress,
         holderPhone,
         holderIdentityCardNumber,
+        holderNationalRegisterNumber,
         holderEmail,
         privacyVersion: "2026-07-30",
         drivers,
