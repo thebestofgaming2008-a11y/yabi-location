@@ -35,6 +35,11 @@
       Retake: "Reprendre",
       "Take photo": "Prendre la photo",
       "Use photo": "Utiliser la photo",
+      "Try camera again": "Réessayer l’appareil photo",
+      "Camera permission is blocked. Allow Camera for yabi-location.pages.dev in your browser settings, then try again. If this page is open inside another app, open it in Chrome or Safari.": "L’accès à l’appareil photo est bloqué. Autorisez l’appareil photo pour yabi-location.pages.dev dans les réglages du navigateur, puis réessayez. Si la page est ouverte dans une autre application, ouvrez-la dans Chrome ou Safari.",
+      "This browser cannot use the camera here. Open the portal directly in Chrome or Safari.": "Ce navigateur ne peut pas utiliser l’appareil photo ici. Ouvrez directement le portail dans Chrome ou Safari.",
+      "The photo could not be prepared. Retake it and try again.": "La photo n’a pas pu être préparée. Reprenez-la puis réessayez.",
+      "The secure upload was rejected. Keep this photo and tap Use photo again.": "L’envoi sécurisé a été refusé. Gardez cette photo et appuyez de nouveau sur Utiliser la photo.",
       "Main driver": "Conducteur principal",
       "Additional driver": "Conducteur supplémentaire",
       "Same information as contract holder": "Mêmes informations que le locataire",
@@ -113,6 +118,11 @@
       Retake: "Opnieuw",
       "Take photo": "Foto nemen",
       "Use photo": "Foto gebruiken",
+      "Try camera again": "Camera opnieuw proberen",
+      "Camera permission is blocked. Allow Camera for yabi-location.pages.dev in your browser settings, then try again. If this page is open inside another app, open it in Chrome or Safari.": "Cameratoegang is geblokkeerd. Sta Camera toe voor yabi-location.pages.dev in de browserinstellingen en probeer opnieuw. Staat deze pagina in een andere app open, open ze dan in Chrome of Safari.",
+      "This browser cannot use the camera here. Open the portal directly in Chrome or Safari.": "Deze browser kan de camera hier niet gebruiken. Open het portaal rechtstreeks in Chrome of Safari.",
+      "The photo could not be prepared. Retake it and try again.": "De foto kon niet worden voorbereid. Neem hem opnieuw en probeer nogmaals.",
+      "The secure upload was rejected. Keep this photo and tap Use photo again.": "De beveiligde upload werd geweigerd. Bewaar deze foto en tik opnieuw op Foto gebruiken.",
       "Main driver": "Hoofdbestuurder",
       "Additional driver": "Extra bestuurder",
       "Same information as contract holder": "Zelfde gegevens als contracthouder",
@@ -184,6 +194,7 @@
     camera: document.querySelector("#camera-dialog"),
     cameraTitle: document.querySelector("#camera-title"),
     cameraVideo: document.querySelector("#camera-video"),
+    cameraStage: document.querySelector(".camera-stage"),
     cameraCanvas: document.querySelector("#camera-canvas"),
     cameraPreview: document.querySelector("#camera-preview"),
     cameraStatus: document.querySelector("#camera-status"),
@@ -423,8 +434,18 @@
     ui.cameraTitle.textContent = t(label);
     resetCameraPreview();
     ui.camera.showModal();
+    await requestCamera();
+  }
+
+  async function requestCamera() {
+    stopCamera();
+    ui.cameraStatus.textContent = "";
+    ui.cameraCapture.disabled = true;
+    ui.cameraCapture.textContent = t("Take photo");
     try {
-      await ensureApplication();
+      if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+        throw new DOMException("Camera unavailable", "NotSupportedError");
+      }
       applicationState.stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {
@@ -435,13 +456,28 @@
       });
       ui.cameraVideo.srcObject = applicationState.stream;
       await ui.cameraVideo.play();
+      const width = ui.cameraVideo.videoWidth;
+      const height = ui.cameraVideo.videoHeight;
+      if (width && height) {
+        ui.cameraStage.style.setProperty("--camera-ratio", `${width} / ${height}`);
+      }
       ui.cameraStatus.textContent = "";
+      ui.cameraCapture.disabled = false;
+      ui.cameraCapture.dataset.cameraMode = "capture";
     } catch (error) {
-      ui.cameraStatus.textContent =
-        error.message === "rate_limited"
-          ? t("Something went wrong. Please try again.")
-          : t("Camera access is required. Allow camera permission and try again.");
-      ui.cameraCapture.disabled = true;
+      stopCamera();
+      const unsupported =
+        error?.name === "NotSupportedError" ||
+        !window.isSecureContext ||
+        !navigator.mediaDevices?.getUserMedia;
+      ui.cameraStatus.textContent = t(
+        unsupported
+          ? "This browser cannot use the camera here. Open the portal directly in Chrome or Safari."
+          : "Camera permission is blocked. Allow Camera for yabi-location.pages.dev in your browser settings, then try again. If this page is open inside another app, open it in Chrome or Safari.",
+      );
+      ui.cameraCapture.disabled = false;
+      ui.cameraCapture.dataset.cameraMode = "retry";
+      ui.cameraCapture.textContent = t("Try camera again");
     }
   }
 
@@ -460,6 +496,10 @@
     ui.cameraCanvas.hidden = true;
     ui.cameraCapture.hidden = false;
     ui.cameraCapture.disabled = false;
+    ui.cameraCapture.dataset.cameraMode = applicationState.stream ? "capture" : "retry";
+    ui.cameraCapture.textContent = t(
+      applicationState.stream ? "Take photo" : "Try camera again",
+    );
     ui.cameraRetake.hidden = true;
     ui.cameraConfirm.hidden = true;
   }
@@ -480,7 +520,12 @@
       .drawImage(ui.cameraVideo, 0, 0, ui.cameraCanvas.width, ui.cameraCanvas.height);
     ui.cameraCanvas.toBlob(
       (blob) => {
-        if (!blob) return;
+        if (!blob) {
+          ui.cameraStatus.textContent = t(
+            "The photo could not be prepared. Retake it and try again.",
+          );
+          return;
+        }
         applicationState.captureBlob = blob;
         applicationState.captureUrl = URL.createObjectURL(blob);
         ui.cameraPreview.src = applicationState.captureUrl;
@@ -490,8 +535,8 @@
         ui.cameraRetake.hidden = false;
         ui.cameraConfirm.hidden = false;
       },
-      "image/webp",
-      0.9,
+      "image/jpeg",
+      0.92,
     );
   }
 
@@ -502,6 +547,7 @@
     ui.cameraConfirm.disabled = true;
     ui.cameraStatus.textContent = t("Uploading photo…");
     try {
+      await ensureApplication();
       const capturedAt = Date.now();
       const prepared = await publicApi("/api/portal/applications/upload", {
         applicationToken: applicationState.applicationToken,
@@ -539,7 +585,12 @@
       ui.cameraStatus.textContent =
         error.message === "application_unauthorized"
           ? t("Your secure application expired. Start again.")
-          : t("Something went wrong. Please try again.");
+          : error.message === "invalid_capture" ||
+              error.message === "invalid_file_type"
+            ? t("The photo could not be prepared. Retake it and try again.")
+            : t(
+                "The secure upload was rejected. Keep this photo and tap Use photo again.",
+              );
     } finally {
       ui.cameraConfirm.disabled = false;
     }
@@ -624,7 +675,16 @@
     ui.camera.close();
     resetCameraPreview();
   });
-  ui.cameraCapture.addEventListener("click", takePhoto);
+  ui.cameraCapture.addEventListener("click", () => {
+    if (
+      ui.cameraCapture.dataset.cameraMode === "retry" ||
+      !applicationState.stream
+    ) {
+      requestCamera();
+      return;
+    }
+    takePhoto();
+  });
   ui.cameraRetake.addEventListener("click", () => {
     resetCameraPreview();
     ui.cameraStatus.textContent = "";

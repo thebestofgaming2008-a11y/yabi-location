@@ -413,11 +413,17 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .camera-card h2 { margin: .2rem 0 0; color: var(--navy); font: 800 1.8rem/1 var(--display); text-transform: uppercase; }
 .camera-card header button { width: 40px; height: 40px; border: 1px solid var(--line); background: white; font-size: 1.4rem; cursor: pointer; }
 .camera-card > p { color: var(--muted); font-size: .68rem; line-height: 1.55; }
-.camera-stage { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: #06172d; }
+.camera-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--camera-ratio, 4 / 3);
+  overflow: hidden;
+  background: #06172d;
+}
 .camera-stage video,
 .camera-stage canvas,
 .camera-stage img { width: 100%; height: 100%; display: block; object-fit: contain; }
-.camera-frame { position: absolute; inset: 8%; border: 2px solid rgba(255,255,255,.9); border-radius: 8px; pointer-events: none; }
+.camera-frame { position: absolute; inset: 4%; border: 2px solid rgba(255,255,255,.9); border-radius: 8px; pointer-events: none; }
 .camera-status { min-height: 1rem; margin: .65rem 0 !important; color: var(--danger) !important; }
 .camera-actions { display: flex; justify-content: flex-end; gap: .6rem; }
 
@@ -432,7 +438,20 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
   .application-heading { align-items: start; flex-direction: column; }
   .driver-card { padding: .85rem; }
   .document-capture { min-width: 0; }
-  .camera-card { min-height: calc(100svh - 20px); display: flex; flex-direction: column; }
+  .camera-dialog {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+  }
+  .camera-card {
+    width: 100%;
+    min-height: 100dvh;
+    padding: max(.85rem, env(safe-area-inset-top)) max(.85rem, env(safe-area-inset-right)) max(.85rem, env(safe-area-inset-bottom)) max(.85rem, env(safe-area-inset-left));
+    display: flex;
+    flex-direction: column;
+  }
   .camera-stage { margin-block: auto; }
   .camera-actions .primary-button,
   .camera-actions .ghost-button { flex: 1; }
