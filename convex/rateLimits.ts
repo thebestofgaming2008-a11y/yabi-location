@@ -11,15 +11,15 @@ export const quoteRateLimiter = new RateLimiter(components.rateLimiter, {
   },
   quoteSubmissionsByFingerprint: {
     kind: "fixed window",
-    rate: 5,
+    rate: 20,
     period: HOUR,
-    capacity: 5,
+    capacity: 20,
   },
   quoteSubmissionsByEmail: {
     kind: "fixed window",
-    rate: 3,
+    rate: 10,
     period: HOUR,
-    capacity: 3,
+    capacity: 10,
   },
 });
 
