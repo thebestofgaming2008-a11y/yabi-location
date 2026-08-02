@@ -39,14 +39,14 @@ export const portalRateLimiter = new RateLimiter(components.rateLimiter, {
   },
   applicationStartByFingerprint: {
     kind: "fixed window",
-    rate: 5,
+    rate: 20,
     period: HOUR,
-    capacity: 5,
+    capacity: 20,
   },
   applicationUploadsByApplication: {
     kind: "fixed window",
-    rate: 40,
+    rate: 120,
     period: HOUR,
-    capacity: 40,
+    capacity: 120,
   },
 });

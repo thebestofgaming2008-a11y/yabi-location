@@ -96,6 +96,7 @@
       "Uploading photo…": "Envoi de la photo…",
       "Sending application…": "Envoi de la demande…",
       "Something went wrong. Please try again.": "Une erreur s’est produite. Veuillez réessayer.",
+      "The submitted details were rejected. Go back and check phone numbers, dates of birth, licence dates, addresses, and company roles.": "Certaines informations ont été refusées. Revenez en arrière et vérifiez les numéros de téléphone, dates de naissance, dates du permis, adresses et fonctions dans la société.",
       "Your secure application expired. Start again.": "Votre dossier sécurisé a expiré. Recommencez.",
       "Application reference": "Référence de la demande",
       "Drivers included": "Conducteurs inclus",
@@ -214,6 +215,7 @@
       "Uploading photo…": "Foto wordt verzonden…",
       "Sending application…": "Aanvraag wordt verzonden…",
       "Something went wrong. Please try again.": "Er is iets misgegaan. Probeer opnieuw.",
+      "The submitted details were rejected. Go back and check phone numbers, dates of birth, licence dates, addresses, and company roles.": "Sommige gegevens zijn geweigerd. Ga terug en controleer telefoonnummers, geboortedata, rijbewijsdatums, adressen en functies binnen de vennootschap.",
       "Your secure application expired. Start again.": "Uw beveiligde aanvraag is verlopen. Begin opnieuw.",
       "Application reference": "Aanvraagreferentie",
       "Drivers included": "Bestuurders",
@@ -1151,6 +1153,10 @@
           ? t("Your secure application expired. Start again.")
           : error.message === "application_documents_missing"
             ? t("Add all four clear document photos for every driver.")
+            : error.message === "application_validation_failed"
+              ? t(
+                  "The submitted details were rejected. Go back and check phone numbers, dates of birth, licence dates, addresses, and company roles.",
+                )
             : t("Something went wrong. Please try again.");
     } finally {
       ui.submit.disabled = false;

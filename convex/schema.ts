@@ -279,6 +279,17 @@ export default defineSchema({
     adminNotes: v.optional(v.string()),
     customerId: v.optional(v.id("customers")),
     portalAccountId: v.optional(v.id("portalAccounts")),
+    emailStatus: v.optional(
+      v.union(
+        v.literal("not_configured"),
+        v.literal("pending"),
+        v.literal("sent"),
+        v.literal("failed"),
+      ),
+    ),
+    emailProviderId: v.optional(v.string()),
+    emailLastError: v.optional(v.string()),
+    emailAttemptedAt: v.optional(v.number()),
     expiresAt: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),

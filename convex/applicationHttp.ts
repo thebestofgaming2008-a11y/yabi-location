@@ -588,6 +588,13 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
         drivers,
       },
     );
+    for (const delay of [0, 60_000, 5 * 60_000]) {
+      await ctx.scheduler.runAfter(
+        delay,
+        internal.applicationEmails.sendApplicationNotification,
+        { applicationId: application.applicationId },
+      );
+    }
     return json({ ok: true, reference: result.reference }, 201, origin);
   } catch (error) {
     const code = safeError(error);

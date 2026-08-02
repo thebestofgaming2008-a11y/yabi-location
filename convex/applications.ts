@@ -21,6 +21,13 @@ const localeValidator = v.union(
   v.literal("nl"),
 );
 
+const emailStatusValidator = v.union(
+  v.literal("not_configured"),
+  v.literal("pending"),
+  v.literal("sent"),
+  v.literal("failed"),
+);
+
 const driverInputValidator = v.object({
   clientKey: v.string(),
   kind: applicationDriverKindValidator,
@@ -459,6 +466,7 @@ export const submitApplication = internalMutation({
       privacyVersion: args.privacyVersion,
       status: "submitted",
       submittedAt: now,
+      emailStatus: "pending",
       updatedAt: now,
       expiresAt: now,
     });
@@ -470,6 +478,117 @@ export const submitApplication = internalMutation({
       `${application.reference} submitted`,
     );
     return { reference: application.reference };
+  },
+});
+
+export const getApplicationForEmail = internalQuery({
+  args: { applicationId: v.id("rentalApplications") },
+  returns: v.union(
+    v.null(),
+    v.object({
+      reference: v.string(),
+      locale: localeValidator,
+      applicantType: applicantTypeValidator,
+      holderFullName: v.string(),
+      companyName: v.optional(v.string()),
+      companyVatNumber: v.optional(v.string()),
+      holderAddress: v.string(),
+      holderPhone: v.string(),
+      holderEmail: v.string(),
+      submittedAt: v.number(),
+      emailStatus: v.optional(emailStatusValidator),
+      drivers: v.array(
+        v.object({
+          kind: applicationDriverKindValidator,
+          fullName: v.string(),
+          email: v.optional(v.string()),
+          phone: v.string(),
+          companyPosition: v.optional(v.string()),
+        }),
+      ),
+      documentCount: v.number(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const application = await ctx.db.get(args.applicationId);
+    if (
+      !application ||
+      application.status === "draft" ||
+      !application.applicantType ||
+      !application.holderFullName ||
+      !application.holderAddress ||
+      !application.holderPhone ||
+      !application.holderEmail ||
+      !application.submittedAt
+    ) {
+      return null;
+    }
+    const [drivers, documents] = await Promise.all([
+      ctx.db
+        .query("applicationDrivers")
+        .withIndex("by_application_id", (query) =>
+          query.eq("applicationId", application._id),
+        )
+        .take(6),
+      ctx.db
+        .query("applicationMedia")
+        .withIndex("by_application_id", (query) =>
+          query.eq("applicationId", application._id),
+        )
+        .take(48),
+    ]);
+    return {
+      reference: application.reference,
+      locale: application.locale,
+      applicantType: application.applicantType,
+      holderFullName: application.holderFullName,
+      companyName: application.companyName,
+      companyVatNumber: application.companyVatNumber,
+      holderAddress: application.holderAddress,
+      holderPhone: application.holderPhone,
+      holderEmail: application.holderEmail,
+      submittedAt: application.submittedAt,
+      emailStatus: application.emailStatus,
+      drivers: drivers
+        .sort((left, right) => left.sortOrder - right.sortOrder)
+        .map((driver) => ({
+          kind: driver.kind,
+          fullName: driver.fullName,
+          email: driver.email,
+          phone: driver.phone,
+          companyPosition: driver.companyPosition,
+        })),
+      documentCount: documents.filter(
+        (document) => document.status === "uploaded",
+      ).length,
+    };
+  },
+});
+
+export const setApplicationEmailStatus = internalMutation({
+  args: {
+    applicationId: v.id("rentalApplications"),
+    emailStatus: v.union(
+      v.literal("not_configured"),
+      v.literal("sent"),
+      v.literal("failed"),
+    ),
+    emailProviderId: v.optional(v.string()),
+    emailLastError: v.optional(v.string()),
+    emailAttemptedAt: v.number(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const application = await ctx.db.get(args.applicationId);
+    if (!application) return null;
+    await ctx.db.patch(application._id, {
+      emailStatus: args.emailStatus,
+      emailProviderId: args.emailProviderId,
+      emailLastError: args.emailLastError,
+      emailAttemptedAt: args.emailAttemptedAt,
+      updatedAt: Date.now(),
+    });
+    return null;
   },
 });
 
