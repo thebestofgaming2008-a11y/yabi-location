@@ -254,15 +254,24 @@ const submitQuote = httpAction(async (ctx, request) => {
     { quoteRequestId: result.quoteRequestId },
   );
   if (!notification.sent) {
+    await ctx.scheduler.runAfter(
+      60_000,
+      internal.emails.sendQuoteNotification,
+      { quoteRequestId: result.quoteRequestId },
+    );
+    await ctx.scheduler.runAfter(
+      5 * 60_000,
+      internal.emails.sendQuoteNotification,
+      { quoteRequestId: result.quoteRequestId },
+    );
     return jsonResponse(
       {
-        ok: false,
-        error: "email_delivery_failed",
-        reason: notification.reason,
+        ok: true,
         reference: result.reference,
         saved: true,
+        emailPending: true,
       },
-      503,
+      202,
       origin,
     );
   }
