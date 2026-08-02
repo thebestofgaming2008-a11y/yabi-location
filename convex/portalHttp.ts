@@ -34,8 +34,12 @@ const allowedWorkflowTypes = new Set([
   "maintenance",
   "handover_take",
   "handover_return",
+  "breakdown_replacement",
+  "vehicle_transfer",
   "report",
 ]);
+const allowedDispositions = new Set(["self", "towing", "mechanic", "other"]);
+const allowedCaptureSources = new Set(["camera", "gallery", "signature"]);
 const allowedMediaCategories = new Set([
   "vehicle_exterior",
   "vehicle_interior",
@@ -267,12 +271,16 @@ function safeError(error: unknown): string {
     "maintenance_details_required",
     "inspection_media_required",
     "before_after_media_required",
+    "operation_details_required",
+    "required_evidence_missing",
     "cannot_deactivate_self",
     "code_collision",
     "media_service_unavailable",
     "portal_not_configured",
   ]);
-  return known.has(message) ? message : "request_failed";
+  if (known.has(message)) return message;
+  const wrapped = /(?:^|\n)Uncaught Error: ([a-z_]+)(?:\n|$)/.exec(message)?.[1];
+  return wrapped && known.has(wrapped) ? wrapped : "request_failed";
 }
 
 function statusFor(error: string): number {
@@ -433,6 +441,9 @@ export const portalAdmin = httpAction(async (ctx, request) => {
       const displayName = clean(body.displayName, 100);
       if (!displayName || !allowedRoles.has(role)) throw new Error("validation_failed");
       const access = generateAccessCode();
+      const workflowAccess = Array.isArray(body.allowedWorkflowTypes)
+        ? [...new Set(body.allowedWorkflowTypes.map((item) => clean(item, 40)).filter((item) => allowedWorkflowTypes.has(item)))].slice(0, 12)
+        : undefined;
       const accountId = await ctx.runMutation(internal.portal.createAccount, {
         actorAccountId: session.account.id,
         displayName,
@@ -441,6 +452,9 @@ export const portalAdmin = httpAction(async (ctx, request) => {
         codeHint: access.normalized.slice(-4),
         linkedCustomerId: optionalString(body.linkedCustomerId, 80) as
           | Id<"customers">
+          | undefined,
+        allowedWorkflowTypes: workflowAccess as
+          | Array<"customer_onboarding" | "check_in" | "check_out" | "wash" | "maintenance" | "handover_take" | "handover_return" | "breakdown_replacement" | "vehicle_transfer" | "report">
           | undefined,
       });
       return json(
@@ -672,13 +686,18 @@ export const portalUpload = httpAction(async (ctx, request) => {
     const fileName = clean(body.fileName, 180);
     const contentType = clean(body.contentType, 80).toLowerCase();
     const category = clean(body.category, 40);
+    const slot = clean(body.slot, 80).toLowerCase();
+    const captureSource = clean(body.captureSource, 20).toLowerCase();
     const uploadGroupId = clean(body.uploadGroupId, 80);
     const size = boundedNumber(body.size, 1, 8_000_000);
+    const sortOrder = boundedNumber(body.sortOrder, 0, 100);
     if (
       !fileName ||
       !uploadGroupId ||
       !allowedImageTypes.has(contentType) ||
       !allowedMediaCategories.has(category) ||
+      (slot && !/^[a-z0-9_]{1,80}$/.test(slot)) ||
+      (captureSource && !allowedCaptureSources.has(captureSource)) ||
       size === undefined
     ) {
       throw new Error("validation_failed");
@@ -711,6 +730,9 @@ export const portalUpload = httpAction(async (ctx, request) => {
         | "maintenance"
         | "other",
       expiresAt,
+      slot: slot || undefined,
+      captureSource: captureSource as "camera" | "gallery" | "signature" | undefined,
+      sortOrder,
     });
     const token = await mediaToken({
       op: "put",
@@ -811,6 +833,8 @@ export const portalWorkflow = httpAction(async (ctx, request) => {
         | "maintenance"
         | "handover_take"
         | "handover_return"
+        | "breakdown_replacement"
+        | "vehicle_transfer"
         | "report",
       uploadGroupId,
       mediaIds: mediaIds as Id<"mediaAssets">[],
@@ -821,13 +845,22 @@ export const portalWorkflow = httpAction(async (ctx, request) => {
         | Id<"customers">
         | undefined,
       rentalId: optionalString(body.rentalId, 80) as Id<"rentals"> | undefined,
-      occurredAt:
-        boundedNumber(body.occurredAt, 1_600_000_000_000, 4_000_000_000_000) ??
-        Date.now(),
+      occurredAt: Date.now(),
       mileage: boundedNumber(body.mileage, 0, 2_000_000),
       mileageAfter: boundedNumber(body.mileageAfter, 0, 2_000_000),
       fuelPercent: boundedNumber(body.fuelPercent, 0, 100),
+      autonomyKm: boundedNumber(body.autonomyKm, 0, 5_000),
       personName: optionalString(body.personName, 100),
+      customerName: optionalString(body.customerName, 100),
+      employeeName: optionalString(body.employeeName, 100),
+      secondaryLicensePlate: normalizePlate(body.secondaryLicensePlate) || undefined,
+      secondaryMileage: boundedNumber(body.secondaryMileage, 0, 2_000_000),
+      secondaryAutonomyKm: boundedNumber(body.secondaryAutonomyKm, 0, 5_000),
+      originAddress: optionalString(body.originAddress, 500),
+      destinationAddress: optionalString(body.destinationAddress, 500),
+      disposition: allowedDispositions.has(clean(body.disposition, 20))
+        ? clean(body.disposition, 20) as "self" | "towing" | "mechanic" | "other"
+        : undefined,
       maintenanceWork: optionalString(body.maintenanceWork, 4000),
       changesMade: optionalString(body.changesMade, 4000),
       reportCategory: reportCategory as
@@ -872,6 +905,9 @@ export const portalRecordMedia = httpAction(async (ctx, request) => {
         fileName: item.fileName,
         contentType: item.contentType,
         category: item.category,
+        slot: item.slot,
+        captureSource: item.captureSource,
+        sortOrder: item.sortOrder,
         url: `${workerUrl}/object/${encodeURIComponent(item.r2Key)}?token=${encodeURIComponent(
           await mediaToken({ op: "get", key: item.r2Key, exp: expiresAt }),
         )}`,

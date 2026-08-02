@@ -7,12 +7,14 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import {
+  captureSourceValidator,
   mediaCategoryValidator,
   operationalVehicleStatusValidator,
   portalRoleValidator,
   rentalStatusValidator,
   vehicleFormatValidator,
   workflowTypeValidator,
+  vehicleDispositionValidator,
 } from "./schema";
 import { portalRateLimiter } from "./rateLimits";
 
@@ -26,6 +28,7 @@ const accountPublicValidator = v.object({
   codeHint: v.string(),
   active: v.boolean(),
   linkedCustomerId: v.optional(v.id("customers")),
+  allowedWorkflowTypes: v.optional(v.array(workflowTypeValidator)),
   lastLoginAt: v.optional(v.number()),
   createdAt: v.number(),
 });
@@ -97,7 +100,16 @@ const workflowPublicValidator = v.object({
   mileage: v.optional(v.number()),
   mileageAfter: v.optional(v.number()),
   fuelPercent: v.optional(v.number()),
+  autonomyKm: v.optional(v.number()),
   personName: v.optional(v.string()),
+  customerName: v.optional(v.string()),
+  employeeName: v.optional(v.string()),
+  secondaryLicensePlate: v.optional(v.string()),
+  secondaryMileage: v.optional(v.number()),
+  secondaryAutonomyKm: v.optional(v.number()),
+  originAddress: v.optional(v.string()),
+  destinationAddress: v.optional(v.string()),
+  disposition: v.optional(vehicleDispositionValidator),
   maintenanceWork: v.optional(v.string()),
   changesMade: v.optional(v.string()),
   reportCategory: v.optional(
@@ -154,6 +166,7 @@ function publicAccount(account: Doc<"portalAccounts">) {
     codeHint: account.codeHint,
     active: account.active,
     linkedCustomerId: account.linkedCustomerId,
+    allowedWorkflowTypes: account.allowedWorkflowTypes,
     lastLoginAt: account.lastLoginAt,
     createdAt: account.createdAt,
   };
@@ -233,7 +246,16 @@ function publicWorkflow(record: Doc<"workflowRecords">) {
     mileage: record.mileage,
     mileageAfter: record.mileageAfter,
     fuelPercent: record.fuelPercent,
+    autonomyKm: record.autonomyKm,
     personName: record.personName,
+    customerName: record.customerName,
+    employeeName: record.employeeName,
+    secondaryLicensePlate: record.secondaryLicensePlate,
+    secondaryMileage: record.secondaryMileage,
+    secondaryAutonomyKm: record.secondaryAutonomyKm,
+    originAddress: record.originAddress,
+    destinationAddress: record.destinationAddress,
+    disposition: record.disposition,
     maintenanceWork: record.maintenanceWork,
     changesMade: record.changesMade,
     reportCategory: record.reportCategory,
@@ -289,8 +311,35 @@ const workflowRoles: Record<WorkflowType, PortalRole[]> = {
   maintenance: ["admin", "mechanic"],
   handover_take: ["admin", "employee", "contractor"],
   handover_return: ["admin", "employee", "contractor"],
+  breakdown_replacement: ["admin", "employee", "contractor"],
+  vehicle_transfer: ["admin", "employee", "contractor"],
   report: ["admin", "employee", "customer", "mechanic", "contractor"],
 };
+
+const standardPhotoSlots = ["front", "right", "left", "rear", "interior"];
+
+function requiredMediaSlots(type: WorkflowType, disposition?: Doc<"workflowRecords">["disposition"]) {
+  if (type === "wash") {
+    return standardPhotoSlots.flatMap((slot) => [`before_${slot}`, `after_${slot}`]);
+  }
+  if (type === "check_in" || type === "check_out") {
+    return ["dashboard_started", ...standardPhotoSlots, "customer_signature"];
+  }
+  if (type === "breakdown_replacement") {
+    return [
+      "outgoing_dashboard_started",
+      ...standardPhotoSlots.map((slot) => `outgoing_${slot}`),
+      "customer_signature",
+      "defective_dashboard_started",
+      ...standardPhotoSlots.map((slot) => `defective_${slot}`),
+      ...(disposition === "self" ? ["employee_signature"] : []),
+    ];
+  }
+  if (type === "vehicle_transfer") {
+    return ["dashboard_started", ...standardPhotoSlots, "employee_signature"];
+  }
+  return [];
+}
 
 export const bootstrapAdmin = internalMutation({
   args: {
@@ -489,11 +538,17 @@ export const getPortalData = internalQuery({
         ctx.db.query("auditEvents").order("desc").take(100),
       ]);
     } else if (actor.role === "employee") {
-      [customers, rentals, workflows] = await Promise.all([
-        ctx.db.query("customers").order("desc").take(100),
-        ctx.db.query("rentals").order("desc").take(100),
-        ctx.db.query("workflowRecords").order("desc").take(100),
-      ]);
+      workflows = await ctx.db
+        .query("workflowRecords")
+        .withIndex("by_actor_account_id", (q) => q.eq("actorAccountId", actor._id))
+        .order("desc")
+        .take(100);
+      if (!actor.allowedWorkflowTypes) {
+        [customers, rentals] = await Promise.all([
+          ctx.db.query("customers").order("desc").take(100),
+          ctx.db.query("rentals").order("desc").take(100),
+        ]);
+      }
     } else if (actor.role === "mechanic") {
       workflows = await ctx.db
         .query("workflowRecords")
@@ -571,6 +626,7 @@ export const createAccount = internalMutation({
     codeHash: v.string(),
     codeHint: v.string(),
     linkedCustomerId: v.optional(v.id("customers")),
+    allowedWorkflowTypes: v.optional(v.array(workflowTypeValidator)),
   },
   returns: v.id("portalAccounts"),
   handler: async (ctx, args) => {
@@ -600,6 +656,7 @@ export const createAccount = internalMutation({
       codeHint: args.codeHint,
       active: true,
       linkedCustomerId: args.linkedCustomerId,
+      allowedWorkflowTypes: args.allowedWorkflowTypes,
       createdBy: actor._id,
       createdAt: now,
       updatedAt: now,
@@ -998,6 +1055,9 @@ export const createPendingMedia = internalMutation({
     contentType: v.string(),
     size: v.number(),
     category: mediaCategoryValidator,
+    slot: v.optional(v.string()),
+    captureSource: v.optional(captureSourceValidator),
+    sortOrder: v.optional(v.number()),
     expiresAt: v.number(),
   },
   returns: v.id("mediaAssets"),
@@ -1017,6 +1077,9 @@ export const createPendingMedia = internalMutation({
       contentType: args.contentType,
       size: args.size,
       category: args.category,
+      slot: args.slot,
+      captureSource: args.captureSource,
+      sortOrder: args.sortOrder,
       status: "pending",
       createdAt: Date.now(),
       expiresAt: args.expiresAt,
@@ -1063,7 +1126,16 @@ export const createWorkflowRecord = internalMutation({
     mileage: v.optional(v.number()),
     mileageAfter: v.optional(v.number()),
     fuelPercent: v.optional(v.number()),
+    autonomyKm: v.optional(v.number()),
     personName: v.optional(v.string()),
+    customerName: v.optional(v.string()),
+    employeeName: v.optional(v.string()),
+    secondaryLicensePlate: v.optional(v.string()),
+    secondaryMileage: v.optional(v.number()),
+    secondaryAutonomyKm: v.optional(v.number()),
+    originAddress: v.optional(v.string()),
+    destinationAddress: v.optional(v.string()),
+    disposition: v.optional(vehicleDispositionValidator),
     maintenanceWork: v.optional(v.string()),
     changesMade: v.optional(v.string()),
     reportCategory: v.optional(reportCategoryValidator),
@@ -1079,7 +1151,17 @@ export const createWorkflowRecord = internalMutation({
     if (!workflowRoles[args.type].includes(actor.role)) {
       throw new Error("forbidden_workflow");
     }
+    if (
+      actor.role !== "admin" &&
+      actor.allowedWorkflowTypes &&
+      !actor.allowedWorkflowTypes.includes(args.type)
+    ) {
+      throw new Error("forbidden_workflow");
+    }
     if (args.mediaIds.length > 24) throw new Error("too_many_files");
+    if (new Set(args.mediaIds.map(String)).size !== args.mediaIds.length) {
+      throw new Error("invalid_media");
+    }
 
     let customerId = args.customerId;
     if (actor.role === "customer") {
@@ -1117,18 +1199,15 @@ export const createWorkflowRecord = internalMutation({
       throw new Error("rental_mismatch");
     }
     if (
-      ["check_in", "check_out", "wash", "maintenance", "handover_take", "handover_return"].includes(
+      ["check_in", "check_out", "wash", "maintenance", "handover_take", "handover_return", "breakdown_replacement", "vehicle_transfer"].includes(
         args.type,
       ) &&
       !vehicle
     ) {
       throw new Error("vehicle_required");
     }
-    if (["check_in", "check_out"].includes(args.type) && !rental) {
-      throw new Error("rental_required");
-    }
     if (
-      ["check_in", "check_out", "wash", "handover_take", "handover_return"].includes(
+      ["check_in", "check_out", "wash", "handover_take", "handover_return", "breakdown_replacement", "vehicle_transfer"].includes(
         args.type,
       ) &&
       args.mileage === undefined
@@ -1140,6 +1219,25 @@ export const createWorkflowRecord = internalMutation({
     }
     if (args.type === "report" && !args.description) {
       throw new Error("description_required");
+    }
+    if (["check_in", "check_out"].includes(args.type) && (!args.personName || args.autonomyKm === undefined)) {
+      throw new Error("operation_details_required");
+    }
+    if (
+      args.type === "breakdown_replacement" &&
+      (!args.customerName || !args.secondaryLicensePlate || args.secondaryMileage === undefined ||
+        args.secondaryAutonomyKm === undefined || !args.disposition)
+    ) {
+      throw new Error("operation_details_required");
+    }
+    if (
+      args.type === "vehicle_transfer" &&
+      (!args.originAddress || !args.destinationAddress || !args.employeeName)
+    ) {
+      throw new Error("operation_details_required");
+    }
+    if (args.type === "breakdown_replacement" && args.disposition === "self" && (!args.destinationAddress || !args.employeeName)) {
+      throw new Error("operation_details_required");
     }
 
     const media = await Promise.all(args.mediaIds.map((id) => ctx.db.get(id)));
@@ -1155,9 +1253,9 @@ export const createWorkflowRecord = internalMutation({
     ) {
       throw new Error("invalid_media");
     }
-    const categories = media
+    const uploadedMedia = media
       .filter((item): item is Doc<"mediaAssets"> => item !== null)
-      .map((item) => item.category);
+    const categories = uploadedMedia.map((item) => item.category);
     if (
       ["check_in", "check_out"].includes(args.type) &&
       (!categories.includes("signature") || media.length < 3)
@@ -1170,6 +1268,10 @@ export const createWorkflowRecord = internalMutation({
     ) {
       throw new Error("before_after_media_required");
     }
+    const slots = uploadedMedia.map((item) => item.slot).filter((slot): slot is string => Boolean(slot));
+    if (new Set(slots).size !== slots.length) throw new Error("invalid_media");
+    const missingSlots = requiredMediaSlots(args.type, args.disposition).filter((slot) => !slots.includes(slot));
+    if (missingSlots.length) throw new Error("required_evidence_missing");
 
     const now = Date.now();
     const recordId = await ctx.db.insert("workflowRecords", {
@@ -1184,7 +1286,16 @@ export const createWorkflowRecord = internalMutation({
       mileage: args.mileage,
       mileageAfter: args.mileageAfter,
       fuelPercent: args.fuelPercent,
+      autonomyKm: args.autonomyKm,
       personName: args.personName,
+      customerName: args.customerName,
+      employeeName: args.employeeName,
+      secondaryLicensePlate: args.secondaryLicensePlate,
+      secondaryMileage: args.secondaryMileage,
+      secondaryAutonomyKm: args.secondaryAutonomyKm,
+      originAddress: args.originAddress,
+      destinationAddress: args.destinationAddress,
+      disposition: args.disposition,
       maintenanceWork: args.maintenanceWork,
       changesMade: args.changesMade,
       reportCategory: args.reportCategory,
@@ -1283,6 +1394,9 @@ export const getRecordMedia = internalQuery({
       fileName: v.string(),
       contentType: v.string(),
       category: mediaCategoryValidator,
+      slot: v.optional(v.string()),
+      captureSource: v.optional(captureSourceValidator),
+      sortOrder: v.optional(v.number()),
     }),
   ),
   handler: async (ctx, args) => {
@@ -1293,6 +1407,13 @@ export const getRecordMedia = internalQuery({
       throw new Error("forbidden");
     }
     if (actor.role === "mechanic" && record.type !== "maintenance") {
+      throw new Error("forbidden");
+    }
+    if (
+      actor.role === "employee" &&
+      actor.allowedWorkflowTypes &&
+      record.actorAccountId !== actor._id
+    ) {
       throw new Error("forbidden");
     }
     if (
@@ -1313,6 +1434,9 @@ export const getRecordMedia = internalQuery({
         fileName: item.fileName,
         contentType: item.contentType,
         category: item.category,
+        slot: item.slot,
+        captureSource: item.captureSource,
+        sortOrder: item.sortOrder,
       }));
   },
 });

@@ -146,12 +146,81 @@ const translations = {
     "Mileage after": "Kilométrage après",
     "Mileage (km)": "Kilométrage (km)",
     "Choose or take photos": "Choisir ou prendre des photos",
+    "Choose or take a photo": "Choisir ou prendre une photo",
+    "Camera or gallery": "Appareil photo ou galerie",
+    "No photo selected": "Aucune photo sélectionnée",
+    "photo selected": "photo sélectionnée",
+    "photos selected": "photos sélectionnées",
+    Front: "Avant",
+    "Right side": "Côté droit",
+    "Left side": "Côté gauche",
+    Rear: "Arrière",
+    Interior: "Intérieur",
+    Dashboard: "Tableau de bord",
+    "Vehicle photos": "Photos du véhicule",
+    "Vehicle must be started": "Le véhicule doit être démarré",
+    "The dashboard must clearly show mileage and autonomy.": "Le tableau de bord doit afficher clairement le kilométrage et l’autonomie.",
+    "Dashboard photo — vehicle started": "Photo du tableau de bord — véhicule démarré",
+    "Autonomy (km)": "Autonomie (km)",
+    "Driver / guest full name": "Nom complet du conducteur / client",
+    "Driver signature": "Signature du conducteur",
+    "Employee signature": "Signature de l’employé",
+    "Employee full name": "Nom complet de l’employé",
+    "Destination address (required when moved by me)": "Adresse de destination (obligatoire si déplacé par moi-même)",
+    "Employee full name (required when moved by me)": "Nom complet de l’employé (obligatoire si déplacé par moi-même)",
+    "Employee signature — only required when moved by me": "Signature de l’employé — obligatoire uniquement si déplacé par moi-même",
+    "Notes (optional)": "Remarques (facultatif)",
+    "Extra photos (optional)": "Photos supplémentaires (facultatif)",
+    "Extra photo": "Photo supplémentaire",
+    "Breakdown replacement": "Remplacement en cas de panne",
+    "Move vehicle": "Déplacer un véhicule",
+    "YABI replacement vehicle": "Véhicule de remplacement YABI",
+    "Key handover": "Remise des clés",
+    "Customer full name": "Nom complet du client",
+    "Defective customer vehicle": "Véhicule défectueux du client",
+    "What happened to the defective vehicle?": "Prise en charge du véhicule défectueux",
+    Disposition: "Prise en charge",
+    "Moved by me": "Déplacé par moi-même",
+    "Towing service": "Dépannage",
+    "Mechanic came": "Le mécanicien est venu",
+    Other: "Autre",
+    "Point A — origin address": "Point A — adresse de départ",
+    "Point B — destination address": "Point B — adresse d’arrivée",
+    Applications: "Demandes",
+    "A clear view of what needs attention today.": "Une vue claire de ce qui nécessite votre attention aujourd’hui.",
+    "Review new rental requests and create access after agreement.": "Examinez les nouvelles demandes de location et créez un accès après accord.",
+    "Create personal access codes and control permissions.": "Créez des codes d’accès personnels et gérez les autorisations.",
+    "Customer records used by rentals and inspections.": "Dossiers clients utilisés pour les locations et les inspections.",
+    "Availability, mileage, and vehicle status at a glance.": "Disponibilité, kilométrage et statut des véhicules en un coup d’œil.",
+    "Follow every rental from planning to closure.": "Suivez chaque location de sa planification à sa clôture.",
+    "Guided procedures with time-stamped evidence.": "Procédures guidées avec preuves horodatées.",
+    "A traceable record of sensitive actions.": "Un historique traçable des actions sensibles.",
+    "Keep your personal and licence information accurate.": "Gardez vos informations personnelles et de permis à jour.",
+    "Complete your personal rental information.": "Complétez vos informations personnelles de location.",
+    "Record mileage, fuel, photos and signature.": "Enregistrez le kilométrage, le carburant, les photos et la signature.",
+    "Document the vehicle when it returns.": "Documentez le véhicule lors de son retour.",
+    "Capture before-and-after photos and mileage.": "Prenez les photos avant et après ainsi que le kilométrage.",
+    "Record the work, changes and evidence.": "Enregistrez les travaux, les modifications et les preuves.",
+    "Record who takes the vehicle and its condition.": "Enregistrez qui prend le véhicule et son état.",
+    "Record who returns the vehicle and its condition.": "Enregistrez qui restitue le véhicule et son état.",
+    "Document the replacement vehicle and the defective vehicle.": "Documentez le véhicule de remplacement et le véhicule défectueux.",
+    "Document a vehicle transfer from point A to point B.": "Documentez le transfert d’un véhicule du point A au point B.",
+    "Report damage, a problem or a modification.": "Signalez un dommage, un problème ou une modification.",
     "No photos selected": "Aucune photo sélectionnée",
     "Complete operation": "Terminer l’opération",
+    Procedure: "Procédure",
+    "Operation recorded.": "Opération enregistrée.",
     Resolution: "Résolution",
     "Resolve report": "Résoudre le signalement",
     "Mark resolved": "Marquer comme résolu",
     Fuel: "Carburant",
+    Autonomy: "Autonomie",
+    "Driver / guest": "Conducteur / client",
+    "Defective vehicle plate": "Plaque du véhicule défectueux",
+    "Defective vehicle mileage": "Kilométrage du véhicule défectueux",
+    "Defective vehicle autonomy": "Autonomie du véhicule défectueux",
+    "Point A / origin": "Point A / départ",
+    "Point B / destination": "Point B / destination",
     Changes: "Modifications",
     Description: "Description",
     "No media attached.": "Aucun média joint.",
@@ -195,6 +264,8 @@ const translations = {
     "Signing in…": "Connexion…",
     "Preparing evidence…": "Préparation des preuves…",
     "Saving record…": "Enregistrement…",
+    "Uploading evidence": "Téléchargement de la preuve",
+    of: "sur",
     "The latest records visible to your role.": "Derniers enregistrements accessibles.",
     "Choose one clear next step.": "Choisissez l’action suivante.",
     "That access code is not valid.": "Ce code d’accès n’est pas valide.",
@@ -202,8 +273,12 @@ const translations = {
     "Too many attempts. Please wait and try again.": "Trop de tentatives. Veuillez patienter.",
     "Your session expired. Sign in again.": "Votre session a expiré. Reconnectez-vous.",
     "Your role does not allow this action.": "Votre rôle ne permet pas cette action.",
+    "This operation is not available for your role.": "Cette opération n’est pas disponible pour votre rôle.",
     "Check the required information and try again.": "Vérifiez les champs obligatoires.",
     "Add the required photos and signature.": "Ajoutez les photos et la signature requises.",
+    "Add every required photo and signature.": "Ajoutez chaque photo et signature requise.",
+    "Complete all required operation details.": "Complétez toutes les informations obligatoires de l’opération.",
+    "You selected too many photos. Keep the total at 24 or fewer.": "Vous avez sélectionné trop de photos. Limitez le total à 24.",
     "Photo storage is temporarily unavailable.": "Le stockage des photos est temporairement indisponible.",
     "Something went wrong. Please try again.": "Une erreur s’est produite. Réessayez.",
   },
@@ -348,12 +423,81 @@ const translations = {
     "Mileage after": "Kilometerstand nadien",
     "Mileage (km)": "Kilometerstand (km)",
     "Choose or take photos": "Foto’s kiezen of nemen",
+    "Choose or take a photo": "Foto kiezen of nemen",
+    "Camera or gallery": "Camera of galerij",
+    "No photo selected": "Geen foto geselecteerd",
+    "photo selected": "foto geselecteerd",
+    "photos selected": "foto’s geselecteerd",
+    Front: "Voorkant",
+    "Right side": "Rechterkant",
+    "Left side": "Linkerkant",
+    Rear: "Achterkant",
+    Interior: "Binnenkant",
+    Dashboard: "Dashboard",
+    "Vehicle photos": "Voertuigfoto’s",
+    "Vehicle must be started": "Het voertuig moet gestart zijn",
+    "The dashboard must clearly show mileage and autonomy.": "Het dashboard moet de kilometerstand en autonomie duidelijk tonen.",
+    "Dashboard photo — vehicle started": "Foto van dashboard — voertuig gestart",
+    "Autonomy (km)": "Actieradius (km)",
+    "Driver / guest full name": "Volledige naam bestuurder / klant",
+    "Driver signature": "Handtekening bestuurder",
+    "Employee signature": "Handtekening medewerker",
+    "Employee full name": "Volledige naam medewerker",
+    "Destination address (required when moved by me)": "Bestemmingsadres (verplicht wanneer door mij verplaatst)",
+    "Employee full name (required when moved by me)": "Volledige naam medewerker (verplicht wanneer door mij verplaatst)",
+    "Employee signature — only required when moved by me": "Handtekening medewerker — alleen verplicht wanneer door mij verplaatst",
+    "Notes (optional)": "Opmerkingen (optioneel)",
+    "Extra photos (optional)": "Extra foto’s (optioneel)",
+    "Extra photo": "Extra foto",
+    "Breakdown replacement": "Vervangwagen bij pech",
+    "Move vehicle": "Voertuig verplaatsen",
+    "YABI replacement vehicle": "YABI-vervangwagen",
+    "Key handover": "Sleuteloverdracht",
+    "Customer full name": "Volledige naam klant",
+    "Defective customer vehicle": "Defect voertuig van de klant",
+    "What happened to the defective vehicle?": "Afhandeling van het defecte voertuig",
+    Disposition: "Afhandeling",
+    "Moved by me": "Door mij verplaatst",
+    "Towing service": "Depannage",
+    "Mechanic came": "Monteur ter plaatse",
+    Other: "Anders",
+    "Point A — origin address": "Punt A — vertrekadres",
+    "Point B — destination address": "Punt B — bestemmingsadres",
+    Applications: "Aanvragen",
+    "A clear view of what needs attention today.": "Een helder overzicht van wat vandaag aandacht nodig heeft.",
+    "Review new rental requests and create access after agreement.": "Beoordeel nieuwe huuraanvragen en maak na akkoord toegang aan.",
+    "Create personal access codes and control permissions.": "Maak persoonlijke toegangscodes en beheer machtigingen.",
+    "Customer records used by rentals and inspections.": "Klantendossiers voor verhuur en inspecties.",
+    "Availability, mileage, and vehicle status at a glance.": "Beschikbaarheid, kilometerstand en voertuigstatus in één oogopslag.",
+    "Follow every rental from planning to closure.": "Volg elke verhuur van planning tot afsluiting.",
+    "Guided procedures with time-stamped evidence.": "Begeleide procedures met bewijs voorzien van een tijdstempel.",
+    "A traceable record of sensitive actions.": "Een traceerbaar overzicht van gevoelige acties.",
+    "Keep your personal and licence information accurate.": "Houd uw persoonlijke en rijbewijsgegevens correct.",
+    "Complete your personal rental information.": "Vul uw persoonlijke huurgegevens in.",
+    "Record mileage, fuel, photos and signature.": "Registreer kilometerstand, brandstof, foto’s en handtekening.",
+    "Document the vehicle when it returns.": "Documenteer het voertuig bij terugkomst.",
+    "Capture before-and-after photos and mileage.": "Leg foto’s voor en na het wassen en de kilometerstand vast.",
+    "Record the work, changes and evidence.": "Registreer werkzaamheden, wijzigingen en bewijs.",
+    "Record who takes the vehicle and its condition.": "Registreer wie het voertuig meeneemt en de staat ervan.",
+    "Record who returns the vehicle and its condition.": "Registreer wie het voertuig terugbrengt en de staat ervan.",
+    "Document the replacement vehicle and the defective vehicle.": "Documenteer de vervangwagen en het defecte voertuig.",
+    "Document a vehicle transfer from point A to point B.": "Documenteer een voertuigverplaatsing van punt A naar punt B.",
+    "Report damage, a problem or a modification.": "Meld schade, een probleem of een wijziging.",
     "No photos selected": "Geen foto’s geselecteerd",
     "Complete operation": "Werkzaamheid voltooien",
+    Procedure: "Procedure",
+    "Operation recorded.": "Werkzaamheid geregistreerd.",
     Resolution: "Oplossing",
     "Resolve report": "Melding oplossen",
     "Mark resolved": "Markeren als opgelost",
     Fuel: "Brandstof",
+    Autonomy: "Actieradius",
+    "Driver / guest": "Bestuurder / klant",
+    "Defective vehicle plate": "Nummerplaat defect voertuig",
+    "Defective vehicle mileage": "Kilometerstand defect voertuig",
+    "Defective vehicle autonomy": "Actieradius defect voertuig",
+    "Point A / origin": "Punt A / vertrek",
+    "Point B / destination": "Punt B / bestemming",
     Changes: "Wijzigingen",
     Description: "Beschrijving",
     "No media attached.": "Geen media toegevoegd.",
@@ -397,6 +541,8 @@ const translations = {
     "Signing in…": "Aanmelden…",
     "Preparing evidence…": "Bewijs voorbereiden…",
     "Saving record…": "Registratie opslaan…",
+    "Uploading evidence": "Bewijs uploaden",
+    of: "van",
     "The latest records visible to your role.": "Laatste registraties voor uw rol.",
     "Choose one clear next step.": "Kies de volgende actie.",
     "That access code is not valid.": "Deze toegangscode is niet geldig.",
@@ -404,8 +550,12 @@ const translations = {
     "Too many attempts. Please wait and try again.": "Te veel pogingen. Wacht even en probeer opnieuw.",
     "Your session expired. Sign in again.": "Uw sessie is verlopen. Meld u opnieuw aan.",
     "Your role does not allow this action.": "Uw rol staat deze actie niet toe.",
+    "This operation is not available for your role.": "Deze werkzaamheid is niet beschikbaar voor uw rol.",
     "Check the required information and try again.": "Controleer de verplichte gegevens.",
     "Add the required photos and signature.": "Voeg de vereiste foto’s en handtekening toe.",
+    "Add every required photo and signature.": "Voeg elke vereiste foto en handtekening toe.",
+    "Complete all required operation details.": "Vul alle verplichte gegevens van de werkzaamheid in.",
+    "You selected too many photos. Keep the total at 24 or fewer.": "U hebt te veel foto’s geselecteerd. Beperk het totaal tot 24.",
     "Photo storage is temporarily unavailable.": "Foto-opslag is tijdelijk niet beschikbaar.",
     "Something went wrong. Please try again.": "Er is iets misgegaan. Probeer opnieuw.",
   },
@@ -428,10 +578,10 @@ const roleViews = {
 };
 
 const roleWorkflows = {
-  admin: ["check_in", "check_out", "wash", "maintenance", "handover_take", "handover_return", "report"],
-  employee: ["check_in", "check_out", "wash", "handover_take", "handover_return", "report"],
+  admin: ["check_in", "check_out", "wash", "breakdown_replacement", "vehicle_transfer", "maintenance", "handover_take", "handover_return", "report"],
+  employee: ["check_in", "check_out", "wash", "breakdown_replacement", "vehicle_transfer", "handover_take", "handover_return", "report"],
   mechanic: ["maintenance", "report"],
-  contractor: ["check_in", "check_out", "handover_take", "handover_return", "report"],
+  contractor: ["check_in", "check_out", "breakdown_replacement", "vehicle_transfer", "handover_take", "handover_return", "report"],
   customer: ["customer_onboarding", "report"],
 };
 
@@ -455,8 +605,25 @@ const workflows = {
   maintenance: ["05", "Maintenance", "Record the work, changes and evidence."],
   handover_take: ["06A", "Vehicle taken", "Record who takes the vehicle and its condition."],
   handover_return: ["06B", "Vehicle returned", "Record who returns the vehicle and its condition."],
+  breakdown_replacement: ["08", "Breakdown replacement", "Document the replacement vehicle and the defective vehicle."],
+  vehicle_transfer: ["09", "Move vehicle", "Document a vehicle transfer from point A to point B."],
   report: ["07", "Report an issue", "Report damage, a problem or a modification."],
 };
+
+const operationalWorkflowDefaults = ["wash", "check_in", "check_out", "breakdown_replacement", "vehicle_transfer"];
+
+function allowedWorkflows() {
+  const base = roleWorkflows[state.data.account.role] || [];
+  const assigned = state.data.account.allowedWorkflowTypes;
+  return Array.isArray(assigned) ? base.filter((type) => assigned.includes(type)) : base;
+}
+
+function allowedViews() {
+  if (state.data?.account?.role === "employee" && Array.isArray(state.data.account.allowedWorkflowTypes)) {
+    return ["overview", "operations"];
+  }
+  return roleViews[state.data.account.role] || ["overview"];
+}
 
 const state = {
   token: localStorage.getItem(TOKEN_KEY) || "",
@@ -590,6 +757,9 @@ function messageFor(error) {
     forbidden: "Your role does not allow this action.",
     validation_failed: "Check the required information and try again.",
     media_required: "Add the required photos and signature.",
+    required_evidence_missing: "Add every required photo and signature.",
+    operation_details_required: "Complete all required operation details.",
+    too_many_files: "You selected too many photos. Keep the total at 24 or fewer.",
     media_service_unavailable: "Photo storage is temporarily unavailable.",
     customer_link_required: "Choose a customer for this customer account.",
     customer_already_linked: "That customer already has an access account.",
@@ -644,7 +814,7 @@ async function refresh() {
   try {
     const result = await api("/api/portal/data");
     state.data = result.data;
-    const allowed = roleViews[result.data.account.role] || ["overview"];
+    const allowed = allowedViews();
     if (!allowed.includes(state.view)) state.view = "overview";
     showApp();
     renderNavigation();
@@ -665,7 +835,7 @@ function renderNavigation() {
   el.profileRole.textContent = roles[account.role] || account.role;
   el.profileAvatar.textContent = initials(account.displayName);
   el.workspace.textContent = account.role === "customer" ? "Customer space" : "Operations";
-  el.navigation.innerHTML = roleViews[account.role]
+  el.navigation.innerHTML = allowedViews()
     .map(
       (view, index) => `<button class="nav-button ${state.view === view ? "active" : ""}" data-view="${view}">
         <span class="nav-icon">${String(index + 1).padStart(2, "0")}</span>
@@ -741,6 +911,8 @@ function quickActions() {
       ["Check in", "Begin a rental inspection", "check_in"],
       ["Check out", "Record a return", "check_out"],
       ["Wash", "Add before and after evidence", "wash"],
+      ["Breakdown replacement", "Replace a defective customer vehicle", "breakdown_replacement"],
+      ["Move vehicle", "Transfer a vehicle from A to B", "vehicle_transfer"],
       ["Report", "Flag a problem", "report"],
     ],
     mechanic: [
@@ -758,7 +930,8 @@ function quickActions() {
       ["Report", "Tell us about a problem", "report"],
     ],
   };
-  return choices[role] || [];
+  const allowed = allowedWorkflows();
+  return (choices[role] || []).filter(([, , target]) => !workflows[target] || allowed.includes(target));
 }
 
 function renderOverview() {
@@ -866,7 +1039,7 @@ function renderRentals() {
 }
 
 function renderOperations() {
-  const allowed = roleWorkflows[state.data.account.role] || [];
+  const allowed = allowedWorkflows();
   el.view.innerHTML = `${header()}
     <section class="workflow-grid">${allowed
       .map((type) => `<button class="workflow-card" data-workflow="${type}"><span>${workflows[type][0]}</span><strong>${clean(workflows[type][1])}</strong></button>`)
@@ -1096,15 +1269,20 @@ function revealCode(person, code) {
 window.yabiRevealAccessCode = (code) => revealCode("Customer", code);
 
 function createAccount() {
+  const permissionOptions = operationalWorkflowDefaults
+    .map((type) => `<label class="permission-option"><input type="checkbox" name="workflowAccess" value="${type}" checked><span><strong>${clean(workflows[type][1])}</strong></span></label>`)
+    .join("");
   modal({
     title: "Create personal access",
     submit: "Create access",
     content: `<form class="portal-form">${field("Display name", "displayName", "", true)}
       ${select("Role", "role", Object.entries(roles), true)}
+      <fieldset id="workflow-access" class="permission-field" hidden><legend>Assigned operations</legend><div class="permission-grid">${permissionOptions}</div></fieldset>
       <div id="customer-link" hidden>${select("Linked customer", "linkedCustomerId", state.data.customers.map((c) => [c.id, c.fullName]), true)}</div></form>`,
     handler: async (data) => {
       const body = { operation: "create_account", displayName: data.get("displayName"), role: data.get("role") };
       if (body.role === "customer") body.linkedCustomerId = data.get("linkedCustomerId");
+      if (["employee", "contractor"].includes(body.role)) body.allowedWorkflowTypes = data.getAll("workflowAccess");
       const result = await api("/api/portal/admin", { method: "POST", body });
       closeModal();
       await refresh();
@@ -1113,9 +1291,11 @@ function createAccount() {
   });
   const role = el.modalBody.querySelector('[name="role"]');
   const wrapper = el.modalBody.querySelector("#customer-link");
+  const workflowAccess = el.modalBody.querySelector("#workflow-access");
   const customerSelect = wrapper.querySelector("[data-custom-select]");
   role.addEventListener("change", () => {
     wrapper.hidden = role.value !== "customer";
+    workflowAccess.hidden = !["employee", "contractor"].includes(role.value);
     customerSelect.dataset.required = String(role.value === "customer");
     if (role.value !== "customer") setCustomValue(wrapper, "linkedCustomerId", "");
   });
@@ -1242,15 +1422,50 @@ function updateVehicle(id) {
   setCustomValue(el.modalBody, "status", vehicle.status);
 }
 
-function uploadField(label, name, category, required = false) {
+function uploadField(label, name, category, required = false, slot = name, multiple = false) {
   return `<div class="upload-field"><label>${clean(tr(label))}${required ? " *" : ""}</label><label class="upload-drop">
-    <input type="file" name="${clean(name)}" accept="image/jpeg,image/png,image/webp" data-category="${clean(category)}" multiple ${required ? "required" : ""}>
-    <strong>${clean(tr("Choose or take photos"))}</strong><span>JPG, PNG or WebP · 8 MB</span></label><div class="file-summary">${clean(tr("No photos selected"))}</div></div>`;
+    <input type="file" name="${clean(name)}" accept="image/jpeg,image/png,image/webp" data-category="${clean(category)}" data-slot="${clean(slot)}" ${multiple ? "multiple" : ""} ${required ? "required" : ""}>
+    <strong>${clean(tr("Choose or take a photo"))}</strong><span>${clean(tr("Camera or gallery"))} · JPG, PNG, WebP</span></label><div class="file-summary">${clean(tr("No photo selected"))}</div></div>`;
 }
 
-function signature() {
-  return `<div class="signature-wrap"><div class="signature-controls"><span>${clean(tr("Customer signature"))} *</span><button type="button" data-clear-signature>${clean(tr("Clear"))}</button></div>
-    <canvas class="signature-canvas" id="signature-canvas"></canvas></div>`;
+function signature(slot, label, required = true) {
+  return `<div class="signature-wrap" data-signature-wrap><div class="signature-controls"><span>${clean(tr(label))}${required ? " *" : ""}</span><button type="button" data-clear-signature>${clean(tr("Clear"))}</button></div>
+    <canvas class="signature-canvas" data-signature-slot="${clean(slot)}" data-required="${required}"></canvas></div>`;
+}
+
+function standardEvidence(prefix = "", category = "vehicle_exterior") {
+  const names = [["front", "Front"], ["right", "Right side"], ["left", "Left side"], ["rear", "Rear"], ["interior", "Interior"]];
+  return `<div class="evidence-grid">${names.map(([slot, label]) => uploadField(label, `${prefix}${slot}`, category, true, `${prefix}${slot}`)).join("")}</div>`;
+}
+
+function dashboardEvidence(prefix = "") {
+  return `<div class="started-vehicle-note"><strong>${clean(tr("Vehicle must be started"))}</strong><span>${clean(tr("The dashboard must clearly show mileage and autonomy."))}</span></div>${uploadField("Dashboard photo — vehicle started", `${prefix}dashboard_started`, "vehicle_interior", true, `${prefix}dashboard_started`)}`;
+}
+
+function notesAndExtras(prefix = "extra") {
+  return `<div class="field"><label>${clean(tr("Notes (optional)"))}</label><textarea name="description"></textarea></div>${uploadField("Extra photos (optional)", prefix, "other", false, prefix, true)}`;
+}
+
+function mediaSlotLabel(slot, category) {
+  const standardLabels = {
+    front: "Front",
+    right: "Right side",
+    left: "Left side",
+    rear: "Rear",
+    interior: "Interior",
+  };
+  if (slot === "dashboard_started") return tr("Dashboard photo — vehicle started");
+  if (slot === "customer_signature") return tr("Customer signature");
+  if (slot === "employee_signature") return tr("Employee signature");
+  if (slot?.startsWith("before_")) return `${tr("Before washing")} — ${tr(standardLabels[slot.slice(7)] || slot.slice(7))}`;
+  if (slot?.startsWith("after_")) return `${tr("After washing")} — ${tr(standardLabels[slot.slice(6)] || slot.slice(6))}`;
+  if (slot === "outgoing_dashboard_started") return `${tr("YABI replacement vehicle")} — ${tr("Dashboard photo — vehicle started")}`;
+  if (slot?.startsWith("outgoing_")) return `${tr("YABI replacement vehicle")} — ${tr(standardLabels[slot.slice(9)] || slot.slice(9))}`;
+  if (slot === "defective_dashboard_started") return `${tr("Defective customer vehicle")} — ${tr("Dashboard photo — vehicle started")}`;
+  if (slot?.startsWith("defective_")) return `${tr("Defective customer vehicle")} — ${tr(standardLabels[slot.slice(10)] || slot.slice(10))}`;
+  if (slot?.startsWith("extra_")) return `${tr("Extra photo")} ${slot.slice(6)}`;
+  if (standardLabels[slot]) return tr(standardLabels[slot]);
+  return tr(String(slot || category || "Evidence").replaceAll("_", " "));
 }
 
 function workflowForm(type) {
@@ -1260,15 +1475,29 @@ function workflowForm(type) {
     .filter((r) => !["closed", "cancelled"].includes(r.status))
     .map((r) => [r.id, `${r.reference} · ${dataMaps.vehicles.get(r.vehicleId)?.registrationPlate || "vehicle"}`]);
   const vehicle = select("Vehicle", "vehicleId", vehicles, true);
-  const rental = select("Rental", "rentalId", rentals, true);
+  const rental = select("Rental (optional)", "rentalId", rentals);
   const mileage = field("Mileage (km)", "mileage", "", true, "number", 'min="0"');
   if (["check_in", "check_out"].includes(type)) {
-    return `<form class="portal-form">${rental}<div class="form-grid">${mileage}${field("Fuel level (%)", "fuelPercent", "", true, "number", 'min="0" max="100"')}</div>
-      <div class="upload-grid">${uploadField("Vehicle condition photos", "condition", "vehicle_exterior", true)}${uploadField("Customer selfie (optional)", "selfie", "selfie")}</div>${signature()}</form>`;
+    return `<form class="portal-form">${vehicle}${rentals.length ? rental : ""}<div class="form-grid">${field("Driver / guest full name", "personName", "", true)}${mileage}${field("Autonomy (km)", "autonomyKm", "", true, "number", 'min="0" max="5000"')}</div>
+      <section class="form-section"><h3>${clean(tr("Dashboard"))}</h3>${dashboardEvidence()}</section>
+      <section class="form-section"><h3>${clean(tr("Vehicle photos"))}</h3>${standardEvidence()}</section>
+      ${signature("customer_signature", "Driver signature")}${notesAndExtras()}</form>`;
   }
   if (type === "wash") {
-    return `<form class="portal-form">${vehicle}<div class="form-grid">${mileage}${field("Mileage after", "mileageAfter", "", true, "number", 'min="0"')}</div>
-      <div class="upload-grid">${uploadField("Before washing", "before", "before", true)}${uploadField("After washing", "after", "after", true)}</div></form>`;
+    return `<form class="portal-form">${vehicle}<div class="form-grid">${mileage}</div>
+      <section class="form-section"><h3>${clean(tr("Before washing"))}</h3>${standardEvidence("before_", "before")}</section>
+      <section class="form-section"><h3>${clean(tr("After washing"))}</h3>${standardEvidence("after_", "after")}</section>${notesAndExtras()}</form>`;
+  }
+  if (type === "breakdown_replacement") {
+    return `<form class="portal-form">${vehicle}
+      <section class="form-section"><h3>${clean(tr("YABI replacement vehicle"))}</h3><div class="form-grid">${mileage}${field("Autonomy (km)", "autonomyKm", "", true, "number", 'min="0" max="5000"')}</div>${dashboardEvidence("outgoing_")}${standardEvidence("outgoing_")}</section>
+      <section class="form-section"><h3>${clean(tr("Key handover"))}</h3>${field("Customer full name", "customerName", "", true)}${signature("customer_signature", "Customer signature")}</section>
+      <section class="form-section"><h3>${clean(tr("Defective customer vehicle"))}</h3><div class="form-grid">${field("Licence plate", "secondaryLicensePlate", "", true)}${field("Mileage (km)", "secondaryMileage", "", true, "number", 'min="0"')}${field("Autonomy (km)", "secondaryAutonomyKm", "", true, "number", 'min="0" max="5000"')}</div>${dashboardEvidence("defective_")}${standardEvidence("defective_")}</section>
+      <section class="form-section"><h3>${clean(tr("What happened to the defective vehicle?"))}</h3>${select("Disposition", "disposition", [["self", "Moved by me"], ["towing", "Towing service"], ["mechanic", "Mechanic came"], ["other", "Other"]], true)}<div class="form-grid">${field("Destination address (required when moved by me)", "destinationAddress")}${field("Employee full name (required when moved by me)", "employeeName", state.data.account.displayName)}</div>${signature("employee_signature", "Employee signature — only required when moved by me", false)}</section>${notesAndExtras()}</form>`;
+  }
+  if (type === "vehicle_transfer") {
+    return `<form class="portal-form">${vehicle}<div class="form-grid">${mileage}${field("Employee full name", "employeeName", state.data.account.displayName, true)}${field("Point A — origin address", "originAddress", "", true)}${field("Point B — destination address", "destinationAddress", "", true)}</div>
+      <section class="form-section"><h3>${clean(tr("Dashboard"))}</h3>${dashboardEvidence()}</section><section class="form-section"><h3>${clean(tr("Vehicle photos"))}</h3>${standardEvidence()}</section>${signature("employee_signature", "Employee signature")}${notesAndExtras()}</form>`;
   }
   if (type === "maintenance") {
     return `<form class="portal-form">${vehicle}${mileage}<div class="field"><label>${clean(tr("Work completed"))} *</label><textarea name="maintenanceWork" required></textarea></div>
@@ -1276,7 +1505,7 @@ function workflowForm(type) {
   }
   if (["handover_take", "handover_return"].includes(type)) {
     return `<form class="portal-form">${vehicle}<div class="form-grid">${field("Person's full name", "personName", state.data.account.displayName, true)}${mileage}</div>
-      ${uploadField("Vehicle condition photos", "handover", type === "handover_take" ? "before" : "after", true)}</form>`;
+      ${uploadField("Vehicle condition photos", "handover", type === "handover_take" ? "before" : "after", true, "handover", true)}</form>`;
   }
   return `<form class="portal-form">${select("Vehicle (optional)", "vehicleId", vehicles)}${select("Rental (optional)", "rentalId", rentals)}
     <div class="form-grid">${select("Category", "reportCategory", [["damage", "Damage"], ["mechanical", "Mechanical"], ["administrative", "Administrative"], ["request", "Request"], ["other", "Other"]], true)}
@@ -1289,56 +1518,80 @@ function openWorkflow(type) {
     navigate("profile");
     return;
   }
-  if (!roleWorkflows[state.data.account.role].includes(type)) {
+  if (!allowedWorkflows().includes(type)) {
     toast("This operation is not available for your role.", "error");
     return;
   }
   modal({
-    kicker: `Procedure ${workflows[type][0]}`,
+    kicker: `${tr("Procedure")} ${workflows[type][0]}`,
     title: workflows[type][1],
     submit: "Complete operation",
     content: workflowForm(type),
     handler: async (formData, form) => {
-      const signatureCanvas = form.querySelector("#signature-canvas");
-      if (signatureCanvas && signatureCanvas.dataset.signed !== "true") throw new Error("media_required");
+      const signatureCanvases = [...form.querySelectorAll(".signature-canvas")];
+      const disposition = formData.get("disposition");
+      const missingSignature = signatureCanvases.find((canvas) =>
+        (canvas.dataset.required === "true" || (canvas.dataset.signatureSlot === "employee_signature" && disposition === "self")) &&
+        canvas.dataset.signed !== "true",
+      );
+      if (missingSignature) throw new Error("media_required");
+      if (type === "breakdown_replacement" && disposition === "self" && (!formData.get("destinationAddress") || !formData.get("employeeName"))) {
+        throw new Error("validation_failed");
+      }
       const files = [];
       form.querySelectorAll('input[type="file"]').forEach((input) => {
-        [...input.files].forEach((file) => files.push({ file, category: input.dataset.category }));
+        [...input.files].forEach((file, index) => files.push({
+          file,
+          category: input.dataset.category,
+          slot: input.multiple ? `${input.dataset.slot}_${index + 1}` : input.dataset.slot,
+          captureSource: "gallery",
+          sortOrder: files.length,
+        }));
       });
+      if (files.length > 24) throw new Error("too_many_files");
       if (
-        (["check_in", "check_out"].includes(type) &&
-          form.querySelector('[name="condition"]').files.length < 2) ||
-        (["handover_take", "handover_return"].includes(type) &&
+        ["handover_take", "handover_return"].includes(type) &&
           form.querySelector('[name="handover"]').files.length < 2)
-      ) {
+      {
         throw new Error("media_required");
       }
-      if (signatureCanvas) {
-        const blob = await canvasBlob(signatureCanvas);
-        files.push({ file: new File([blob], "customer-signature.webp", { type: "image/webp" }), category: "signature" });
+      for (const canvas of signatureCanvases.filter((item) => item.dataset.signed === "true")) {
+        const blob = await canvasBlob(canvas);
+        files.push({
+          file: new File([blob], `${canvas.dataset.signatureSlot}.webp`, { type: "image/webp" }),
+          category: "signature",
+          slot: canvas.dataset.signatureSlot,
+          captureSource: "signature",
+          sortOrder: files.length,
+        });
       }
       const progress = document.createElement("div");
       progress.className = "upload-progress visible";
-      progress.innerHTML = '<div class="progress-track"><i></i></div><span>Preparing evidence…</span>';
+      progress.innerHTML = `<div class="progress-track"><i></i></div><span>${clean(tr("Preparing evidence…"))}</span>`;
       form.querySelector(".form-submit-row").before(progress);
       const uploadGroupId = crypto.randomUUID();
       const mediaIds = await upload(files, uploadGroupId, (done, total) => {
         progress.querySelector("i").style.width = `${Math.round((done / Math.max(1, total)) * 100)}%`;
-        progress.querySelector("span").textContent = total ? `Uploading evidence ${Math.ceil(done)} of ${total}` : "Saving record…";
+        progress.querySelector("span").textContent = total
+          ? `${tr("Uploading evidence")} ${Math.ceil(done)} ${tr("of")} ${total}`
+          : tr("Saving record…");
       });
-      const values = Object.fromEntries(formData);
-      ["mileage", "mileageAfter", "fuelPercent"].forEach((key) => {
+      const values = {};
+      for (const [key, value] of formData.entries()) {
+        if (!(value instanceof File)) values[key] = value;
+      }
+      ["mileage", "mileageAfter", "fuelPercent", "autonomyKm", "secondaryMileage", "secondaryAutonomyKm"].forEach((key) => {
         if (values[key]) values[key] = Number(values[key]);
         else delete values[key];
       });
-      if (values.rentalId && !values.vehicleId) {
+      if (values.rentalId) {
         const selectedRental = state.data.rentals.find((r) => r.id === values.rentalId);
-        values.vehicleId = selectedRental?.vehicleId;
+        values.vehicleId ||= selectedRental?.vehicleId;
         values.customerId = selectedRental?.customerId;
       }
       await api("/api/portal/workflows", { method: "POST", body: { type, uploadGroupId, mediaIds, ...values } });
       closeModal();
-      toast(`${workflows[type][1]} recorded.`);
+      toast("Operation recorded.");
       await refresh();
       navigate("operations");
     },
@@ -1351,46 +1604,48 @@ function bindUploads() {
   el.modalBody.querySelectorAll('input[type="file"]').forEach((input) => {
     input.addEventListener("change", () => {
       input.closest(".upload-field").querySelector(".file-summary").textContent =
-        input.files.length ? `${input.files.length} photo${input.files.length === 1 ? "" : "s"} selected` : "No photos selected";
+        input.files.length
+          ? `${input.files.length} ${tr(input.files.length === 1 ? "photo selected" : "photos selected")}`
+          : tr("No photos selected");
     });
   });
 }
 
 function bindSignature() {
-  const canvas = el.modalBody.querySelector("#signature-canvas");
-  if (!canvas) return;
-  const context = canvas.getContext("2d");
-  requestAnimationFrame(() => {
-    const rect = canvas.getBoundingClientRect();
-    const ratio = Math.min(devicePixelRatio || 1, 2);
-    canvas.width = rect.width * ratio;
-    canvas.height = rect.height * ratio;
-    context.scale(ratio, ratio);
-    context.strokeStyle = "#062f69";
-    context.lineWidth = 2.2;
-    context.lineCap = "round";
-  });
-  let drawing = false;
-  const point = (event) => {
-    const rect = canvas.getBoundingClientRect();
-    return [event.clientX - rect.left, event.clientY - rect.top];
-  };
-  canvas.addEventListener("pointerdown", (event) => {
-    drawing = true;
-    canvas.setPointerCapture(event.pointerId);
-    context.beginPath();
-    context.moveTo(...point(event));
-  });
-  canvas.addEventListener("pointermove", (event) => {
-    if (!drawing) return;
-    context.lineTo(...point(event));
-    context.stroke();
-    canvas.dataset.signed = "true";
-  });
-  canvas.addEventListener("pointerup", () => (drawing = false));
-  el.modalBody.querySelector("[data-clear-signature]").addEventListener("click", () => {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    delete canvas.dataset.signed;
+  el.modalBody.querySelectorAll(".signature-canvas").forEach((canvas) => {
+    const context = canvas.getContext("2d");
+    requestAnimationFrame(() => {
+      const rect = canvas.getBoundingClientRect();
+      const ratio = Math.min(devicePixelRatio || 1, 2);
+      canvas.width = rect.width * ratio;
+      canvas.height = rect.height * ratio;
+      context.scale(ratio, ratio);
+      context.strokeStyle = "#062f69";
+      context.lineWidth = 2.2;
+      context.lineCap = "round";
+    });
+    let drawing = false;
+    const point = (event) => {
+      const rect = canvas.getBoundingClientRect();
+      return [event.clientX - rect.left, event.clientY - rect.top];
+    };
+    canvas.addEventListener("pointerdown", (event) => {
+      drawing = true;
+      canvas.setPointerCapture(event.pointerId);
+      context.beginPath();
+      context.moveTo(...point(event));
+    });
+    canvas.addEventListener("pointermove", (event) => {
+      if (!drawing) return;
+      context.lineTo(...point(event));
+      context.stroke();
+      canvas.dataset.signed = "true";
+    });
+    canvas.addEventListener("pointerup", () => (drawing = false));
+    canvas.closest("[data-signature-wrap]").querySelector("[data-clear-signature]").addEventListener("click", () => {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      delete canvas.dataset.signed;
+    });
   });
 }
 
@@ -1419,7 +1674,16 @@ async function upload(files, uploadGroupId, progress) {
     const file = await optimise(files[index].file);
     const prepared = await api("/api/portal/uploads", {
       method: "POST",
-      body: { uploadGroupId, fileName: file.name, contentType: file.type, size: file.size, category: files[index].category },
+      body: {
+        uploadGroupId,
+        fileName: file.name,
+        contentType: file.type,
+        size: file.size,
+        category: files[index].category,
+        slot: files[index].slot,
+        captureSource: files[index].captureSource,
+        sortOrder: files[index].sortOrder,
+      },
     });
     const response = await fetch(prepared.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
     if (!response.ok) throw new Error("upload_failed");
@@ -1435,8 +1699,18 @@ async function viewRecord(id) {
     const record = state.data.workflows.find((item) => item.id === id);
     const details = [
       ["Mileage", record.mileage != null ? `${record.mileage} km` : ""],
+      ["Mileage after", record.mileageAfter != null ? `${record.mileageAfter} km` : ""],
       ["Fuel", record.fuelPercent != null ? `${record.fuelPercent}%` : ""],
-      ["Person", record.personName],
+      ["Autonomy", record.autonomyKm != null ? `${record.autonomyKm} km` : ""],
+      ["Driver / guest", record.personName],
+      ["Customer", record.customerName],
+      ["Employee", record.employeeName],
+      ["Defective vehicle plate", record.secondaryLicensePlate],
+      ["Defective vehicle mileage", record.secondaryMileage != null ? `${record.secondaryMileage} km` : ""],
+      ["Defective vehicle autonomy", record.secondaryAutonomyKm != null ? `${record.secondaryAutonomyKm} km` : ""],
+      ["Point A / origin", record.originAddress],
+      ["Point B / destination", record.destinationAddress],
+      ["Disposition", record.disposition ? tr({ self: "Moved by me", towing: "Towing service", mechanic: "Mechanic came", other: "Other" }[record.disposition]) : ""],
       ["Maintenance", record.maintenanceWork],
       ["Changes", record.changesMade],
       ["Description", record.description],
@@ -1445,8 +1719,11 @@ async function viewRecord(id) {
     modal({
       kicker: record.reference,
       title: workflows[record.type]?.[1] || "Operation",
-      content: `<div class="portal-form">${details.map(([label, value]) => `<div class="field"><label>${clean(label)}</label><div>${clean(value)}</div></div>`).join("")}
-        ${result.items.length ? `<div class="media-gallery">${result.items.map((item) => `<figure><img src="${clean(item.url)}" alt="${clean(item.category)}"><figcaption>${clean(item.category.replaceAll("_", " "))}</figcaption></figure>`).join("")}</div>` : "<p>No media attached.</p>"}</div>`,
+      content: `<div class="portal-form">${details.map(([label, value]) => `<div class="field"><label>${clean(tr(label))}</label><div>${clean(value)}</div></div>`).join("")}
+        ${result.items.length ? `<div class="media-gallery">${result.items.sort((a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99)).map((item) => {
+          const caption = mediaSlotLabel(item.slot, item.category);
+          return `<figure><img src="${clean(item.url)}" alt="${clean(caption)}" loading="lazy"><figcaption>${clean(caption)}</figcaption></figure>`;
+        }).join("")}</div>` : `<p>${clean(tr("No media attached."))}</p>`}</div>`,
     });
   } catch (error) {
     toast(messageFor(error), "error");
@@ -1468,7 +1745,7 @@ function resolveReport(id) {
 }
 
 function navigate(view) {
-  const allowed = roleViews[state.data.account.role];
+  const allowed = allowedViews();
   state.view = allowed.includes(view) ? view : "overview";
   history.replaceState(null, "", `#${state.view}`);
   renderNavigation();

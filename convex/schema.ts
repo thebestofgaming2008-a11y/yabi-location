@@ -68,7 +68,22 @@ export const workflowTypeValidator = v.union(
   v.literal("maintenance"),
   v.literal("handover_take"),
   v.literal("handover_return"),
+  v.literal("breakdown_replacement"),
+  v.literal("vehicle_transfer"),
   v.literal("report"),
+);
+
+export const vehicleDispositionValidator = v.union(
+  v.literal("self"),
+  v.literal("towing"),
+  v.literal("mechanic"),
+  v.literal("other"),
+);
+
+export const captureSourceValidator = v.union(
+  v.literal("camera"),
+  v.literal("gallery"),
+  v.literal("signature"),
 );
 
 export const mediaCategoryValidator = v.union(
@@ -168,6 +183,7 @@ export default defineSchema({
     codeHint: v.string(),
     active: v.boolean(),
     linkedCustomerId: v.optional(v.id("customers")),
+    allowedWorkflowTypes: v.optional(v.array(workflowTypeValidator)),
     createdBy: v.optional(v.id("portalAccounts")),
     lastLoginAt: v.optional(v.number()),
     createdAt: v.number(),
@@ -408,7 +424,16 @@ export default defineSchema({
     mileage: v.optional(v.number()),
     mileageAfter: v.optional(v.number()),
     fuelPercent: v.optional(v.number()),
+    autonomyKm: v.optional(v.number()),
     personName: v.optional(v.string()),
+    customerName: v.optional(v.string()),
+    employeeName: v.optional(v.string()),
+    secondaryLicensePlate: v.optional(v.string()),
+    secondaryMileage: v.optional(v.number()),
+    secondaryAutonomyKm: v.optional(v.number()),
+    originAddress: v.optional(v.string()),
+    destinationAddress: v.optional(v.string()),
+    disposition: v.optional(vehicleDispositionValidator),
     maintenanceWork: v.optional(v.string()),
     changesMade: v.optional(v.string()),
     reportCategory: v.optional(
@@ -448,6 +473,9 @@ export default defineSchema({
     contentType: v.string(),
     size: v.number(),
     category: mediaCategoryValidator,
+    slot: v.optional(v.string()),
+    captureSource: v.optional(captureSourceValidator),
+    sortOrder: v.optional(v.number()),
     status: v.union(
       v.literal("pending"),
       v.literal("uploaded"),

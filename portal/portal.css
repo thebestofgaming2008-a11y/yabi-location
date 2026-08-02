@@ -218,6 +218,18 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .media-gallery figure { margin: 0; border: 1px solid var(--line); }
 .media-gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--surface); }
 .media-gallery figcaption { padding: .5rem; color: var(--muted); font-size: .58rem; text-transform: capitalize; }
+.form-section { display: grid; gap: .8rem; padding: 1rem; border: 1px solid var(--line); background: #fbfdff; }
+.form-section h3 { margin: 0; color: var(--navy); font: 700 1rem var(--display); letter-spacing: .02em; text-transform: uppercase; }
+.evidence-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
+.started-vehicle-note { padding: .75rem .85rem; display: grid; gap: .2rem; border-left: 4px solid var(--blue); background: var(--blue-light); }
+.started-vehicle-note strong { color: var(--navy); font-size: .68rem; text-transform: uppercase; }
+.started-vehicle-note span { color: var(--muted); font-size: .62rem; line-height: 1.45; }
+.permission-field { margin: 0; padding: .85rem; border: 1px solid var(--line); }
+.permission-field legend { padding: 0 .35rem; color: #43566b; font-size: .59rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.permission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.permission-option { min-height: 44px; padding: .65rem; display: flex; align-items: center; gap: .6rem; border: 1px solid var(--line); background: white; cursor: pointer; }
+.permission-option input { width: 17px; height: 17px; accent-color: var(--blue); }
+.permission-option strong { color: var(--navy); font-size: .62rem; }
 .toast-region { position: fixed; right: 1rem; bottom: 1rem; z-index: 200; display: grid; gap: .6rem; pointer-events: none; }
 .toast { min-width: min(340px, calc(100vw - 2rem)); padding: .9rem 1rem; display: grid; grid-template-columns: auto 1fr; gap: .65rem; background: var(--navy); color: white; box-shadow: var(--shadow); font-size: .68rem; animation: toast-in .25s ease; }
 .toast.error { background: #8e2020; }
@@ -254,6 +266,11 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
   .view-header h1 { font-size: clamp(3.1rem, 15vw, 4.8rem); }
   .view-actions { width: 100%; }
   .view-actions > button { flex: 1; }
+}
+
+@media (max-width: 560px) {
+  .evidence-grid, .permission-grid { grid-template-columns: 1fr; }
+  .form-section { padding: .8rem; }
 }
 
 @media (max-width: 560px) {
