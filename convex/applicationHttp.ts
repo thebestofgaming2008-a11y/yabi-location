@@ -10,6 +10,19 @@ const allowedDocumentCategories = new Set([
   "licence_back",
 ]);
 const allowedAdminStatuses = new Set(["contacted", "agreed", "rejected"]);
+const allowedBelgianProvinces = new Set([
+  "antwerp",
+  "brussels_capital",
+  "east_flanders",
+  "flemish_brabant",
+  "hainaut",
+  "liege",
+  "limburg",
+  "luxembourg",
+  "namur",
+  "walloon_brabant",
+  "west_flanders",
+]);
 const codeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 type JsonBody = Record<string, unknown>;
@@ -88,6 +101,23 @@ function dateAtLeastYearsAgo(value: string, years: number): boolean {
   cutoff.setUTCHours(0, 0, 0, 0);
   cutoff.setUTCFullYear(cutoff.getUTCFullYear() - years);
   return value <= cutoff.toISOString().slice(0, 10);
+}
+
+function belgianPostalCodeValid(value: string): boolean {
+  return /^\d{4}$/.test(value);
+}
+
+function composeBelgianAddress(parts: {
+  street: string;
+  houseNumber: string;
+  addressBox?: string;
+  postalCode: string;
+  city: string;
+}): string {
+  const number = parts.addressBox
+    ? `${parts.houseNumber} box ${parts.addressBox}`
+    : parts.houseNumber;
+  return `${parts.street} ${number}, ${parts.postalCode} ${parts.city}`;
 }
 
 function boundedNumber(
@@ -401,7 +431,19 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
     const holderFullName = clean(body.holderFullName, 160);
     const companyName = optionalString(body.companyName, 160);
     const companyVatNumber = optionalString(body.companyVatNumber, 32);
-    const holderAddress = clean(body.holderAddress, 300);
+    const holderStreet = clean(body.holderStreet, 160);
+    const holderHouseNumber = clean(body.holderHouseNumber, 20);
+    const holderAddressBox = optionalString(body.holderAddressBox, 30);
+    const holderPostalCode = clean(body.holderPostalCode, 4);
+    const holderCity = clean(body.holderCity, 100);
+    const holderProvince = clean(body.holderProvince, 40);
+    const holderAddress = composeBelgianAddress({
+      street: holderStreet,
+      houseNumber: holderHouseNumber,
+      ...(holderAddressBox ? { addressBox: holderAddressBox } : {}),
+      postalCode: holderPostalCode,
+      city: holderCity,
+    });
     const holderPhone = clean(body.holderPhone, 40);
     const holderIdentityCardNumber = clean(
       body.holderIdentityCardNumber,
@@ -420,12 +462,41 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
           ? (value as JsonBody)
           : {};
       const companyPosition = optionalString(driver.companyPosition, 120);
+      const street = clean(driver.street, 160);
+      const houseNumber = clean(driver.houseNumber, 20);
+      const addressBox = optionalString(driver.addressBox, 30);
+      const postalCode = clean(driver.postalCode, 4);
+      const city = clean(driver.city, 100);
+      const province = clean(driver.province, 40);
       return {
         clientKey: clean(driver.clientKey, 80),
         kind: clean(driver.kind, 20) as "main" | "additional",
         sortOrder: index,
         fullName: clean(driver.fullName, 120),
-        address: clean(driver.address, 300),
+        address: composeBelgianAddress({
+          street,
+          houseNumber,
+          ...(addressBox ? { addressBox } : {}),
+          postalCode,
+          city,
+        }),
+        street,
+        houseNumber,
+        ...(addressBox ? { addressBox } : {}),
+        postalCode,
+        city,
+        province: province as
+          | "antwerp"
+          | "brussels_capital"
+          | "east_flanders"
+          | "flemish_brabant"
+          | "hainaut"
+          | "liege"
+          | "limburg"
+          | "luxembourg"
+          | "namur"
+          | "walloon_brabant"
+          | "west_flanders",
         email: clean(driver.email, 254).toLowerCase(),
         phone: clean(driver.phone, 40),
         identityCardNumber: clean(driver.identityCardNumber, 80),
@@ -447,7 +518,11 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
         (!companyName ||
           !companyVatNumber ||
           !belgianVatNumberValid(companyVatNumber))) ||
-      !holderAddress ||
+      !holderStreet ||
+      !holderHouseNumber ||
+      !belgianPostalCodeValid(holderPostalCode) ||
+      !holderCity ||
+      !allowedBelgianProvinces.has(holderProvince) ||
       !phoneValid(holderPhone) ||
       !holderIdentityCardNumber ||
       !nationalRegisterNumberValid(holderNationalRegisterNumber) ||
@@ -459,7 +534,11 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
           !driver.clientKey ||
           !["main", "additional"].includes(driver.kind) ||
           !driver.fullName ||
-          !driver.address ||
+          !driver.street ||
+          !driver.houseNumber ||
+          !belgianPostalCodeValid(driver.postalCode) ||
+          !driver.city ||
+          !allowedBelgianProvinces.has(driver.province) ||
           !emailAddressValid(driver.email) ||
           !phoneValid(driver.phone) ||
           !driver.identityCardNumber ||
@@ -484,6 +563,23 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
         ...(companyName ? { companyName } : {}),
         ...(companyVatNumber ? { companyVatNumber } : {}),
         holderAddress,
+        holderStreet,
+        holderHouseNumber,
+        ...(holderAddressBox ? { holderAddressBox } : {}),
+        holderPostalCode,
+        holderCity,
+        holderProvince: holderProvince as
+          | "antwerp"
+          | "brussels_capital"
+          | "east_flanders"
+          | "flemish_brabant"
+          | "hainaut"
+          | "liege"
+          | "limburg"
+          | "luxembourg"
+          | "namur"
+          | "walloon_brabant"
+          | "west_flanders",
         holderPhone,
         holderIdentityCardNumber,
         holderNationalRegisterNumber,

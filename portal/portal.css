@@ -343,6 +343,21 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .driver-card h3 { margin: 0; color: var(--navy); font: 800 1.65rem/1 var(--display); text-transform: uppercase; }
 .application-intro p { max-width: 680px; margin: .5rem 0 0; color: var(--muted); font-size: .72rem; line-height: 1.65; }
 .application-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
+.address-group {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  background: #f8fbff;
+}
+.address-group.full { grid-column: 1 / -1; }
+.address-group > strong {
+  display: block;
+  margin-bottom: .85rem;
+  color: var(--navy);
+  font: 800 .92rem/1 var(--display);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+.address-group .application-grid { gap: .7rem; }
 .app-field { display: grid; gap: .4rem; }
 .app-field.full { grid-column: 1 / -1; }
 .app-field > span,

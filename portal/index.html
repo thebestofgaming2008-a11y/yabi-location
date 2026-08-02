@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="portal.css?v=20260802-1">
+  <link rel="stylesheet" href="portal.css?v=20260802-2">
   <script src="portal.js?v=20260730-1" defer></script>
-  <script src="applications.js?v=20260802-1" defer></script>
+  <script src="applications.js?v=20260802-2" defer></script>
 </head>
 <body data-api-base="https://kindhearted-caiman-242.eu-west-1.convex.site">
   <a class="skip-link" href="#portal-main" data-i18n="Skip to content">Skip to content</a>
@@ -99,7 +99,38 @@
                 <label class="app-field full company-only" hidden><span data-app-i18n="Company name">Company name</span><input name="companyName" autocomplete="organization" maxlength="160" required disabled></label>
                 <label class="app-field company-only" hidden><span data-app-i18n="Belgian VAT number">Belgian VAT number</span><input name="companyVatNumber" autocomplete="off" maxlength="32" placeholder="BE 0123.456.789" required disabled></label>
                 <label class="app-field full"><span data-app-i18n="Full name">Full name</span><input name="holderFullName" autocomplete="name" maxlength="160" required></label>
-                <label class="app-field full"><span id="holder-address-label" data-app-i18n="Full address">Full address</span><input name="holderAddress" autocomplete="street-address" maxlength="300" required></label>
+                <div class="address-group full">
+                  <strong id="holder-address-label" data-app-i18n="Address details">Address details</strong>
+                  <div class="application-grid">
+                    <label class="app-field full"><span data-app-i18n="Street">Street</span><input name="holderStreet" autocomplete="address-line1" maxlength="160" required></label>
+                    <label class="app-field"><span data-app-i18n="House number">House number</span><input name="holderHouseNumber" autocomplete="address-line2" maxlength="20" required></label>
+                    <label class="app-field"><span data-app-i18n="Box / unit (optional)">Box / unit (optional)</span><input name="holderAddressBox" maxlength="30"></label>
+                    <label class="app-field"><span data-app-i18n="Postal code">Postal code</span><input name="holderPostalCode" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{4}" maxlength="4" required></label>
+                    <label class="app-field"><span data-app-i18n="City">City</span><input name="holderCity" autocomplete="address-level2" maxlength="100" required></label>
+                    <label class="app-field full"><span data-app-i18n="Province">Province</span>
+                      <div class="custom-select application-select" data-application-select data-required="true">
+                        <input type="hidden" name="holderProvince" required>
+                        <button class="custom-select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                          <span class="custom-select-value placeholder" data-application-select-value data-placeholder-key="Choose a province">Choose a province</span>
+                          <span class="custom-select-chevron" aria-hidden="true"></span>
+                        </button>
+                        <div class="custom-select-menu" role="listbox" hidden>
+                          <button class="custom-select-option" type="button" role="option" data-application-option="antwerp" data-label-key="Antwerp" aria-selected="false">Antwerp</button>
+                          <button class="custom-select-option" type="button" role="option" data-application-option="brussels_capital" data-label-key="Brussels-Capital" aria-selected="false">Brussels-Capital</button>
+                          <button class="custom-select-option" type="button" role="option" data-application-option="east_flanders" data-label-key="East Flanders" aria-selected="false">East Flanders</button>
+                          <button class="custom-select-option" type="button" role="option" data-application-option="flemish_brabant" data-label-key="Flemish Brabant" aria-selected="false">Flemish Brabant</button>
+                          <button class="custom-select-option" type="button" role="option" data-application-option="hainaut" data-label-key="Hainaut" aria-selected="false">Hainaut</button>
+                          <button class="custom-select-option" type="button" role="option" data-application-option="liege" data-label-key="Liège" aria-selected="false">Liège</button>
+                          <button class="custom-select-option" type="button" role="option" data-application-option="limburg" data-label-key="Limburg" aria-selected="false">Limburg</button>
+                          <button class="custom-select-option" type="button" role="option" data-application-option="luxembourg" data-label-key="Luxembourg" aria-selected="false">Luxembourg</button>
+                          <button class="custom-select-option" type="button" role="option" data-application-option="namur" data-label-key="Namur" aria-selected="false">Namur</button>
+                          <button class="custom-select-option" type="button" role="option" data-application-option="walloon_brabant" data-label-key="Walloon Brabant" aria-selected="false">Walloon Brabant</button>
+                          <button class="custom-select-option" type="button" role="option" data-application-option="west_flanders" data-label-key="West Flanders" aria-selected="false">West Flanders</button>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
                 <label class="app-field"><span data-app-i18n="Phone">Phone</span><input name="holderPhone" type="tel" autocomplete="tel" maxlength="40" required></label>
                 <label class="app-field"><span data-app-i18n="Identity card number">Identity card number</span><input name="holderIdentityCardNumber" maxlength="80" required></label>
                 <label class="app-field"><span data-app-i18n="National register number">National register number</span><input name="holderNationalRegisterNumber" inputmode="numeric" autocomplete="off" maxlength="24" required></label>

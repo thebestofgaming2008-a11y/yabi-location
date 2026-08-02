@@ -6,7 +6,7 @@
   "workers_dev": true,
   "vars": {
     "CONVEX_CALLBACK_URL": "https://kindhearted-caiman-242.eu-west-1.convex.site/api/portal/media-callback",
-    "ALLOWED_ORIGINS": "https://yabi-location.pages.dev,http://localhost:4173,http://127.0.0.1:4173"
+    "ALLOWED_ORIGINS": "https://yabilocation.com,https://www.yabilocation.com,https://yabi-location.pages.dev,http://localhost:4173,http://127.0.0.1:4173"
   },
   "r2_buckets": [
     {

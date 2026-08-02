@@ -22,7 +22,26 @@
       "Company name": "Nom de la société",
       "Belgian VAT number": "Numéro de TVA belge",
       "Company address": "Adresse de la société",
+      "Address details": "Adresse",
       "Full address": "Adresse complète",
+      Street: "Rue",
+      "House number": "Numéro",
+      "Box / unit (optional)": "Boîte / unité (facultatif)",
+      "Postal code": "Code postal",
+      City: "Ville",
+      Province: "Province",
+      "Choose a province": "Choisissez une province",
+      Antwerp: "Anvers",
+      "Brussels-Capital": "Bruxelles-Capitale",
+      "East Flanders": "Flandre-Orientale",
+      "Flemish Brabant": "Brabant flamand",
+      Hainaut: "Hainaut",
+      Liège: "Liège",
+      Limburg: "Limbourg",
+      Luxembourg: "Luxembourg",
+      Namur: "Namur",
+      "Walloon Brabant": "Brabant wallon",
+      "West Flanders": "Flandre-Occidentale",
       Address: "Adresse",
       Phone: "Téléphone",
       "Identity card number": "N° de carte d’identité",
@@ -121,7 +140,26 @@
       "Company name": "Naam van de vennootschap",
       "Belgian VAT number": "Belgisch btw-nummer",
       "Company address": "Adres van de vennootschap",
+      "Address details": "Adres",
       "Full address": "Volledig adres",
+      Street: "Straat",
+      "House number": "Huisnummer",
+      "Box / unit (optional)": "Bus / eenheid (optioneel)",
+      "Postal code": "Postcode",
+      City: "Gemeente",
+      Province: "Provincie",
+      "Choose a province": "Kies een provincie",
+      Antwerp: "Antwerpen",
+      "Brussels-Capital": "Brussels Hoofdstedelijk Gewest",
+      "East Flanders": "Oost-Vlaanderen",
+      "Flemish Brabant": "Vlaams-Brabant",
+      Hainaut: "Henegouwen",
+      Liège: "Luik",
+      Limburg: "Limburg",
+      Luxembourg: "Luxemburg",
+      Namur: "Namen",
+      "Walloon Brabant": "Waals-Brabant",
+      "West Flanders": "West-Vlaanderen",
       Address: "Adres",
       Phone: "Telefoon",
       "Identity card number": "Identiteitskaartnummer",
@@ -246,6 +284,20 @@
     ["licence_back", "Driving licence — back"],
   ];
 
+  const provinceOptions = [
+    ["antwerp", "Antwerp"],
+    ["brussels_capital", "Brussels-Capital"],
+    ["east_flanders", "East Flanders"],
+    ["flemish_brabant", "Flemish Brabant"],
+    ["hainaut", "Hainaut"],
+    ["liege", "Liège"],
+    ["limburg", "Limburg"],
+    ["luxembourg", "Luxembourg"],
+    ["namur", "Namur"],
+    ["walloon_brabant", "Walloon Brabant"],
+    ["west_flanders", "West Flanders"],
+  ];
+
   const applicationState = {
     language: ["en", "fr", "nl"].includes(localStorage.getItem(languageKey))
       ? localStorage.getItem(languageKey)
@@ -268,6 +320,12 @@
       kind,
       fullName: "",
       address: "",
+      street: "",
+      houseNumber: "",
+      addressBox: "",
+      postalCode: "",
+      city: "",
+      province: "",
       email: "",
       phone: "",
       identityCardNumber: "",
@@ -327,6 +385,58 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
+  function belgianPostalCodeValid(value = "") {
+    return /^\d{4}$/.test(value);
+  }
+
+  function composeAddress({ street, houseNumber, addressBox, postalCode, city }) {
+    const number = addressBox
+      ? `${houseNumber} box ${addressBox}`
+      : houseNumber;
+    return `${street} ${number}, ${postalCode} ${city}`.trim();
+  }
+
+  function updateApplicationSelect(select) {
+    const input = select.querySelector('input[type="hidden"]');
+    const value = select.querySelector("[data-application-select-value]");
+    const selected = provinceOptions.find(([code]) => code === input.value);
+    value.textContent = selected ? t(selected[1]) : t(value.dataset.placeholderKey);
+    value.classList.toggle("placeholder", !selected);
+    select.classList.toggle("invalid", select.dataset.invalid === "true");
+    select.querySelectorAll("[data-application-option]").forEach((option) => {
+      option.textContent = t(option.dataset.labelKey);
+      option.setAttribute(
+        "aria-selected",
+        String(option.dataset.applicationOption === input.value),
+      );
+    });
+  }
+
+  function closeApplicationSelects(except = null) {
+    document.querySelectorAll("[data-application-select].open").forEach((select) => {
+      if (select === except) return;
+      select.classList.remove("open");
+      select.querySelector(".custom-select-trigger")?.setAttribute("aria-expanded", "false");
+      const menu = select.querySelector(".custom-select-menu");
+      if (menu) menu.hidden = true;
+    });
+  }
+
+  function provinceSelect(name, value, full = true) {
+    return `<label class="app-field${full ? " full" : ""}"><span>${escape(t("Province"))}</span>
+      <div class="custom-select application-select" data-application-select data-required="true">
+        <input type="hidden" name="${escape(name)}" value="${escape(value)}" required>
+        <button class="custom-select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span class="custom-select-value${value ? "" : " placeholder"}" data-application-select-value data-placeholder-key="Choose a province">${escape(value ? t(provinceOptions.find(([code]) => code === value)?.[1] || "Choose a province") : t("Choose a province"))}</span>
+          <span class="custom-select-chevron" aria-hidden="true"></span>
+        </button>
+        <div class="custom-select-menu" role="listbox" hidden>
+          ${provinceOptions.map(([code, label]) => `<button class="custom-select-option" type="button" role="option" data-application-option="${escape(code)}" data-label-key="${escape(label)}" aria-selected="${code === value}">${escape(t(label))}</button>`).join("")}
+        </div>
+      </div>
+    </label>`;
+  }
+
   async function publicApi(path, body) {
     const response = await fetch(`${apiBase}${path}`, {
       method: "POST",
@@ -373,7 +483,7 @@
       });
     });
     ui.holderAddressLabel.textContent = t(
-      type === "company" ? "Company address" : "Full address",
+      type === "company" ? "Company address" : "Address details",
     );
     setPage(1);
     renderDrivers();
@@ -392,16 +502,25 @@
         ui.holderAddressLabel.textContent = t(
           applicationState.applicantType === "company"
             ? "Company address"
-            : "Full address",
+            : "Address details",
         );
       }
       if (applicationState.page === 3) renderSummary();
     }
+    document.querySelectorAll("[data-application-select]").forEach(
+      updateApplicationSelect,
+    );
   }
 
-  function field(label, name, value, type = "text", full = false) {
+  function field(label, name, value, type = "text", full = false, required = true) {
     const attributes = {
       address: 'autocomplete="street-address" maxlength="300"',
+      street: 'autocomplete="address-line1" maxlength="160"',
+      houseNumber: 'autocomplete="address-line2" maxlength="20"',
+      addressBox: 'maxlength="30"',
+      postalCode:
+        'inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{4}" maxlength="4"',
+      city: 'autocomplete="address-level2" maxlength="100"',
       email: 'autocomplete="email" maxlength="254"',
       phone: 'inputmode="tel" autocomplete="tel" maxlength="40"',
       identityCardNumber: 'maxlength="80"',
@@ -413,7 +532,7 @@
       licenceIssueDate: `max="${dateCutoff(0)}"`,
       licenceValidSince: `max="${dateCutoff(5)}"`,
     }[name] || "";
-    return `<label class="app-field${full ? " full" : ""}"><span>${escape(t(label))}</span><input name="${escape(name)}" type="${type}" value="${escape(value)}" ${attributes} required></label>`;
+    return `<label class="app-field${full ? " full" : ""}"><span>${escape(t(label))}</span><input name="${escape(name)}" type="${type}" value="${escape(value)}" ${attributes} ${required ? "required" : ""}></label>`;
   }
 
   function renderDrivers() {
@@ -426,7 +545,14 @@
           ${driver.kind === "main" ? `<label class="same-holder"><input type="checkbox" data-same-holder><span>${escape(t("Same information as contract holder"))}</span></label>` : ""}
           <div class="application-grid">
             ${field("Full name", "fullName", driver.fullName, "text", true)}
-            ${field("Full address", "address", driver.address, "text", true)}
+            <div class="address-group full"><strong>${escape(t("Address details"))}</strong><div class="application-grid">
+              ${field("Street", "street", driver.street, "text", true)}
+              ${field("House number", "houseNumber", driver.houseNumber)}
+              ${field("Box / unit (optional)", "addressBox", driver.addressBox, "text", false, false)}
+              ${field("Postal code", "postalCode", driver.postalCode)}
+              ${field("City", "city", driver.city)}
+              ${provinceSelect("province", driver.province)}
+            </div></div>
             ${field("Email", "email", driver.email, "email")}
             ${field("Phone", "phone", driver.phone, "tel")}
             ${field("Date of birth", "dateOfBirth", driver.dateOfBirth, "date")}
@@ -458,7 +584,12 @@
       if (!driver) return;
       [
         "fullName",
-        "address",
+        "street",
+        "houseNumber",
+        "addressBox",
+        "postalCode",
+        "city",
+        "province",
         "email",
         "phone",
         "identityCardNumber",
@@ -471,6 +602,7 @@
       ].forEach((key) => {
         driver[key] = card.querySelector(`[name="${key}"]`)?.value.trim() || "";
       });
+      driver.address = composeAddress(driver);
       driver.ageConfirmed = card.querySelector('[name="ageConfirmed"]')?.checked === true;
     });
   }
@@ -479,7 +611,7 @@
     ui.message.textContent = "";
     if (applicationState.page === 1) {
       const fields = [...ui.pages[0].querySelectorAll("input:not(:disabled)")];
-      const valid = fields.every((input) => {
+      const fieldsValid = fields.every((input) => {
         const okay =
           input.checkValidity() &&
           (input.name !== "holderNationalRegisterNumber" ||
@@ -489,6 +621,18 @@
         input.setAttribute("aria-invalid", String(!okay));
         return okay;
       });
+      const province = ui.form.elements.holderProvince.value;
+      const addressValid =
+        belgianPostalCodeValid(ui.form.elements.holderPostalCode.value) &&
+        provinceOptions.some(([code]) => code === province);
+      const holderProvinceSelect = ui.pages[0].querySelector(
+        '[data-application-select] input[name="holderProvince"]',
+      )?.closest("[data-application-select]");
+      if (holderProvinceSelect) {
+        holderProvinceSelect.dataset.invalid = String(!province);
+        updateApplicationSelect(holderProvinceSelect);
+      }
+      const valid = fieldsValid && addressValid;
       if (!valid) {
         ui.message.textContent =
           applicationState.applicantType === "company" &&
@@ -503,7 +647,11 @@
       const missingFields = applicationState.drivers.some(
         (driver) =>
           !driver.fullName ||
-          !driver.address ||
+          !driver.street ||
+          !driver.houseNumber ||
+          !belgianPostalCodeValid(driver.postalCode) ||
+          !driver.city ||
+          !provinceOptions.some(([code]) => code === driver.province) ||
           !emailAddressValid(driver.email) ||
           !driver.phone ||
           !driver.identityCardNumber ||
@@ -782,6 +930,12 @@
       sortOrder: index,
       fullName: driver.fullName,
       address: driver.address,
+      street: driver.street,
+      houseNumber: driver.houseNumber,
+      addressBox: driver.addressBox || undefined,
+      postalCode: driver.postalCode,
+      city: driver.city,
+      province: driver.province,
       email: driver.email,
       phone: driver.phone,
       identityCardNumber: driver.identityCardNumber,
@@ -799,6 +953,35 @@
   }
 
   document.addEventListener("click", (event) => {
+    const applicationOption = event.target.closest("[data-application-option]");
+    if (applicationOption) {
+      const select = applicationOption.closest("[data-application-select]");
+      select.querySelector('input[type="hidden"]').value =
+        applicationOption.dataset.applicationOption;
+      select.dataset.invalid = "false";
+      updateApplicationSelect(select);
+      closeApplicationSelects();
+      select.querySelector(".custom-select-trigger").focus();
+      return;
+    }
+    const applicationSelectTrigger = event.target.closest(
+      "[data-application-select] .custom-select-trigger",
+    );
+    if (applicationSelectTrigger) {
+      const select = applicationSelectTrigger.closest("[data-application-select]");
+      const opening = !select.classList.contains("open");
+      closeApplicationSelects(select);
+      select.classList.toggle("open", opening);
+      applicationSelectTrigger.setAttribute("aria-expanded", String(opening));
+      select.querySelector(".custom-select-menu").hidden = !opening;
+      if (opening) {
+        select.querySelector('[aria-selected="true"], [data-application-option]')?.focus();
+      }
+      return;
+    }
+    if (!event.target.closest("[data-application-select]")) {
+      closeApplicationSelects();
+    }
     const mode = event.target.closest("[data-entry-mode]");
     if (mode) {
       showFlow(mode.dataset.entryMode);
@@ -838,13 +1021,43 @@
     }
   });
 
+  document.addEventListener("keydown", (event) => {
+    const select = event.target.closest("[data-application-select]");
+    if (!select) return;
+    const options = [...select.querySelectorAll("[data-application-option]")];
+    const index = options.indexOf(event.target);
+    if (event.key === "Escape") {
+      closeApplicationSelects();
+      select.querySelector(".custom-select-trigger")?.focus();
+      return;
+    }
+    if (index < 0 || !["ArrowDown", "ArrowUp"].includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === "ArrowDown"
+      ? Math.min(options.length - 1, index + 1)
+      : Math.max(0, index - 1);
+    options[next]?.focus();
+  });
+
   ui.drivers.addEventListener("change", (event) => {
     if (!event.target.matches("[data-same-holder]") || !event.target.checked) return;
     const card = event.target.closest("[data-driver-key]");
     card.querySelector('[name="fullName"]').value =
       ui.form.elements.holderFullName.value;
-    card.querySelector('[name="address"]').value =
-      ui.form.elements.holderAddress.value;
+    [
+      ["street", "holderStreet"],
+      ["houseNumber", "holderHouseNumber"],
+      ["addressBox", "holderAddressBox"],
+      ["postalCode", "holderPostalCode"],
+      ["city", "holderCity"],
+      ["province", "holderProvince"],
+    ].forEach(([driverField, holderField]) => {
+      card.querySelector(`[name="${driverField}"]`).value =
+        ui.form.elements[holderField].value;
+    });
+    updateApplicationSelect(
+      card.querySelector('[name="province"]').closest("[data-application-select]"),
+    );
     card.querySelector('[name="email"]').value =
       ui.form.elements.holderEmail.value;
     card.querySelector('[name="phone"]').value = ui.form.elements.holderPhone.value;
@@ -915,7 +1128,12 @@
           applicationState.applicantType === "company"
             ? form.get("companyVatNumber")
             : undefined,
-        holderAddress: form.get("holderAddress"),
+        holderStreet: form.get("holderStreet"),
+        holderHouseNumber: form.get("holderHouseNumber"),
+        holderAddressBox: form.get("holderAddressBox") || undefined,
+        holderPostalCode: form.get("holderPostalCode"),
+        holderCity: form.get("holderCity"),
+        holderProvince: form.get("holderProvince"),
         holderPhone: form.get("holderPhone"),
         holderIdentityCardNumber: form.get("holderIdentityCardNumber"),
         holderNationalRegisterNumber: form.get(

@@ -11,6 +11,7 @@ import {
   applicationDocumentCategoryValidator,
   applicationDriverKindValidator,
   applicationStatusValidator,
+  belgianProvinceValidator,
 } from "./schema";
 import { portalRateLimiter } from "./rateLimits";
 
@@ -26,6 +27,12 @@ const driverInputValidator = v.object({
   sortOrder: v.number(),
   fullName: v.string(),
   address: v.string(),
+  street: v.string(),
+  houseNumber: v.string(),
+  addressBox: v.optional(v.string()),
+  postalCode: v.string(),
+  city: v.string(),
+  province: belgianProvinceValidator,
   email: v.string(),
   phone: v.string(),
   identityCardNumber: v.string(),
@@ -57,6 +64,12 @@ const driverPublicValidator = v.object({
   sortOrder: v.number(),
   fullName: v.string(),
   address: v.optional(v.string()),
+  street: v.optional(v.string()),
+  houseNumber: v.optional(v.string()),
+  addressBox: v.optional(v.string()),
+  postalCode: v.optional(v.string()),
+  city: v.optional(v.string()),
+  province: v.optional(belgianProvinceValidator),
   email: v.optional(v.string()),
   phone: v.string(),
   identityCardNumber: v.string(),
@@ -137,6 +150,10 @@ function nationalRegisterNumberValid(value: string): boolean {
 
 function belgianVatNumberValid(value: string): boolean {
   return /^(?:BE)?[01]\d{9}$/.test(value.replace(/[.\s-]/g, "").toUpperCase());
+}
+
+function belgianPostalCodeValid(value: string): boolean {
+  return /^\d{4}$/.test(value);
 }
 
 export const startApplication = internalMutation({
@@ -321,6 +338,12 @@ export const submitApplication = internalMutation({
     companyName: v.optional(v.string()),
     companyVatNumber: v.optional(v.string()),
     holderAddress: v.string(),
+    holderStreet: v.string(),
+    holderHouseNumber: v.string(),
+    holderAddressBox: v.optional(v.string()),
+    holderPostalCode: v.string(),
+    holderCity: v.string(),
+    holderProvince: belgianProvinceValidator,
     holderPhone: v.string(),
     holderIdentityCardNumber: v.string(),
     holderNationalRegisterNumber: v.string(),
@@ -347,6 +370,10 @@ export const submitApplication = internalMutation({
         args.drivers.length ||
       !args.holderFullName ||
       !args.holderAddress ||
+      !args.holderStreet ||
+      !args.holderHouseNumber ||
+      !belgianPostalCodeValid(args.holderPostalCode) ||
+      !args.holderCity ||
       !args.holderPhone ||
       !args.holderIdentityCardNumber ||
       !nationalRegisterNumberValid(args.holderNationalRegisterNumber) ||
@@ -359,6 +386,10 @@ export const submitApplication = internalMutation({
         (driver) =>
           !driver.ageConfirmed ||
           !driver.address ||
+          !driver.street ||
+          !driver.houseNumber ||
+          !belgianPostalCodeValid(driver.postalCode) ||
+          !driver.city ||
           !emailAddressValid(driver.email) ||
           !nationalRegisterNumberValid(driver.nationalRegisterNumber) ||
           !dateAtLeastYearsAgo(driver.dateOfBirth, 23) ||
@@ -414,6 +445,12 @@ export const submitApplication = internalMutation({
           ? args.companyName
           : args.holderFullName,
       holderAddress: args.holderAddress,
+      holderStreet: args.holderStreet,
+      holderHouseNumber: args.holderHouseNumber,
+      holderAddressBox: args.holderAddressBox,
+      holderPostalCode: args.holderPostalCode,
+      holderCity: args.holderCity,
+      holderProvince: args.holderProvince,
       holderPhone: args.holderPhone,
       holderIdentityCardNumber: args.holderIdentityCardNumber,
       holderNationalRegisterNumber: args.holderNationalRegisterNumber,
@@ -479,6 +516,12 @@ export const getApplicationForAdmin = internalQuery({
       companyVatNumber: v.optional(v.string()),
       holderNameOrCompany: v.optional(v.string()),
       holderAddress: v.optional(v.string()),
+      holderStreet: v.optional(v.string()),
+      holderHouseNumber: v.optional(v.string()),
+      holderAddressBox: v.optional(v.string()),
+      holderPostalCode: v.optional(v.string()),
+      holderCity: v.optional(v.string()),
+      holderProvince: v.optional(belgianProvinceValidator),
       holderPhone: v.optional(v.string()),
       holderIdentityCardNumber: v.optional(v.string()),
       holderNationalRegisterNumber: v.optional(v.string()),
@@ -522,6 +565,12 @@ export const getApplicationForAdmin = internalQuery({
         companyVatNumber: application.companyVatNumber,
         holderNameOrCompany: application.holderNameOrCompany,
         holderAddress: application.holderAddress,
+        holderStreet: application.holderStreet,
+        holderHouseNumber: application.holderHouseNumber,
+        holderAddressBox: application.holderAddressBox,
+        holderPostalCode: application.holderPostalCode,
+        holderCity: application.holderCity,
+        holderProvince: application.holderProvince,
         holderPhone: application.holderPhone,
         holderIdentityCardNumber: application.holderIdentityCardNumber,
         holderNationalRegisterNumber:
@@ -542,6 +591,12 @@ export const getApplicationForAdmin = internalQuery({
           sortOrder: driver.sortOrder,
           fullName: driver.fullName,
           address: driver.address,
+          street: driver.street,
+          houseNumber: driver.houseNumber,
+          addressBox: driver.addressBox,
+          postalCode: driver.postalCode,
+          city: driver.city,
+          province: driver.province,
           email: driver.email,
           phone: driver.phone,
           identityCardNumber: driver.identityCardNumber,
@@ -667,6 +722,12 @@ export const activateApplication = internalMutation({
       email: application.holderEmail,
       phone: application.holderPhone,
       address: application.holderAddress,
+      street: application.holderStreet,
+      houseNumber: application.holderHouseNumber,
+      addressBox: application.holderAddressBox,
+      postalCode: application.holderPostalCode,
+      city: application.holderCity,
+      province: application.holderProvince,
       identityCardNumber: application.holderIdentityCardNumber,
       nationalRegisterNumber: application.holderNationalRegisterNumber,
       status: "active",
@@ -696,6 +757,12 @@ export const activateApplication = internalMutation({
         sortOrder: driver.sortOrder,
         fullName: driver.fullName,
         address: driver.address,
+        street: driver.street,
+        houseNumber: driver.houseNumber,
+        addressBox: driver.addressBox,
+        postalCode: driver.postalCode,
+        city: driver.city,
+        province: driver.province,
         email: driver.email,
         phone: driver.phone,
         identityCardNumber: driver.identityCardNumber,
