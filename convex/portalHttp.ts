@@ -1,6 +1,10 @@
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { httpAction, type ActionCtx } from "./_generated/server";
+import {
+  maintenanceInterventionTypes,
+  maintenanceItemCodes,
+} from "./maintenanceCatalog";
 
 const allowedRoles = new Set([
   "admin",
@@ -39,6 +43,8 @@ const allowedWorkflowTypes = new Set([
   "report",
 ]);
 const allowedDispositions = new Set(["self", "towing", "mechanic", "other"]);
+const allowedMaintenanceInterventionTypes = new Set<string>(maintenanceInterventionTypes);
+const allowedMaintenanceItemCodes = new Set<string>(maintenanceItemCodes);
 const allowedCaptureSources = new Set(["camera", "gallery", "signature"]);
 const allowedMediaCategories = new Set([
   "vehicle_exterior",
@@ -269,6 +275,7 @@ function safeError(error: unknown): string {
     "mileage_required",
     "description_required",
     "maintenance_details_required",
+    "invalid_maintenance_items",
     "inspection_media_required",
     "before_after_media_required",
     "operation_details_required",
@@ -815,11 +822,22 @@ export const portalWorkflow = httpAction(async (ctx, request) => {
     }
     const reportCategory = optionalString(body.reportCategory, 30);
     const reportPriority = optionalString(body.reportPriority, 20);
+    const maintenanceInterventionType = clean(body.maintenanceInterventionType, 40);
+    const maintenanceItems = Array.isArray(body.maintenanceItems)
+      ? body.maintenanceItems.map((item) => clean(item, 80))
+      : undefined;
     if (reportCategory && !allowedReportCategories.has(reportCategory)) {
       throw new Error("validation_failed");
     }
     if (reportPriority && !allowedPriorities.has(reportPriority)) {
       throw new Error("validation_failed");
+    }
+    if (
+      (maintenanceInterventionType &&
+        !allowedMaintenanceInterventionTypes.has(maintenanceInterventionType)) ||
+      maintenanceItems?.some((item) => !allowedMaintenanceItemCodes.has(item))
+    ) {
+      throw new Error("invalid_maintenance_items");
     }
     const reference = `OP-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${base64Url(randomBytes(5)).toUpperCase().slice(0, 7)}`;
     const result = await ctx.runMutation(internal.portal.createWorkflowRecord, {
@@ -861,6 +879,15 @@ export const portalWorkflow = httpAction(async (ctx, request) => {
       disposition: allowedDispositions.has(clean(body.disposition, 20))
         ? clean(body.disposition, 20) as "self" | "towing" | "mechanic" | "other"
         : undefined,
+      maintenanceInterventionType: allowedMaintenanceInterventionTypes.has(maintenanceInterventionType)
+        ? maintenanceInterventionType as "regular_service" | "breakdown_repair" | "technical_inspection"
+        : undefined,
+      maintenanceItems,
+      maintenanceOtherDetails: optionalString(body.maintenanceOtherDetails, 4000),
+      roadTestPerformed:
+        typeof body.roadTestPerformed === "boolean" ? body.roadTestPerformed : undefined,
+      readyForService:
+        typeof body.readyForService === "boolean" ? body.readyForService : undefined,
       maintenanceWork: optionalString(body.maintenanceWork, 4000),
       changesMade: optionalString(body.changesMade, 4000),
       reportCategory: reportCategory as

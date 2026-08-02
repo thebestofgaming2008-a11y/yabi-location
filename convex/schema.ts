@@ -80,6 +80,12 @@ export const vehicleDispositionValidator = v.union(
   v.literal("other"),
 );
 
+export const maintenanceInterventionTypeValidator = v.union(
+  v.literal("regular_service"),
+  v.literal("breakdown_repair"),
+  v.literal("technical_inspection"),
+);
+
 export const captureSourceValidator = v.union(
   v.literal("camera"),
   v.literal("gallery"),
@@ -434,6 +440,12 @@ export default defineSchema({
     originAddress: v.optional(v.string()),
     destinationAddress: v.optional(v.string()),
     disposition: v.optional(vehicleDispositionValidator),
+    mechanicName: v.optional(v.string()),
+    maintenanceInterventionType: v.optional(maintenanceInterventionTypeValidator),
+    maintenanceItems: v.optional(v.array(v.string())),
+    maintenanceOtherDetails: v.optional(v.string()),
+    roadTestPerformed: v.optional(v.boolean()),
+    readyForService: v.optional(v.boolean()),
     maintenanceWork: v.optional(v.string()),
     changesMade: v.optional(v.string()),
     reportCategory: v.optional(

@@ -8,6 +8,7 @@ import {
 } from "./_generated/server";
 import {
   captureSourceValidator,
+  maintenanceInterventionTypeValidator,
   mediaCategoryValidator,
   operationalVehicleStatusValidator,
   portalRoleValidator,
@@ -16,10 +17,12 @@ import {
   workflowTypeValidator,
   vehicleDispositionValidator,
 } from "./schema";
+import { maintenanceItemCodes } from "./maintenanceCatalog";
 import { portalRateLimiter } from "./rateLimits";
 
 type PortalRole = Doc<"portalAccounts">["role"];
 type WorkflowType = Doc<"workflowRecords">["type"];
+const maintenanceItemCodeSet = new Set<string>(maintenanceItemCodes);
 
 const accountPublicValidator = v.object({
   id: v.id("portalAccounts"),
@@ -110,6 +113,12 @@ const workflowPublicValidator = v.object({
   originAddress: v.optional(v.string()),
   destinationAddress: v.optional(v.string()),
   disposition: v.optional(vehicleDispositionValidator),
+  mechanicName: v.optional(v.string()),
+  maintenanceInterventionType: v.optional(maintenanceInterventionTypeValidator),
+  maintenanceItems: v.optional(v.array(v.string())),
+  maintenanceOtherDetails: v.optional(v.string()),
+  roadTestPerformed: v.optional(v.boolean()),
+  readyForService: v.optional(v.boolean()),
   maintenanceWork: v.optional(v.string()),
   changesMade: v.optional(v.string()),
   reportCategory: v.optional(
@@ -256,6 +265,12 @@ function publicWorkflow(record: Doc<"workflowRecords">) {
     originAddress: record.originAddress,
     destinationAddress: record.destinationAddress,
     disposition: record.disposition,
+    mechanicName: record.mechanicName,
+    maintenanceInterventionType: record.maintenanceInterventionType,
+    maintenanceItems: record.maintenanceItems,
+    maintenanceOtherDetails: record.maintenanceOtherDetails,
+    roadTestPerformed: record.roadTestPerformed,
+    readyForService: record.readyForService,
     maintenanceWork: record.maintenanceWork,
     changesMade: record.changesMade,
     reportCategory: record.reportCategory,
@@ -337,6 +352,9 @@ function requiredMediaSlots(type: WorkflowType, disposition?: Doc<"workflowRecor
   }
   if (type === "vehicle_transfer") {
     return ["dashboard_started", ...standardPhotoSlots, "employee_signature"];
+  }
+  if (type === "maintenance") {
+    return ["mechanic_signature"];
   }
   return [];
 }
@@ -1136,6 +1154,11 @@ export const createWorkflowRecord = internalMutation({
     originAddress: v.optional(v.string()),
     destinationAddress: v.optional(v.string()),
     disposition: v.optional(vehicleDispositionValidator),
+    maintenanceInterventionType: v.optional(maintenanceInterventionTypeValidator),
+    maintenanceItems: v.optional(v.array(v.string())),
+    maintenanceOtherDetails: v.optional(v.string()),
+    roadTestPerformed: v.optional(v.boolean()),
+    readyForService: v.optional(v.boolean()),
     maintenanceWork: v.optional(v.string()),
     changesMade: v.optional(v.string()),
     reportCategory: v.optional(reportCategoryValidator),
@@ -1207,15 +1230,30 @@ export const createWorkflowRecord = internalMutation({
       throw new Error("vehicle_required");
     }
     if (
-      ["check_in", "check_out", "wash", "handover_take", "handover_return", "breakdown_replacement", "vehicle_transfer"].includes(
+      ["check_in", "check_out", "wash", "maintenance", "handover_take", "handover_return", "breakdown_replacement", "vehicle_transfer"].includes(
         args.type,
       ) &&
       args.mileage === undefined
     ) {
       throw new Error("mileage_required");
     }
-    if (args.type === "maintenance" && !args.maintenanceWork) {
-      throw new Error("maintenance_details_required");
+    if (args.type === "maintenance") {
+      const maintenanceItems = args.maintenanceItems ?? [];
+      if (
+        maintenanceItems.length > maintenanceItemCodes.length ||
+        new Set(maintenanceItems).size !== maintenanceItems.length ||
+        maintenanceItems.some((item) => !maintenanceItemCodeSet.has(item))
+      ) {
+        throw new Error("invalid_maintenance_items");
+      }
+      if (
+        !args.maintenanceInterventionType ||
+        (maintenanceItems.length === 0 && !args.maintenanceOtherDetails) ||
+        args.roadTestPerformed === undefined ||
+        args.readyForService === undefined
+      ) {
+        throw new Error("maintenance_details_required");
+      }
     }
     if (args.type === "report" && !args.description) {
       throw new Error("description_required");
@@ -1296,7 +1334,17 @@ export const createWorkflowRecord = internalMutation({
       originAddress: args.originAddress,
       destinationAddress: args.destinationAddress,
       disposition: args.disposition,
-      maintenanceWork: args.maintenanceWork,
+      mechanicName: args.type === "maintenance" ? actor.displayName : undefined,
+      maintenanceInterventionType: args.maintenanceInterventionType,
+      maintenanceItems: args.maintenanceItems,
+      maintenanceOtherDetails: args.maintenanceOtherDetails,
+      roadTestPerformed: args.roadTestPerformed,
+      readyForService: args.readyForService,
+      maintenanceWork:
+        args.maintenanceWork ??
+        (args.type === "maintenance" && args.maintenanceItems?.length
+          ? args.maintenanceItems.join(", ")
+          : undefined),
       changesMade: args.changesMade,
       reportCategory: args.reportCategory,
       reportPriority: args.reportPriority,

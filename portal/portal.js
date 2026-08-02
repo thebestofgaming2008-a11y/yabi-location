@@ -137,6 +137,37 @@ const translations = {
     Clear: "Effacer",
     "Work completed": "Travaux effectués",
     "Parts or settings changed": "Pièces ou réglages modifiés",
+    "Vehicle identification": "Identification du véhicule",
+    "Date and time": "Date et heure",
+    "Recorded automatically by the server.": "Enregistrées automatiquement par le serveur.",
+    "Registration plate": "Plaque d’immatriculation",
+    "Select a fleet vehicle to show its plate.": "Sélectionnez un véhicule de la flotte pour afficher sa plaque.",
+    "Mechanic name": "Nom du mécanicien",
+    "Taken from the signed-in account.": "Repris du compte connecté.",
+    "Intervention type": "Type d’intervention",
+    "Regular maintenance": "Entretien régulier",
+    "Breakdown / repair": "Panne / réparation",
+    "Technical inspection": "Contrôle technique",
+    "Parts and work performed": "Pièces et travaux effectués",
+    "Select every item completed during this intervention.": "Cochez chaque élément effectué pendant cette intervention.",
+    "Final notes and closure": "Remarques et clôture",
+    "Other part / details": "Autre pièce / précisions",
+    "Road test performed?": "Essai routier effectué ?",
+    "Vehicle ready to return to service?": "Véhicule prêt à reprendre le service ?",
+    Yes: "Oui",
+    No: "Non",
+    "Mechanic notes (optional)": "Remarques du mécanicien (facultatif)",
+    "Mechanic notes": "Remarques du mécanicien",
+    "Optional photos": "Photos facultatives",
+    "Mechanic signature": "Signature du mécanicien",
+    "Select at least one completed item or add details.": "Cochez au moins un élément effectué ou ajoutez des précisions.",
+    "Maintenance checklist is incomplete.": "La fiche d’entretien est incomplète.",
+    "Invalid maintenance selection.": "La sélection d’entretien n’est pas valide.",
+    "Parts / work completed": "Pièces / travaux effectués",
+    "Road test": "Essai routier",
+    "Ready for service": "Prêt à reprendre le service",
+    "Other maintenance details": "Autres précisions d’entretien",
+    "Server date and time": "Date et heure du serveur",
     Evidence: "Preuves",
     "Person's full name": "Nom complet de la personne",
     "Vehicle condition photos": "Photos de l’état du véhicule",
@@ -414,6 +445,37 @@ const translations = {
     Clear: "Wissen",
     "Work completed": "Uitgevoerde werkzaamheden",
     "Parts or settings changed": "Gewijzigde onderdelen of instellingen",
+    "Vehicle identification": "Voertuigidentificatie",
+    "Date and time": "Datum en tijd",
+    "Recorded automatically by the server.": "Automatisch geregistreerd door de server.",
+    "Registration plate": "Nummerplaat",
+    "Select a fleet vehicle to show its plate.": "Selecteer een voertuig uit het wagenpark om de nummerplaat te tonen.",
+    "Mechanic name": "Naam mecanicien",
+    "Taken from the signed-in account.": "Overgenomen van het aangemelde account.",
+    "Intervention type": "Type interventie",
+    "Regular maintenance": "Regulier onderhoud",
+    "Breakdown / repair": "Pech / reparatie",
+    "Technical inspection": "Technische keuring",
+    "Parts and work performed": "Onderdelen en uitgevoerde werkzaamheden",
+    "Select every item completed during this intervention.": "Vink elk onderdeel aan dat tijdens deze interventie is uitgevoerd.",
+    "Final notes and closure": "Opmerkingen en afsluiting",
+    "Other part / details": "Ander onderdeel / toelichting",
+    "Road test performed?": "Proefrit uitgevoerd?",
+    "Vehicle ready to return to service?": "Voertuig klaar om opnieuw ingezet te worden?",
+    Yes: "Ja",
+    No: "Nee",
+    "Mechanic notes (optional)": "Opmerkingen mecanicien (optioneel)",
+    "Mechanic notes": "Opmerkingen mecanicien",
+    "Optional photos": "Optionele foto’s",
+    "Mechanic signature": "Handtekening mecanicien",
+    "Select at least one completed item or add details.": "Vink minstens één uitgevoerd onderdeel aan of voeg een toelichting toe.",
+    "Maintenance checklist is incomplete.": "De onderhoudsfiche is onvolledig.",
+    "Invalid maintenance selection.": "De onderhoudsselectie is ongeldig.",
+    "Parts / work completed": "Uitgevoerde onderdelen / werkzaamheden",
+    "Road test": "Proefrit",
+    "Ready for service": "Klaar voor inzet",
+    "Other maintenance details": "Andere onderhoudsdetails",
+    "Server date and time": "Serverdatum en -tijd",
     Evidence: "Bewijs",
     "Person's full name": "Volledige naam persoon",
     "Vehicle condition photos": "Foto’s voertuigstaat",
@@ -610,6 +672,125 @@ const workflows = {
   report: ["07", "Report an issue", "Report damage, a problem or a modification."],
 };
 
+const maintenanceCopy = (en, fr, nl) => ({ en, fr, nl });
+const maintenanceCatalog = [
+  {
+    title: maintenanceCopy("Oil change & filters", "Vidange et filtres", "Olie verversen en filters"),
+    items: [
+      ["engine_oil_change", maintenanceCopy("Engine oil (oil change completed)", "Huile moteur (vidange effectuée)", "Motorolie (olie ververst)")],
+      ["oil_filter", maintenanceCopy("Oil filter", "Filtre à huile", "Oliefilter")],
+      ["engine_air_filter", maintenanceCopy("Engine air filter", "Filtre à air moteur", "Motorluchtfilter")],
+      ["cabin_filter", maintenanceCopy("Cabin filter (pollen / air conditioning)", "Filtre d’habitacle (pollen / climatisation)", "Interieurfilter (pollen / airconditioning)")],
+      ["fuel_filter", maintenanceCopy("Fuel filter (diesel / petrol)", "Filtre à carburant (gazole / essence)", "Brandstoffilter (diesel / benzine)")],
+      ["drain_plug_seal", maintenanceCopy("Drain plug seal", "Joint de bouchon de vidange", "Afdichtring aftapplug")],
+      ["gearbox_oil_change", maintenanceCopy("Gearbox oil change (manual / automatic)", "Vidange boîte de vitesses (manuelle / auto)", "Versnellingsbakolie vervangen (handmatig / automatisch)")],
+      ["differential_oil_change", maintenanceCopy("Axle / differential oil change", "Vidange pont / différentiel", "As- / differentieelolie vervangen")],
+    ],
+  },
+  {
+    title: maintenanceCopy("Braking", "Freinage", "Remmen"),
+    items: [
+      ["front_brake_pads", maintenanceCopy("Front brake pads", "Plaquettes de frein avant", "Remblokken voor")],
+      ["rear_brake_pads", maintenanceCopy("Rear brake pads", "Plaquettes de frein arrière", "Remblokken achter")],
+      ["front_brake_discs", maintenanceCopy("Front brake discs", "Disques de frein avant", "Remschijven voor")],
+      ["rear_brake_discs", maintenanceCopy("Rear brake discs", "Disques de frein arrière", "Remschijven achter")],
+      ["brake_wear_sensor", maintenanceCopy("Brake wear sensor", "Témoin d’usure des freins", "Remslijtagesensor")],
+      ["brake_caliper", maintenanceCopy("Brake caliper (front / rear)", "Étrier de frein (AV / AR)", "Remklauw (voor / achter)")],
+      ["brake_fluid", maintenanceCopy("Brake fluid (bleed / replacement)", "Liquide de frein (purge / remplacement)", "Remvloeistof (ontluchten / vervangen)")],
+      ["handbrake_cable", maintenanceCopy("Handbrake cable", "Câble de frein à main", "Handremkabel")],
+      ["rear_drum_brake_kit", maintenanceCopy("Rear drum brake kit", "Kit de freins à tambour (arrière)", "Trommelremset achter")],
+    ],
+  },
+  {
+    title: maintenanceCopy("Engine & timing", "Moteur et distribution", "Motor en distributie"),
+    items: [
+      ["timing_belt_kit", maintenanceCopy("Timing belt kit (belt + rollers)", "Kit de distribution (courroie + galets)", "Distributieriemset (riem + rollen)")],
+      ["water_pump", maintenanceCopy("Water pump", "Pompe à eau", "Waterpomp")],
+      ["accessory_belt", maintenanceCopy("Accessory / alternator belt", "Courroie d’accessoires / alternateur", "Multiriem / dynamoriem")],
+      ["accessory_tensioner", maintenanceCopy("Accessory belt tensioner", "Galet tendeur d’accessoires", "Spanrol multiriem")],
+      ["spark_plugs", maintenanceCopy("Spark plugs (petrol)", "Bougies d’allumage (essence)", "Bougies (benzine)")],
+      ["glow_plugs", maintenanceCopy("Glow plugs (diesel)", "Bougies de préchauffage (diesel)", "Gloeibougies (diesel)")],
+      ["injectors", maintenanceCopy("Injectors", "Injecteurs", "Injectoren")],
+      ["head_gasket_engine_seals", maintenanceCopy("Head gasket / engine seals", "Joint de culasse / joints moteur", "Koppakking / motorafdichtingen")],
+      ["air_turbo_hose", maintenanceCopy("Air / turbo hose", "Durite d’air / durite de turbo", "Lucht- / turboslang")],
+      ["engine_mount", maintenanceCopy("Engine mount (silent block)", "Support moteur (silentbloc)", "Motorsteun (silentblok)")],
+    ],
+  },
+  {
+    title: maintenanceCopy("Suspension & steering", "Suspension et liaison au sol", "Ophanging en stuurinrichting"),
+    items: [
+      ["front_shock_absorbers", maintenanceCopy("Front shock absorbers", "Amortisseurs avant", "Schokdempers voor")],
+      ["rear_shock_absorbers", maintenanceCopy("Rear shock absorbers", "Amortisseurs arrière", "Schokdempers achter")],
+      ["strut_mounts", maintenanceCopy("Strut mounts", "Coupelles d’amortisseur", "Veerpootlagers")],
+      ["tie_rod_ends", maintenanceCopy("Tie-rod ends (left / right)", "Rotules de direction (gauche / droite)", "Spoorstangeinden (links / rechts)")],
+      ["ball_joints", maintenanceCopy("Suspension ball joints", "Rotules de suspension", "Fuseekogels")],
+      ["stabilizer_links", maintenanceCopy("Stabilizer links", "Biellettes de barre stabilisatrice", "Stabilisatorstangen")],
+      ["suspension_arms", maintenanceCopy("Suspension arms", "Triangles / bras de suspension", "Draagarmen")],
+      ["wheel_bearings", maintenanceCopy("Wheel bearings (front / rear)", "Roulements de roue (AV / AR)", "Wiellagers (voor / achter)")],
+      ["driveshaft_cv_boot", maintenanceCopy("Driveshaft / CV boot", "Cardan / soufflet de cardan", "Aandrijfas / homokineethoes")],
+    ],
+  },
+  {
+    title: maintenanceCopy("Electrical, charging & starting", "Électricité, charge et démarrage", "Elektriciteit, laden en starten"),
+    items: [
+      ["battery_12v", maintenanceCopy("12V battery", "Batterie 12V", "12V-accu")],
+      ["alternator", maintenanceCopy("Alternator", "Alternateur", "Dynamo")],
+      ["starter_motor", maintenanceCopy("Starter motor", "Démarreur", "Startmotor")],
+      ["bulbs_lights", maintenanceCopy("Bulbs / headlights / rear lights", "Ampoules / phares / feux arrière", "Lampen / koplampen / achterlichten")],
+      ["fuses_relays", maintenanceCopy("Fuses / relays", "Fusibles / relais", "Zekeringen / relais")],
+      ["sensors", maintenanceCopy("Sensors (ABS, engine, pressure)", "Capteurs / sondes (ABS, moteur, pression)", "Sensoren (ABS, motor, druk)")],
+      ["ignition_switch", maintenanceCopy("Ignition lock / starter switch", "Neiman / contacteur de démarrage", "Contactslot / startschakelaar")],
+    ],
+  },
+  {
+    title: maintenanceCopy("Exhaust & emissions", "Échappement et dépollution", "Uitlaat en emissieregeling"),
+    items: [
+      ["egr_valve", maintenanceCopy("EGR valve (cleaning or replacement)", "Vanne EGR (nettoyage ou remplacement)", "EGR-klep (reinigen of vervangen)")],
+      ["particulate_filter", maintenanceCopy("Particulate filter / DPF (regeneration or replacement)", "Filtre à particules - FAP (régénération ou remplacement)", "Roetfilter / DPF (regenereren of vervangen)")],
+      ["lambda_sensor", maintenanceCopy("Lambda sensor", "Sonde lambda", "Lambdasonde")],
+      ["exhaust_system", maintenanceCopy("Exhaust system / silencer", "Ligne d’échappement / silencieux", "Uitlaatsysteem / demper")],
+      ["adblue_refill", maintenanceCopy("AdBlue refill", "Remplissage AdBlue", "AdBlue bijvullen")],
+    ],
+  },
+  {
+    title: maintenanceCopy("Transmission & clutch", "Transmission et embrayage", "Transmissie en koppeling"),
+    items: [
+      ["clutch_kit", maintenanceCopy("Clutch kit (disc + mechanism)", "Kit d’embrayage (disque + mécanisme)", "Koppelingsset (plaat + mechanisme)")],
+      ["flywheel", maintenanceCopy("Flywheel (dual mass)", "Volant moteur (bi-masse)", "Vliegwiel (dubbele massa)")],
+      ["clutch_release_hydraulics", maintenanceCopy("Release bearing / clutch hydraulics", "Butée d’embrayage / émetteur-récepteur", "Druklager / koppelingshydrauliek")],
+      ["transmission_flex_disc", maintenanceCopy("Transmission flex disc", "Flector de transmission", "Hardyschijf aandrijving")],
+    ],
+  },
+  {
+    title: maintenanceCopy("Tyres & wheel alignment", "Pneumatiques et géométrie", "Banden en uitlijning"),
+    items: [
+      ["front_tyres", maintenanceCopy("Front tyre(s) (replacement + balancing)", "Pneu(s) avant (remplacement + équilibrage)", "Voorband(en) (vervanging + balanceren)")],
+      ["rear_tyres", maintenanceCopy("Rear tyre(s) (replacement + balancing)", "Pneu(s) arrière (remplacement + équilibrage)", "Achterband(en) (vervanging + balanceren)")],
+      ["puncture_repair", maintenanceCopy("Puncture repair / plug", "Réparation crevaison / mèche", "Bandenreparatie / prop")],
+      ["wheel_alignment", maintenanceCopy("Wheel alignment / geometry", "Réglage parallélisme / géométrie", "Uitlijning / geometrie")],
+      ["tyre_pressure", maintenanceCopy("Tyre pressure adjustment", "Ajustement pression des pneus", "Bandenspanning aanpassen")],
+    ],
+  },
+  {
+    title: maintenanceCopy("Visibility, air conditioning & fluid levels", "Visibilité, climatisation et niveaux", "Zicht, airconditioning en vloeistofniveaus"),
+    items: [
+      ["wiper_blades", maintenanceCopy("Wiper blades (front / rear)", "Balais d’essuie-glace (AV / AR)", "Ruitenwissers (voor / achter)")],
+      ["washer_fluid", maintenanceCopy("Washer fluid top-up", "Appoint liquide lave-glace", "Ruitensproeiervloeistof bijvullen")],
+      ["air_conditioning_recharge", maintenanceCopy("Air-conditioning recharge (gas)", "Recharge climatisation (gaz)", "Airconditioning bijvullen (gas)")],
+      ["coolant", maintenanceCopy("Coolant (top-up / bleed)", "Liquide de refroidissement (appoint / purge)", "Koelvloeistof (bijvullen / ontluchten)")],
+      ["lock_handle_window_regulator", maintenanceCopy("Lock / handle / window regulator", "Serrure / poignée / lève-vitre", "Slot / handgreep / raammechanisme")],
+    ],
+  },
+];
+
+const maintenanceItemsByCode = new Map(
+  maintenanceCatalog.flatMap((category) => category.items),
+);
+
+function maintenanceLabel(copy) {
+  return copy?.[state.language] || copy?.en || "";
+}
+
 const operationalWorkflowDefaults = ["wash", "check_in", "check_out", "breakdown_replacement", "vehicle_transfer"];
 
 function allowedWorkflows() {
@@ -759,6 +940,8 @@ function messageFor(error) {
     media_required: "Add the required photos and signature.",
     required_evidence_missing: "Add every required photo and signature.",
     operation_details_required: "Complete all required operation details.",
+    maintenance_details_required: "Maintenance checklist is incomplete.",
+    invalid_maintenance_items: "Invalid maintenance selection.",
     too_many_files: "You selected too many photos. Keep the total at 24 or fewer.",
     media_service_unavailable: "Photo storage is temporarily unavailable.",
     customer_link_required: "Choose a customer for this customer account.",
@@ -1457,6 +1640,7 @@ function mediaSlotLabel(slot, category) {
   if (slot === "dashboard_started") return tr("Dashboard photo — vehicle started");
   if (slot === "customer_signature") return tr("Customer signature");
   if (slot === "employee_signature") return tr("Employee signature");
+  if (slot === "mechanic_signature") return tr("Mechanic signature");
   if (slot?.startsWith("before_")) return `${tr("Before washing")} — ${tr(standardLabels[slot.slice(7)] || slot.slice(7))}`;
   if (slot?.startsWith("after_")) return `${tr("After washing")} — ${tr(standardLabels[slot.slice(6)] || slot.slice(6))}`;
   if (slot === "outgoing_dashboard_started") return `${tr("YABI replacement vehicle")} — ${tr("Dashboard photo — vehicle started")}`;
@@ -1464,8 +1648,23 @@ function mediaSlotLabel(slot, category) {
   if (slot === "defective_dashboard_started") return `${tr("Defective customer vehicle")} — ${tr("Dashboard photo — vehicle started")}`;
   if (slot?.startsWith("defective_")) return `${tr("Defective customer vehicle")} — ${tr(standardLabels[slot.slice(10)] || slot.slice(10))}`;
   if (slot?.startsWith("extra_")) return `${tr("Extra photo")} ${slot.slice(6)}`;
+  if (slot?.startsWith("maintenance_photo_")) return `${tr("Optional photos")} ${slot.slice(18)}`;
   if (standardLabels[slot]) return tr(standardLabels[slot]);
   return tr(String(slot || category || "Evidence").replaceAll("_", " "));
+}
+
+function readonlyField(label, value, help = "", valueAttribute = "") {
+  return `<div class="field readonly-field"><label>${clean(tr(label))}</label><div class="readonly-value" ${valueAttribute}>${clean(value || "—")}</div>${help ? `<small>${clean(tr(help))}</small>` : ""}</div>`;
+}
+
+function maintenanceChecklist() {
+  return maintenanceCatalog.map((category, categoryIndex) => `
+    <section class="maintenance-category">
+      <h4><span>${String(categoryIndex + 1).padStart(2, "0")}</span>${clean(maintenanceLabel(category.title))}</h4>
+      <div class="maintenance-check-grid">
+        ${category.items.map(([code, label]) => `<label class="maintenance-check"><input type="checkbox" name="maintenanceItems" value="${clean(code)}"><span>${clean(maintenanceLabel(label))}</span></label>`).join("")}
+      </div>
+    </section>`).join("");
 }
 
 function workflowForm(type) {
@@ -1500,8 +1699,11 @@ function workflowForm(type) {
       <section class="form-section"><h3>${clean(tr("Dashboard"))}</h3>${dashboardEvidence()}</section><section class="form-section"><h3>${clean(tr("Vehicle photos"))}</h3>${standardEvidence()}</section>${signature("employee_signature", "Employee signature")}${notesAndExtras()}</form>`;
   }
   if (type === "maintenance") {
-    return `<form class="portal-form">${vehicle}${mileage}<div class="field"><label>${clean(tr("Work completed"))} *</label><textarea name="maintenanceWork" required></textarea></div>
-      <div class="field"><label>${clean(tr("Parts or settings changed"))}</label><textarea name="changesMade"></textarea></div>${uploadField("Evidence", "evidence", "maintenance")}</form>`;
+    return `<form class="portal-form maintenance-form">
+      <section class="form-section"><h3>${clean(tr("Vehicle identification"))}</h3><div class="form-grid">${vehicle}${readonlyField("Registration plate", "—", "Select a fleet vehicle to show its plate.", "data-maintenance-plate")}${mileage}${readonlyField("Mechanic name", state.data.account.displayName, "Taken from the signed-in account.")}${readonlyField("Date and time", date(Date.now(), true), "Recorded automatically by the server.")}${select("Intervention type", "maintenanceInterventionType", [["regular_service", "Regular maintenance"], ["breakdown_repair", "Breakdown / repair"], ["technical_inspection", "Technical inspection"]], true)}</div></section>
+      <section class="form-section maintenance-parts"><h3>${clean(tr("Parts and work performed"))}</h3><p>${clean(tr("Select every item completed during this intervention."))}</p>${maintenanceChecklist()}</section>
+      <section class="form-section"><h3>${clean(tr("Final notes and closure"))}</h3><div class="field"><label>${clean(tr("Other part / details"))}</label><textarea name="maintenanceOtherDetails"></textarea><small>${clean(tr("Select at least one completed item or add details."))}</small></div><div class="form-grid">${select("Road test performed?", "roadTestPerformed", [["true", "Yes"], ["false", "No"]], true)}${select("Vehicle ready to return to service?", "readyForService", [["true", "Yes"], ["false", "No"]], true)}</div><div class="field"><label>${clean(tr("Mechanic notes (optional)"))}</label><textarea name="description"></textarea></div>${uploadField("Optional photos", "maintenance_photo", "maintenance", false, "maintenance_photo", true)}${signature("mechanic_signature", "Mechanic signature")}</section>
+    </form>`;
   }
   if (["handover_take", "handover_return"].includes(type)) {
     return `<form class="portal-form">${vehicle}<div class="form-grid">${field("Person's full name", "personName", state.data.account.displayName, true)}${mileage}</div>
@@ -1537,6 +1739,16 @@ function openWorkflow(type) {
       if (missingSignature) throw new Error("media_required");
       if (type === "breakdown_replacement" && disposition === "self" && (!formData.get("destinationAddress") || !formData.get("employeeName"))) {
         throw new Error("validation_failed");
+      }
+      const maintenanceItems = type === "maintenance"
+        ? formData.getAll("maintenanceItems").map(String)
+        : [];
+      if (
+        type === "maintenance" &&
+        maintenanceItems.length === 0 &&
+        !String(formData.get("maintenanceOtherDetails") || "").trim()
+      ) {
+        throw new Error("maintenance_details_required");
       }
       const files = [];
       form.querySelectorAll('input[type="file"]').forEach((input) => {
@@ -1580,6 +1792,12 @@ function openWorkflow(type) {
       for (const [key, value] of formData.entries()) {
         if (!(value instanceof File)) values[key] = value;
       }
+      if (type === "maintenance") {
+        values.maintenanceItems = maintenanceItems;
+        values.maintenanceWork = maintenanceItems.join(", ") || values.maintenanceOtherDetails;
+        values.roadTestPerformed = values.roadTestPerformed === "true";
+        values.readyForService = values.readyForService === "true";
+      }
       ["mileage", "mileageAfter", "fuelPercent", "autonomyKm", "secondaryMileage", "secondaryAutonomyKm"].forEach((key) => {
         if (values[key]) values[key] = Number(values[key]);
         else delete values[key];
@@ -1598,6 +1816,19 @@ function openWorkflow(type) {
   });
   bindUploads();
   bindSignature();
+  if (type === "maintenance") bindMaintenanceForm();
+}
+
+function bindMaintenanceForm() {
+  const vehicleInput = el.modalBody.querySelector('[name="vehicleId"]');
+  const plate = el.modalBody.querySelector("[data-maintenance-plate]");
+  if (!vehicleInput || !plate) return;
+  const updatePlate = () => {
+    const vehicle = state.data.vehicles.find((item) => item.id === vehicleInput.value);
+    plate.textContent = vehicle?.registrationPlate || "—";
+  };
+  vehicleInput.addEventListener("change", updatePlate);
+  updatePlate();
 }
 
 function bindUploads() {
@@ -1693,11 +1924,27 @@ async function upload(files, uploadGroupId, progress) {
   return ids;
 }
 
+function recordDetailValue(value) {
+  if (Array.isArray(value)) {
+    return `<ul class="record-detail-list">${value.map((item) => `<li>${clean(item)}</li>`).join("")}</ul>`;
+  }
+  return `<div>${clean(value)}</div>`;
+}
+
 async function viewRecord(id) {
   try {
     const result = await api("/api/portal/record-media", { method: "POST", body: { recordId: id } });
     const record = state.data.workflows.find((item) => item.id === id);
+    const interventionLabel = record.maintenanceInterventionType
+      ? tr({
+        regular_service: "Regular maintenance",
+        breakdown_repair: "Breakdown / repair",
+        technical_inspection: "Technical inspection",
+      }[record.maintenanceInterventionType])
+      : "";
     const details = [
+      ["Server date and time", date(record.occurredAt, true)],
+      ["Registration plate", record.licensePlate],
       ["Mileage", record.mileage != null ? `${record.mileage} km` : ""],
       ["Mileage after", record.mileageAfter != null ? `${record.mileageAfter} km` : ""],
       ["Fuel", record.fuelPercent != null ? `${record.fuelPercent}%` : ""],
@@ -1711,15 +1958,21 @@ async function viewRecord(id) {
       ["Point A / origin", record.originAddress],
       ["Point B / destination", record.destinationAddress],
       ["Disposition", record.disposition ? tr({ self: "Moved by me", towing: "Towing service", mechanic: "Mechanic came", other: "Other" }[record.disposition]) : ""],
-      ["Maintenance", record.maintenanceWork],
+      ["Mechanic name", record.mechanicName],
+      ["Intervention type", interventionLabel],
+      ["Parts / work completed", record.maintenanceItems?.length ? record.maintenanceItems.map((code) => maintenanceLabel(maintenanceItemsByCode.get(code)) || code) : ""],
+      ["Other maintenance details", record.maintenanceOtherDetails],
+      ["Road test", record.roadTestPerformed == null ? "" : tr(record.roadTestPerformed ? "Yes" : "No")],
+      ["Ready for service", record.readyForService == null ? "" : tr(record.readyForService ? "Yes" : "No")],
+      ["Maintenance", !record.maintenanceItems?.length ? record.maintenanceWork : ""],
       ["Changes", record.changesMade],
-      ["Description", record.description],
+      [record.type === "maintenance" ? "Mechanic notes" : "Description", record.description],
       ["Resolution", record.resolution],
     ].filter(([, value]) => value);
     modal({
       kicker: record.reference,
       title: workflows[record.type]?.[1] || "Operation",
-      content: `<div class="portal-form">${details.map(([label, value]) => `<div class="field"><label>${clean(tr(label))}</label><div>${clean(value)}</div></div>`).join("")}
+      content: `<div class="portal-form">${details.map(([label, value]) => `<div class="field"><label>${clean(tr(label))}</label>${recordDetailValue(value)}</div>`).join("")}
         ${result.items.length ? `<div class="media-gallery">${result.items.sort((a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99)).map((item) => {
           const caption = mediaSlotLabel(item.slot, item.category);
           return `<figure><img src="${clean(item.url)}" alt="${clean(caption)}" loading="lazy"><figcaption>${clean(caption)}</figcaption></figure>`;
