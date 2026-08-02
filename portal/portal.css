@@ -310,6 +310,14 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .entry-option > span { color: var(--blue); font: 700 .7rem var(--display); letter-spacing: .12em; }
 .entry-option strong { font: 800 1.75rem/.95 var(--display); text-transform: uppercase; }
 .entry-option small { color: var(--muted); font-size: .67rem; line-height: 1.5; }
+.applicant-type-intro { margin-bottom: 1.25rem; }
+.applicant-type-intro h1 {
+  margin: 0;
+  color: var(--navy);
+  font: 800 clamp(2.4rem, 8vw, 3.5rem)/.95 var(--display);
+  text-transform: uppercase;
+}
+.applicant-type-options .entry-option { min-height: 180px; }
 .flow-back {
   width: 40px;
   height: 40px;

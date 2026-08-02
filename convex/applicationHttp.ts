@@ -65,6 +65,31 @@ function nationalRegisterNumberValid(value: string): boolean {
   );
 }
 
+function belgianVatNumberValid(value: string): boolean {
+  return /^(?:BE)?[01]\d{9}$/.test(value.replace(/[.\s-]/g, "").toUpperCase());
+}
+
+function emailAddressValid(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function validIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return (
+    !Number.isNaN(parsed.getTime()) &&
+    parsed.toISOString().slice(0, 10) === value
+  );
+}
+
+function dateAtLeastYearsAgo(value: string, years: number): boolean {
+  if (!validIsoDate(value)) return false;
+  const cutoff = new Date();
+  cutoff.setUTCHours(0, 0, 0, 0);
+  cutoff.setUTCFullYear(cutoff.getUTCFullYear() - years);
+  return value <= cutoff.toISOString().slice(0, 10);
+}
+
 function boundedNumber(
   value: unknown,
   minimum: number,
@@ -370,7 +395,12 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
       { tokenHash, now: Date.now() },
     );
     if (!application) throw new Error("application_unauthorized");
-    const holderNameOrCompany = clean(body.holderNameOrCompany, 160);
+    const applicantType = clean(body.applicantType, 20) as
+      | "individual"
+      | "company";
+    const holderFullName = clean(body.holderFullName, 160);
+    const companyName = optionalString(body.companyName, 160);
+    const companyVatNumber = optionalString(body.companyVatNumber, 32);
     const holderAddress = clean(body.holderAddress, 300);
     const holderPhone = clean(body.holderPhone, 40);
     const holderIdentityCardNumber = clean(
@@ -384,36 +414,44 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
     const holderEmail = clean(body.holderEmail, 254).toLowerCase();
     const privacyAccepted = body.privacyAccepted === true;
     const rawDrivers = Array.isArray(body.drivers) ? body.drivers.slice(0, 6) : [];
-    const datePattern = /^\d{4}-\d{2}-\d{2}$/;
     const drivers = rawDrivers.map((value, index) => {
       const driver =
         value && typeof value === "object" && !Array.isArray(value)
           ? (value as JsonBody)
           : {};
+      const companyPosition = optionalString(driver.companyPosition, 120);
       return {
         clientKey: clean(driver.clientKey, 80),
         kind: clean(driver.kind, 20) as "main" | "additional",
         sortOrder: index,
         fullName: clean(driver.fullName, 120),
+        address: clean(driver.address, 300),
+        email: clean(driver.email, 254).toLowerCase(),
         phone: clean(driver.phone, 40),
         identityCardNumber: clean(driver.identityCardNumber, 80),
         nationalRegisterNumber: clean(driver.nationalRegisterNumber, 24),
+        dateOfBirth: clean(driver.dateOfBirth, 10),
+        ...(companyPosition ? { companyPosition } : {}),
         drivingLicenceNumber: clean(driver.drivingLicenceNumber, 80),
         licenceIssueDate: clean(driver.licenceIssueDate, 10),
         licenceValidSince: clean(driver.licenceValidSince, 10),
         ageConfirmed: driver.ageConfirmed === true,
       };
     });
-    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(holderEmail);
     const phoneValid = (value: string) => /^[+()0-9.\s/-]{7,40}$/.test(value);
     if (
       !rawToken ||
-      !holderNameOrCompany ||
+      !["individual", "company"].includes(applicantType) ||
+      !holderFullName ||
+      (applicantType === "company" &&
+        (!companyName ||
+          !companyVatNumber ||
+          !belgianVatNumberValid(companyVatNumber))) ||
       !holderAddress ||
       !phoneValid(holderPhone) ||
       !holderIdentityCardNumber ||
       !nationalRegisterNumberValid(holderNationalRegisterNumber) ||
-      !emailValid ||
+      !emailAddressValid(holderEmail) ||
       !privacyAccepted ||
       drivers.length < 1 ||
       drivers.some(
@@ -421,12 +459,16 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
           !driver.clientKey ||
           !["main", "additional"].includes(driver.kind) ||
           !driver.fullName ||
+          !driver.address ||
+          !emailAddressValid(driver.email) ||
           !phoneValid(driver.phone) ||
           !driver.identityCardNumber ||
           !nationalRegisterNumberValid(driver.nationalRegisterNumber) ||
+          !dateAtLeastYearsAgo(driver.dateOfBirth, 23) ||
+          (applicantType === "company" && !driver.companyPosition) ||
           !driver.drivingLicenceNumber ||
-          !datePattern.test(driver.licenceIssueDate) ||
-          !datePattern.test(driver.licenceValidSince) ||
+          !dateAtLeastYearsAgo(driver.licenceIssueDate, 0) ||
+          !dateAtLeastYearsAgo(driver.licenceValidSince, 5) ||
           !driver.ageConfirmed,
       )
     ) {
@@ -437,13 +479,16 @@ export const portalApplicationSubmit = httpAction(async (ctx, request) => {
       {
         applicationId: application.applicationId,
         tokenHash,
-        holderNameOrCompany,
+        applicantType,
+        holderFullName,
+        ...(companyName ? { companyName } : {}),
+        ...(companyVatNumber ? { companyVatNumber } : {}),
         holderAddress,
         holderPhone,
         holderIdentityCardNumber,
         holderNationalRegisterNumber,
         holderEmail,
-        privacyVersion: "2026-07-30",
+        privacyVersion: "2026-08-02",
         drivers,
       },
     );

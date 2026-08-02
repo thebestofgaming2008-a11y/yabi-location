@@ -7,6 +7,7 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import {
+  applicantTypeValidator,
   applicationDocumentCategoryValidator,
   applicationDriverKindValidator,
   applicationStatusValidator,
@@ -24,9 +25,13 @@ const driverInputValidator = v.object({
   kind: applicationDriverKindValidator,
   sortOrder: v.number(),
   fullName: v.string(),
+  address: v.string(),
+  email: v.string(),
   phone: v.string(),
   identityCardNumber: v.string(),
   nationalRegisterNumber: v.string(),
+  dateOfBirth: v.string(),
+  companyPosition: v.optional(v.string()),
   drivingLicenceNumber: v.string(),
   licenceIssueDate: v.string(),
   licenceValidSince: v.string(),
@@ -51,9 +56,13 @@ const driverPublicValidator = v.object({
   kind: applicationDriverKindValidator,
   sortOrder: v.number(),
   fullName: v.string(),
+  address: v.optional(v.string()),
+  email: v.optional(v.string()),
   phone: v.string(),
   identityCardNumber: v.string(),
   nationalRegisterNumber: v.optional(v.string()),
+  dateOfBirth: v.optional(v.string()),
+  companyPosition: v.optional(v.string()),
   drivingLicenceNumber: v.string(),
   licenceIssueDate: v.string(),
   licenceValidSince: v.string(),
@@ -97,6 +106,37 @@ async function audit(
     summary,
     createdAt: Date.now(),
   });
+}
+
+function validIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return (
+    !Number.isNaN(parsed.getTime()) &&
+    parsed.toISOString().slice(0, 10) === value
+  );
+}
+
+function dateAtLeastYearsAgo(value: string, years: number): boolean {
+  if (!validIsoDate(value)) return false;
+  const cutoff = new Date();
+  cutoff.setUTCHours(0, 0, 0, 0);
+  cutoff.setUTCFullYear(cutoff.getUTCFullYear() - years);
+  return value <= cutoff.toISOString().slice(0, 10);
+}
+
+function emailAddressValid(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function nationalRegisterNumberValid(value: string): boolean {
+  return (
+    /^[0-9.\s/-]+$/.test(value) && value.replace(/\D/g, "").length === 11
+  );
+}
+
+function belgianVatNumberValid(value: string): boolean {
+  return /^(?:BE)?[01]\d{9}$/.test(value.replace(/[.\s-]/g, "").toUpperCase());
 }
 
 export const startApplication = internalMutation({
@@ -276,7 +316,10 @@ export const submitApplication = internalMutation({
   args: {
     applicationId: v.id("rentalApplications"),
     tokenHash: v.string(),
-    holderNameOrCompany: v.string(),
+    applicantType: applicantTypeValidator,
+    holderFullName: v.string(),
+    companyName: v.optional(v.string()),
+    companyVatNumber: v.optional(v.string()),
     holderAddress: v.string(),
     holderPhone: v.string(),
     holderIdentityCardNumber: v.string(),
@@ -302,7 +345,27 @@ export const submitApplication = internalMutation({
       args.drivers.filter((driver) => driver.kind === "main").length !== 1 ||
       new Set(args.drivers.map((driver) => driver.clientKey)).size !==
         args.drivers.length ||
-      args.drivers.some((driver) => !driver.ageConfirmed)
+      !args.holderFullName ||
+      !args.holderAddress ||
+      !args.holderPhone ||
+      !args.holderIdentityCardNumber ||
+      !nationalRegisterNumberValid(args.holderNationalRegisterNumber) ||
+      !emailAddressValid(args.holderEmail) ||
+      (args.applicantType === "company" &&
+        (!args.companyName ||
+          !args.companyVatNumber ||
+          !belgianVatNumberValid(args.companyVatNumber))) ||
+      args.drivers.some(
+        (driver) =>
+          !driver.ageConfirmed ||
+          !driver.address ||
+          !emailAddressValid(driver.email) ||
+          !nationalRegisterNumberValid(driver.nationalRegisterNumber) ||
+          !dateAtLeastYearsAgo(driver.dateOfBirth, 23) ||
+          !dateAtLeastYearsAgo(driver.licenceIssueDate, 0) ||
+          !dateAtLeastYearsAgo(driver.licenceValidSince, 5) ||
+          (args.applicantType === "company" && !driver.companyPosition),
+      )
     ) {
       throw new Error("application_validation_failed");
     }
@@ -342,7 +405,14 @@ export const submitApplication = internalMutation({
       });
     }
     await ctx.db.patch(application._id, {
-      holderNameOrCompany: args.holderNameOrCompany,
+      applicantType: args.applicantType,
+      holderFullName: args.holderFullName,
+      companyName: args.companyName,
+      companyVatNumber: args.companyVatNumber,
+      holderNameOrCompany:
+        args.applicantType === "company"
+          ? args.companyName
+          : args.holderFullName,
       holderAddress: args.holderAddress,
       holderPhone: args.holderPhone,
       holderIdentityCardNumber: args.holderIdentityCardNumber,
@@ -403,6 +473,10 @@ export const getApplicationForAdmin = internalQuery({
       reference: v.string(),
       locale: localeValidator,
       status: applicationStatusValidator,
+      applicantType: v.optional(applicantTypeValidator),
+      holderFullName: v.optional(v.string()),
+      companyName: v.optional(v.string()),
+      companyVatNumber: v.optional(v.string()),
       holderNameOrCompany: v.optional(v.string()),
       holderAddress: v.optional(v.string()),
       holderPhone: v.optional(v.string()),
@@ -442,6 +516,10 @@ export const getApplicationForAdmin = internalQuery({
         reference: application.reference,
         locale: application.locale,
         status: application.status,
+        applicantType: application.applicantType,
+        holderFullName: application.holderFullName,
+        companyName: application.companyName,
+        companyVatNumber: application.companyVatNumber,
         holderNameOrCompany: application.holderNameOrCompany,
         holderAddress: application.holderAddress,
         holderPhone: application.holderPhone,
@@ -463,9 +541,13 @@ export const getApplicationForAdmin = internalQuery({
           kind: driver.kind,
           sortOrder: driver.sortOrder,
           fullName: driver.fullName,
+          address: driver.address,
+          email: driver.email,
           phone: driver.phone,
           identityCardNumber: driver.identityCardNumber,
           nationalRegisterNumber: driver.nationalRegisterNumber,
+          dateOfBirth: driver.dateOfBirth,
+          companyPosition: driver.companyPosition,
           drivingLicenceNumber: driver.drivingLicenceNumber,
           licenceIssueDate: driver.licenceIssueDate,
           licenceValidSince: driver.licenceValidSince,
@@ -544,8 +626,11 @@ export const activateApplication = internalMutation({
     if (application.status !== "agreed") {
       throw new Error("application_must_be_agreed");
     }
+    const holderFullName =
+      application.holderFullName ?? application.holderNameOrCompany;
     if (
       !application.holderNameOrCompany ||
+      !holderFullName ||
       !application.holderEmail ||
       !application.holderPhone ||
       !application.holderNationalRegisterNumber
@@ -571,17 +656,28 @@ export const activateApplication = internalMutation({
     }
     const now = Date.now();
     const customerId = await ctx.db.insert("customers", {
-      fullName: application.holderNameOrCompany,
+      fullName: holderFullName,
+      ...(application.applicantType === "company" && application.companyName
+        ? { company: application.companyName }
+        : {}),
+      ...(application.applicantType === "company" &&
+      application.companyVatNumber
+        ? { companyVatNumber: application.companyVatNumber }
+        : {}),
       email: application.holderEmail,
       phone: application.holderPhone,
       address: application.holderAddress,
+      identityCardNumber: application.holderIdentityCardNumber,
       nationalRegisterNumber: application.holderNationalRegisterNumber,
       status: "active",
       createdAt: now,
       updatedAt: now,
     });
     const portalAccountId = await ctx.db.insert("portalAccounts", {
-      displayName: application.holderNameOrCompany,
+      displayName:
+        application.applicantType === "company"
+          ? application.companyName ?? holderFullName
+          : holderFullName,
       role: "customer",
       codeHash: args.codeHash,
       codeHint: args.codeHint,
@@ -599,9 +695,13 @@ export const activateApplication = internalMutation({
         kind: driver.kind,
         sortOrder: driver.sortOrder,
         fullName: driver.fullName,
+        address: driver.address,
+        email: driver.email,
         phone: driver.phone,
         identityCardNumber: driver.identityCardNumber,
         nationalRegisterNumber: driver.nationalRegisterNumber,
+        dateOfBirth: driver.dateOfBirth,
+        companyPosition: driver.companyPosition,
         drivingLicenceNumber: driver.drivingLicenceNumber,
         licenceIssueDate: driver.licenceIssueDate,
         licenceValidSince: driver.licenceValidSince,

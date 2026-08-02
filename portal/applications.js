@@ -11,16 +11,25 @@
       "New account": "Nouveau dossier",
       "I want to submit a rental application": "Je souhaite introduire une demande de location",
       "Rental application": "Demande de location",
+      "Who is applying?": "Qui introduit la demande ?",
+      "Choose the type of rental application.": "Choisissez le type de demande de location.",
+      Individual: "Particulier",
+      "I am renting privately": "Je loue à titre privé",
+      Company: "Société",
+      "I am renting for a company": "Je loue pour une société",
       "Contract holder": "Le locataire",
       "This information is required to prepare the rental contract.": "Ces informations sont nécessaires pour préparer le contrat de location.",
-      "Full name or company": "Nom et prénom / Société",
+      "Company name": "Nom de la société",
+      "Belgian VAT number": "Numéro de TVA belge",
+      "Company address": "Adresse de la société",
+      "Full address": "Adresse complète",
       Address: "Adresse",
       Phone: "Téléphone",
       "Identity card number": "N° de carte d’identité",
       "National register number": "N° de registre national",
       Email: "E-mail",
       Drivers: "Conducteurs",
-      "Every driver must be at least 23. Take clear live photos of both sides of the identity card and driving licence.": "Chaque conducteur doit avoir au moins 23 ans. Prenez des photos nettes, en direct, du recto et du verso de la carte d’identité et du permis.",
+      "Every driver must be at least 23 and must have held a driving licence for at least 5 years. Take clear live photos of both sides of the identity card and driving licence.": "Chaque conducteur doit avoir au moins 23 ans et détenir un permis depuis au moins 5 ans. Prenez des photos nettes, en direct, du recto et du verso de la carte d’identité et du permis.",
       "Add another driver": "Ajouter un conducteur",
       "Check and submit": "Vérifier et envoyer",
       "The YABI administrator will review the information and prepare the contract outside the portal. Submitting does not confirm a rental.": "L’administrateur YABI vérifiera les informations et préparera le contrat en dehors du portail. L’envoi ne confirme pas la location.",
@@ -37,7 +46,7 @@
       "Take photo": "Prendre la photo",
       "Use photo": "Utiliser la photo",
       "Try camera again": "Réessayer l’appareil photo",
-      "Camera permission is blocked. Allow Camera for yabi-location.pages.dev in your browser settings, then try again. If this page is open inside another app, open it in Chrome or Safari.": "L’accès à l’appareil photo est bloqué. Autorisez l’appareil photo pour yabi-location.pages.dev dans les réglages du navigateur, puis réessayez. Si la page est ouverte dans une autre application, ouvrez-la dans Chrome ou Safari.",
+      "Camera permission is blocked. Allow Camera for this site in your browser settings, then try again. If this page is open inside another app, open it in Chrome or Safari.": "L’accès à l’appareil photo est bloqué. Autorisez l’appareil photo pour ce site dans les réglages du navigateur, puis réessayez. Si la page est ouverte dans une autre application, ouvrez-la dans Chrome ou Safari.",
       "This browser cannot use the camera here. Open the portal directly in Chrome or Safari.": "Ce navigateur ne peut pas utiliser l’appareil photo ici. Ouvrez directement le portail dans Chrome ou Safari.",
       "The photo could not be prepared. Retake it and try again.": "La photo n’a pas pu être préparée. Reprenez-la puis réessayez.",
       "The secure upload was rejected. Keep this photo and tap Use photo again.": "L’envoi sécurisé a été refusé. Gardez cette photo et appuyez de nouveau sur Utiliser la photo.",
@@ -45,10 +54,12 @@
       "Additional driver": "Conducteur supplémentaire",
       "Same information as contract holder": "Mêmes informations que le locataire",
       "Full name": "Nom et prénom",
+      "Date of birth": "Date de naissance",
+      "Position in company": "Fonction dans la société",
       "Driving licence number": "N° de permis de conduire",
       "Licence issue date": "Date de délivrance du permis",
       "Licence valid since": "Permis valable depuis le",
-      "I confirm this driver is at least 23 years old.": "Je confirme que ce conducteur est âgé d’au moins 23 ans.",
+      "I confirm this driver is at least 23 years old and has held a driving licence for at least 5 years.": "Je confirme que ce conducteur a au moins 23 ans et détient un permis depuis au moins 5 ans.",
       "Identity card — front": "Carte d’identité — recto",
       "Identity card — back": "Carte d’identité — verso",
       "Driving licence — front": "Permis de conduire — recto",
@@ -58,6 +69,9 @@
       Remove: "Supprimer",
       "Camera access is required. Allow camera permission and try again.": "L’accès à l’appareil photo est obligatoire. Autorisez-le puis réessayez.",
       "Check all required fields.": "Vérifiez tous les champs obligatoires.",
+      "Every driver must be at least 23 years old.": "Chaque conducteur doit avoir au moins 23 ans.",
+      "Every driver must have held a driving licence for at least 5 years.": "Chaque conducteur doit détenir un permis depuis au moins 5 ans.",
+      "Enter a valid Belgian VAT number.": "Saisissez un numéro de TVA belge valide.",
       "Add all four clear document photos for every driver.": "Ajoutez les quatre photos nettes pour chaque conducteur.",
       "Starting secure application…": "Ouverture du dossier sécurisé…",
       "Uploading photo…": "Envoi de la photo…",
@@ -76,6 +90,7 @@
       "No applications": "Aucune demande",
       Application: "Demande",
       "Name / company": "Nom / société",
+      "Applicant type": "Type de demandeur",
       "Identity card": "Carte d’identité",
       "Driving licence": "Permis de conduire",
       Issued: "Délivré le",
@@ -95,16 +110,25 @@
       "New account": "Nieuwe aanvraag",
       "I want to submit a rental application": "Ik wil een huuraanvraag indienen",
       "Rental application": "Huuraanvraag",
+      "Who is applying?": "Wie dient de aanvraag in?",
+      "Choose the type of rental application.": "Kies het type huuraanvraag.",
+      Individual: "Particulier",
+      "I am renting privately": "Ik huur als particulier",
+      Company: "Vennootschap",
+      "I am renting for a company": "Ik huur voor een vennootschap",
       "Contract holder": "Contracthouder",
       "This information is required to prepare the rental contract.": "Deze informatie is nodig om het huurcontract op te stellen.",
-      "Full name or company": "Naam en voornaam / Bedrijf",
+      "Company name": "Naam van de vennootschap",
+      "Belgian VAT number": "Belgisch btw-nummer",
+      "Company address": "Adres van de vennootschap",
+      "Full address": "Volledig adres",
       Address: "Adres",
       Phone: "Telefoon",
       "Identity card number": "Identiteitskaartnummer",
       "National register number": "Rijksregisternummer",
       Email: "E-mail",
       Drivers: "Bestuurders",
-      "Every driver must be at least 23. Take clear live photos of both sides of the identity card and driving licence.": "Elke bestuurder moet minstens 23 jaar zijn. Maak duidelijke livefoto’s van de voor- en achterkant van identiteitskaart en rijbewijs.",
+      "Every driver must be at least 23 and must have held a driving licence for at least 5 years. Take clear live photos of both sides of the identity card and driving licence.": "Elke bestuurder moet minstens 23 jaar zijn en minstens 5 jaar een rijbewijs hebben. Maak duidelijke livefoto’s van de voor- en achterkant van identiteitskaart en rijbewijs.",
       "Add another driver": "Bestuurder toevoegen",
       "Check and submit": "Controleren en verzenden",
       "The YABI administrator will review the information and prepare the contract outside the portal. Submitting does not confirm a rental.": "De YABI-beheerder controleert de informatie en maakt het contract buiten het portaal. Indienen bevestigt geen huur.",
@@ -121,7 +145,7 @@
       "Take photo": "Foto nemen",
       "Use photo": "Foto gebruiken",
       "Try camera again": "Camera opnieuw proberen",
-      "Camera permission is blocked. Allow Camera for yabi-location.pages.dev in your browser settings, then try again. If this page is open inside another app, open it in Chrome or Safari.": "Cameratoegang is geblokkeerd. Sta Camera toe voor yabi-location.pages.dev in de browserinstellingen en probeer opnieuw. Staat deze pagina in een andere app open, open ze dan in Chrome of Safari.",
+      "Camera permission is blocked. Allow Camera for this site in your browser settings, then try again. If this page is open inside another app, open it in Chrome or Safari.": "Cameratoegang is geblokkeerd. Sta Camera toe voor deze site in de browserinstellingen en probeer opnieuw. Staat deze pagina in een andere app open, open ze dan in Chrome of Safari.",
       "This browser cannot use the camera here. Open the portal directly in Chrome or Safari.": "Deze browser kan de camera hier niet gebruiken. Open het portaal rechtstreeks in Chrome of Safari.",
       "The photo could not be prepared. Retake it and try again.": "De foto kon niet worden voorbereid. Neem hem opnieuw en probeer nogmaals.",
       "The secure upload was rejected. Keep this photo and tap Use photo again.": "De beveiligde upload werd geweigerd. Bewaar deze foto en tik opnieuw op Foto gebruiken.",
@@ -129,10 +153,12 @@
       "Additional driver": "Extra bestuurder",
       "Same information as contract holder": "Zelfde gegevens als contracthouder",
       "Full name": "Naam en voornaam",
+      "Date of birth": "Geboortedatum",
+      "Position in company": "Functie in de vennootschap",
       "Driving licence number": "Rijbewijsnummer",
       "Licence issue date": "Afgiftedatum rijbewijs",
       "Licence valid since": "Rijbewijs geldig sinds",
-      "I confirm this driver is at least 23 years old.": "Ik bevestig dat deze bestuurder minstens 23 jaar is.",
+      "I confirm this driver is at least 23 years old and has held a driving licence for at least 5 years.": "Ik bevestig dat deze bestuurder minstens 23 jaar is en minstens 5 jaar een rijbewijs heeft.",
       "Identity card — front": "Identiteitskaart — voorkant",
       "Identity card — back": "Identiteitskaart — achterkant",
       "Driving licence — front": "Rijbewijs — voorkant",
@@ -142,6 +168,9 @@
       Remove: "Verwijderen",
       "Camera access is required. Allow camera permission and try again.": "Cameratoegang is verplicht. Geef toestemming en probeer opnieuw.",
       "Check all required fields.": "Controleer alle verplichte velden.",
+      "Every driver must be at least 23 years old.": "Elke bestuurder moet minstens 23 jaar zijn.",
+      "Every driver must have held a driving licence for at least 5 years.": "Elke bestuurder moet minstens 5 jaar een rijbewijs hebben.",
+      "Enter a valid Belgian VAT number.": "Vul een geldig Belgisch btw-nummer in.",
       "Add all four clear document photos for every driver.": "Voeg voor elke bestuurder vier duidelijke documentfoto’s toe.",
       "Starting secure application…": "Beveiligde aanvraag wordt gestart…",
       "Uploading photo…": "Foto wordt verzonden…",
@@ -160,6 +189,7 @@
       "No applications": "Geen aanvragen",
       Application: "Aanvraag",
       "Name / company": "Naam / bedrijf",
+      "Applicant type": "Type aanvrager",
       "Identity card": "Identiteitskaart",
       "Driving licence": "Rijbewijs",
       Issued: "Afgegeven",
@@ -180,6 +210,9 @@
     entry: document.querySelector("#portal-entry"),
     login: document.querySelector("#login-flow"),
     application: document.querySelector("#application-flow"),
+    applicantTypeStep: document.querySelector("#applicant-type-step"),
+    applicationDetails: document.querySelector("#application-details"),
+    holderAddressLabel: document.querySelector("#holder-address-label"),
     success: document.querySelector("#application-success"),
     form: document.querySelector("#application-form"),
     pages: [...document.querySelectorAll("[data-application-page]")],
@@ -217,6 +250,7 @@
     language: ["en", "fr", "nl"].includes(localStorage.getItem(languageKey))
       ? localStorage.getItem(languageKey)
       : "en",
+    applicantType: null,
     page: 1,
     applicationId: "",
     applicationToken: "",
@@ -233,9 +267,13 @@
       clientKey: crypto.randomUUID(),
       kind,
       fullName: "",
+      address: "",
+      email: "",
       phone: "",
       identityCardNumber: "",
       nationalRegisterNumber: "",
+      dateOfBirth: "",
+      companyPosition: "",
       drivingLicenceNumber: "",
       licenceIssueDate: "",
       licenceValidSince: "",
@@ -264,6 +302,31 @@
     );
   }
 
+  function belgianVatNumberValid(value = "") {
+    return /^(?:BE)?[01]\d{9}$/.test(
+      value.replace(/[.\s-]/g, "").toUpperCase(),
+    );
+  }
+
+  function dateCutoff(years) {
+    const cutoff = new Date();
+    cutoff.setUTCHours(0, 0, 0, 0);
+    cutoff.setUTCFullYear(cutoff.getUTCFullYear() - years);
+    return [
+      cutoff.getUTCFullYear(),
+      String(cutoff.getUTCMonth() + 1).padStart(2, "0"),
+      String(cutoff.getUTCDate()).padStart(2, "0"),
+    ].join("-");
+  }
+
+  function dateAtLeastYearsAgo(value, years) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(value) && value <= dateCutoff(years);
+  }
+
+  function emailAddressValid(value = "") {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
   async function publicApi(path, body) {
     const response = await fetch(`${apiBase}${path}`, {
       method: "POST",
@@ -287,9 +350,33 @@
     ui.panel.classList.toggle("application-mode", name === "signup");
     ui.card.classList.toggle("wide", name === "signup");
     if (name === "signup") {
-      setPage(1);
-      renderDrivers();
+      showApplicantTypeStep();
     }
+  }
+
+  function showApplicantTypeStep() {
+    applicationState.applicantType = null;
+    ui.applicantTypeStep.hidden = false;
+    ui.applicationDetails.hidden = true;
+    ui.message.textContent = "";
+  }
+
+  function selectApplicantType(type) {
+    applicationState.applicantType = type;
+    ui.applicantTypeStep.hidden = true;
+    ui.applicationDetails.hidden = false;
+    document.querySelectorAll(".company-only").forEach((field) => {
+      const company = type === "company";
+      field.hidden = !company;
+      field.querySelectorAll("input").forEach((input) => {
+        input.disabled = !company;
+      });
+    });
+    ui.holderAddressLabel.textContent = t(
+      type === "company" ? "Company address" : "Full address",
+    );
+    setPage(1);
+    renderDrivers();
   }
 
   function translateApplicantUi() {
@@ -301,18 +388,32 @@
     if (!ui.application.hidden) {
       syncDrivers();
       renderDrivers();
+      if (applicationState.applicantType) {
+        ui.holderAddressLabel.textContent = t(
+          applicationState.applicantType === "company"
+            ? "Company address"
+            : "Full address",
+        );
+      }
       if (applicationState.page === 3) renderSummary();
     }
   }
 
-  function field(label, name, value, type = "text") {
-    const inputMode =
-      type === "tel"
-        ? 'inputmode="tel"'
-        : name === "nationalRegisterNumber"
-          ? 'inputmode="numeric" autocomplete="off" maxlength="24"'
-          : "";
-    return `<label class="app-field"><span>${escape(t(label))}</span><input name="${escape(name)}" type="${type}" value="${escape(value)}" ${inputMode} required></label>`;
+  function field(label, name, value, type = "text", full = false) {
+    const attributes = {
+      address: 'autocomplete="street-address" maxlength="300"',
+      email: 'autocomplete="email" maxlength="254"',
+      phone: 'inputmode="tel" autocomplete="tel" maxlength="40"',
+      identityCardNumber: 'maxlength="80"',
+      nationalRegisterNumber:
+        'inputmode="numeric" autocomplete="off" maxlength="24"',
+      dateOfBirth: `max="${dateCutoff(23)}"`,
+      companyPosition: 'maxlength="120"',
+      drivingLicenceNumber: 'maxlength="80"',
+      licenceIssueDate: `max="${dateCutoff(0)}"`,
+      licenceValidSince: `max="${dateCutoff(5)}"`,
+    }[name] || "";
+    return `<label class="app-field${full ? " full" : ""}"><span>${escape(t(label))}</span><input name="${escape(name)}" type="${type}" value="${escape(value)}" ${attributes} required></label>`;
   }
 
   function renderDrivers() {
@@ -324,15 +425,19 @@
           ${driver.kind === "additional" ? `<button type="button" data-remove-driver="${escape(driver.clientKey)}">${escape(t("Remove"))}</button>` : ""}</div>
           ${driver.kind === "main" ? `<label class="same-holder"><input type="checkbox" data-same-holder><span>${escape(t("Same information as contract holder"))}</span></label>` : ""}
           <div class="application-grid">
-            ${field("Full name", "fullName", driver.fullName)}
+            ${field("Full name", "fullName", driver.fullName, "text", true)}
+            ${field("Full address", "address", driver.address, "text", true)}
+            ${field("Email", "email", driver.email, "email")}
             ${field("Phone", "phone", driver.phone, "tel")}
+            ${field("Date of birth", "dateOfBirth", driver.dateOfBirth, "date")}
             ${field("Identity card number", "identityCardNumber", driver.identityCardNumber)}
             ${field("National register number", "nationalRegisterNumber", driver.nationalRegisterNumber)}
+            ${applicationState.applicantType === "company" ? field("Position in company", "companyPosition", driver.companyPosition, "text", true) : ""}
             ${field("Driving licence number", "drivingLicenceNumber", driver.drivingLicenceNumber)}
             ${field("Licence issue date", "licenceIssueDate", driver.licenceIssueDate, "date")}
             ${field("Licence valid since", "licenceValidSince", driver.licenceValidSince, "date")}
           </div>
-          <label class="age-check"><input type="checkbox" name="ageConfirmed" ${driver.ageConfirmed ? "checked" : ""} required><span>${escape(t("I confirm this driver is at least 23 years old."))}</span></label>
+          <label class="age-check"><input type="checkbox" name="ageConfirmed" ${driver.ageConfirmed ? "checked" : ""} required><span>${escape(t("I confirm this driver is at least 23 years old and has held a driving licence for at least 5 years."))}</span></label>
           <div class="document-grid">${documentTypes.map(([category, label]) => {
             const photo = driver.photos[category];
             return `<div class="document-capture"><span>${escape(t(label))}</span><button class="capture-button ${photo ? "complete" : ""}" type="button" data-camera-driver="${escape(driver.clientKey)}" data-camera-category="${category}">
@@ -353,9 +458,13 @@
       if (!driver) return;
       [
         "fullName",
+        "address",
+        "email",
         "phone",
         "identityCardNumber",
         "nationalRegisterNumber",
+        "dateOfBirth",
+        "companyPosition",
         "drivingLicenceNumber",
         "licenceIssueDate",
         "licenceValidSince",
@@ -369,16 +478,24 @@
   function validatePage() {
     ui.message.textContent = "";
     if (applicationState.page === 1) {
-      const fields = [...ui.pages[0].querySelectorAll("input")];
+      const fields = [...ui.pages[0].querySelectorAll("input:not(:disabled)")];
       const valid = fields.every((input) => {
         const okay =
           input.checkValidity() &&
           (input.name !== "holderNationalRegisterNumber" ||
-            nationalRegisterNumberValid(input.value));
+            nationalRegisterNumberValid(input.value)) &&
+          (input.name !== "companyVatNumber" ||
+            belgianVatNumberValid(input.value));
         input.setAttribute("aria-invalid", String(!okay));
         return okay;
       });
-      if (!valid) ui.message.textContent = t("Check all required fields.");
+      if (!valid) {
+        ui.message.textContent =
+          applicationState.applicantType === "company" &&
+          !belgianVatNumberValid(ui.form.elements.companyVatNumber.value)
+            ? t("Enter a valid Belgian VAT number.")
+            : t("Check all required fields.");
+      }
       return valid;
     }
     if (applicationState.page === 2) {
@@ -386,9 +503,14 @@
       const missingFields = applicationState.drivers.some(
         (driver) =>
           !driver.fullName ||
+          !driver.address ||
+          !emailAddressValid(driver.email) ||
           !driver.phone ||
           !driver.identityCardNumber ||
           !nationalRegisterNumberValid(driver.nationalRegisterNumber) ||
+          !driver.dateOfBirth ||
+          (applicationState.applicantType === "company" &&
+            !driver.companyPosition) ||
           !driver.drivingLicenceNumber ||
           !driver.licenceIssueDate ||
           !driver.licenceValidSince ||
@@ -396,6 +518,26 @@
       );
       if (missingFields) {
         ui.message.textContent = t("Check all required fields.");
+        return false;
+      }
+      if (
+        applicationState.drivers.some(
+          (driver) => !dateAtLeastYearsAgo(driver.dateOfBirth, 23),
+        )
+      ) {
+        ui.message.textContent = t(
+          "Every driver must be at least 23 years old.",
+        );
+        return false;
+      }
+      if (
+        applicationState.drivers.some(
+          (driver) => !dateAtLeastYearsAgo(driver.licenceValidSince, 5),
+        )
+      ) {
+        ui.message.textContent = t(
+          "Every driver must have held a driving licence for at least 5 years.",
+        );
         return false;
       }
       const missingPhotos = applicationState.drivers.some((driver) =>
@@ -425,7 +567,17 @@
   function renderSummary() {
     const holder = new FormData(ui.form);
     ui.summary.innerHTML = [
-      [t("Contract holder"), holder.get("holderNameOrCompany")],
+      [
+        t("Applicant type"),
+        t(applicationState.applicantType === "company" ? "Company" : "Individual"),
+      ],
+      ...(applicationState.applicantType === "company"
+        ? [
+            [t("Company name"), holder.get("companyName")],
+            [t("Belgian VAT number"), holder.get("companyVatNumber")],
+          ]
+        : []),
+      [t("Contract holder"), holder.get("holderFullName")],
       [
         t("National register number"),
         holder.get("holderNationalRegisterNumber"),
@@ -499,7 +651,7 @@
       ui.cameraStatus.textContent = t(
         unsupported
           ? "This browser cannot use the camera here. Open the portal directly in Chrome or Safari."
-          : "Camera permission is blocked. Allow Camera for yabi-location.pages.dev in your browser settings, then try again. If this page is open inside another app, open it in Chrome or Safari.",
+          : "Camera permission is blocked. Allow Camera for this site in your browser settings, then try again. If this page is open inside another app, open it in Chrome or Safari.",
       );
       ui.cameraCapture.disabled = false;
       ui.cameraCapture.dataset.cameraMode = "retry";
@@ -629,9 +781,16 @@
       kind: driver.kind,
       sortOrder: index,
       fullName: driver.fullName,
+      address: driver.address,
+      email: driver.email,
       phone: driver.phone,
       identityCardNumber: driver.identityCardNumber,
       nationalRegisterNumber: driver.nationalRegisterNumber,
+      dateOfBirth: driver.dateOfBirth,
+      companyPosition:
+        applicationState.applicantType === "company"
+          ? driver.companyPosition
+          : undefined,
       drivingLicenceNumber: driver.drivingLicenceNumber,
       licenceIssueDate: driver.licenceIssueDate,
       licenceValidSince: driver.licenceValidSince,
@@ -645,8 +804,17 @@
       showFlow(mode.dataset.entryMode);
       return;
     }
+    const applicantType = event.target.closest("[data-applicant-type]");
+    if (applicantType) {
+      selectApplicantType(applicantType.dataset.applicantType);
+      return;
+    }
     const back = event.target.closest("[data-entry-back]");
     if (back) {
+      if (!ui.application.hidden && !ui.applicationDetails.hidden) {
+        showApplicantTypeStep();
+        return;
+      }
       showFlow("entry");
       return;
     }
@@ -674,7 +842,11 @@
     if (!event.target.matches("[data-same-holder]") || !event.target.checked) return;
     const card = event.target.closest("[data-driver-key]");
     card.querySelector('[name="fullName"]').value =
-      ui.form.elements.holderNameOrCompany.value;
+      ui.form.elements.holderFullName.value;
+    card.querySelector('[name="address"]').value =
+      ui.form.elements.holderAddress.value;
+    card.querySelector('[name="email"]').value =
+      ui.form.elements.holderEmail.value;
     card.querySelector('[name="phone"]').value = ui.form.elements.holderPhone.value;
     card.querySelector('[name="identityCardNumber"]').value =
       ui.form.elements.holderIdentityCardNumber.value;
@@ -733,7 +905,16 @@
       const form = new FormData(ui.form);
       const result = await publicApi("/api/portal/applications/submit", {
         applicationToken: applicationState.applicationToken,
-        holderNameOrCompany: form.get("holderNameOrCompany"),
+        applicantType: applicationState.applicantType,
+        holderFullName: form.get("holderFullName"),
+        companyName:
+          applicationState.applicantType === "company"
+            ? form.get("companyName")
+            : undefined,
+        companyVatNumber:
+          applicationState.applicantType === "company"
+            ? form.get("companyVatNumber")
+            : undefined,
         holderAddress: form.get("holderAddress"),
         holderPhone: form.get("holderPhone"),
         holderIdentityCardNumber: form.get("holderIdentityCardNumber"),
@@ -817,7 +998,9 @@
       });
       modalBody.innerHTML = `<div class="application-admin-detail">
         <section class="detail-block"><h3>${escape(t("Contract holder"))}</h3>
-          <dl><div><dt>${escape(t("Name / company"))}</dt><dd>${escape(app.holderNameOrCompany || "")}</dd></div>
+          <dl><div><dt>${escape(t("Applicant type"))}</dt><dd>${escape(t(app.applicantType === "company" ? "Company" : "Individual"))}</dd></div>
+          ${app.applicantType === "company" ? `<div><dt>${escape(t("Company name"))}</dt><dd>${escape(app.companyName || "")}</dd></div><div><dt>${escape(t("Belgian VAT number"))}</dt><dd>${escape(app.companyVatNumber || "")}</dd></div>` : ""}
+          <div><dt>${escape(t("Full name"))}</dt><dd>${escape(app.holderFullName || app.holderNameOrCompany || "")}</dd></div>
           <div><dt>${escape(t("Address"))}</dt><dd>${escape(app.holderAddress || "")}</dd></div>
           <div><dt>${escape(t("Phone"))}</dt><dd>${escape(app.holderPhone || "")}</dd></div>
           <div><dt>${escape(t("Email"))}</dt><dd>${escape(app.holderEmail || "")}</dd></div>
@@ -825,7 +1008,9 @@
           <div><dt>${escape(t("National register number"))}</dt><dd>${escape(app.holderNationalRegisterNumber || "")}</dd></div></dl>
         </section>
         ${result.drivers.map((driver) => `<section class="detail-block"><h3>${escape(t(driver.kind === "main" ? "Main driver" : "Additional driver"))} · ${escape(driver.fullName)}</h3>
-          <dl><div><dt>${escape(t("Phone"))}</dt><dd>${escape(driver.phone)}</dd></div><div><dt>${escape(t("Identity card"))}</dt><dd>${escape(driver.identityCardNumber)}</dd></div>
+          <dl><div><dt>${escape(t("Full address"))}</dt><dd>${escape(driver.address || "")}</dd></div><div><dt>${escape(t("Email"))}</dt><dd>${escape(driver.email || "")}</dd></div>
+          <div><dt>${escape(t("Phone"))}</dt><dd>${escape(driver.phone)}</dd></div><div><dt>${escape(t("Date of birth"))}</dt><dd>${escape(driver.dateOfBirth || "")}</dd></div>
+          ${driver.companyPosition ? `<div><dt>${escape(t("Position in company"))}</dt><dd>${escape(driver.companyPosition)}</dd></div>` : ""}<div><dt>${escape(t("Identity card"))}</dt><dd>${escape(driver.identityCardNumber)}</dd></div>
           <div><dt>${escape(t("National register number"))}</dt><dd>${escape(driver.nationalRegisterNumber || "")}</dd></div>
           <div><dt>${escape(t("Driving licence"))}</dt><dd>${escape(driver.drivingLicenceNumber)}</dd></div><div><dt>${escape(t("Issued"))}</dt><dd>${escape(driver.licenceIssueDate)}</dd></div>
           <div><dt>${escape(t("Valid since"))}</dt><dd>${escape(driver.licenceValidSince)}</dd></div></dl>

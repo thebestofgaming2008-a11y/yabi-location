@@ -99,6 +99,11 @@ export const applicationDriverKindValidator = v.union(
   v.literal("additional"),
 );
 
+export const applicantTypeValidator = v.union(
+  v.literal("individual"),
+  v.literal("company"),
+);
+
 export const applicationDocumentCategoryValidator = v.union(
   v.literal("identity_front"),
   v.literal("identity_back"),
@@ -174,9 +179,11 @@ export default defineSchema({
   customers: defineTable({
     fullName: v.string(),
     company: v.optional(v.string()),
+    companyVatNumber: v.optional(v.string()),
     email: v.string(),
     phone: v.string(),
     address: v.optional(v.string()),
+    identityCardNumber: v.optional(v.string()),
     nationalRegisterNumber: v.optional(v.string()),
     postalCode: v.optional(v.string()),
     city: v.optional(v.string()),
@@ -202,9 +209,13 @@ export default defineSchema({
     kind: applicationDriverKindValidator,
     sortOrder: v.number(),
     fullName: v.string(),
+    address: v.optional(v.string()),
+    email: v.optional(v.string()),
     phone: v.string(),
     identityCardNumber: v.string(),
     nationalRegisterNumber: v.optional(v.string()),
+    dateOfBirth: v.optional(v.string()),
+    companyPosition: v.optional(v.string()),
     drivingLicenceNumber: v.string(),
     licenceIssueDate: v.string(),
     licenceValidSince: v.string(),
@@ -220,6 +231,10 @@ export default defineSchema({
     tokenHash: v.string(),
     locale: v.union(v.literal("en"), v.literal("fr"), v.literal("nl")),
     status: applicationStatusValidator,
+    applicantType: v.optional(applicantTypeValidator),
+    holderFullName: v.optional(v.string()),
+    companyName: v.optional(v.string()),
+    companyVatNumber: v.optional(v.string()),
     holderNameOrCompany: v.optional(v.string()),
     holderAddress: v.optional(v.string()),
     holderPhone: v.optional(v.string()),
@@ -249,9 +264,13 @@ export default defineSchema({
     kind: applicationDriverKindValidator,
     sortOrder: v.number(),
     fullName: v.string(),
+    address: v.optional(v.string()),
+    email: v.optional(v.string()),
     phone: v.string(),
     identityCardNumber: v.string(),
     nationalRegisterNumber: v.optional(v.string()),
+    dateOfBirth: v.optional(v.string()),
+    companyPosition: v.optional(v.string()),
     drivingLicenceNumber: v.string(),
     licenceIssueDate: v.string(),
     licenceValidSince: v.string(),
