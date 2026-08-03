@@ -716,7 +716,9 @@ export const getPortalData = internalQuery({
     } else if (actor.role === "mechanic") {
       workflows = await ctx.db
         .query("workflowRecords")
-        .withIndex("by_type", (q) => q.eq("type", "maintenance"))
+        .withIndex("by_actor_account_id", (q) =>
+          q.eq("actorAccountId", actor._id),
+        )
         .order("desc")
         .take(100);
     } else if (actor.role === "contractor") {
@@ -2203,7 +2205,11 @@ export const getRecordMedia = internalQuery({
     if (actor.role === "driver" && record.actorAccountId !== actor._id) {
       throw new Error("forbidden");
     }
-    if (actor.role === "mechanic" && record.type !== "maintenance") {
+    if (
+      actor.role === "mechanic" &&
+      (record.actorAccountId !== actor._id ||
+        !["maintenance", "report"].includes(record.type))
+    ) {
       throw new Error("forbidden");
     }
     if (

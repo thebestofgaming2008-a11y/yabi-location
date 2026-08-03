@@ -46,6 +46,28 @@ const translations = {
     "Recent operations": "Opérations récentes",
     "View all": "Tout voir",
     "Quick actions": "Actions rapides",
+    Home: "Accueil",
+    "My actions": "Mes actions",
+    "My vehicles": "Mes véhicules",
+    "Team operations": "Opérations de l’équipe",
+    "Mechanic workspace": "Espace mécanicien",
+    "Customer portal": "Espace client",
+    "Driver portal": "Espace chauffeur",
+    "External work": "Interventions externes",
+    "What do you need to do?": "Que devez-vous faire ?",
+    "Choose an action below. The form will guide you step by step.": "Choisissez une action ci-dessous. Le formulaire vous guidera étape par étape.",
+    "Record maintenance or report a concern.": "Enregistrez un entretien ou signalez un problème.",
+    "Complete the required vehicle procedure.": "Effectuez la procédure requise pour le véhicule.",
+    "Report a problem, accident, payment, or monthly inspection.": "Signalez un problème, un accident, un paiement ou effectuez l’inspection mensuelle.",
+    "Report a problem, accident, or monthly inspection.": "Signalez un problème, un accident ou effectuez l’inspection mensuelle.",
+    "Complete the assigned handover or vehicle movement.": "Effectuez la remise ou le déplacement de véhicule demandé.",
+    Start: "Commencer",
+    Urgent: "Urgent",
+    "Your recent work": "Vos activités récentes",
+    "Your submitted records appear here.": "Vos enregistrements envoyés apparaissent ici.",
+    "Vehicles available for your work": "Véhicules disponibles pour votre intervention",
+    "No work recorded yet": "Aucune activité enregistrée",
+    "Complete an action and it will appear here.": "Effectuez une action ; elle apparaîtra ensuite ici.",
     Access: "Accès",
     Rental: "Location",
     Report: "Signalement",
@@ -475,6 +497,28 @@ const translations = {
     "Recent operations": "Recente werkzaamheden",
     "View all": "Alles bekijken",
     "Quick actions": "Snelle acties",
+    Home: "Start",
+    "My actions": "Mijn acties",
+    "My vehicles": "Mijn voertuigen",
+    "Team operations": "Teamactiviteiten",
+    "Mechanic workspace": "Werkplaats monteur",
+    "Customer portal": "Klantenportaal",
+    "Driver portal": "Chauffeursportaal",
+    "External work": "Externe opdrachten",
+    "What do you need to do?": "Wat moet u doen?",
+    "Choose an action below. The form will guide you step by step.": "Kies hieronder een actie. Het formulier begeleidt u stap voor stap.",
+    "Record maintenance or report a concern.": "Registreer onderhoud of meld een probleem.",
+    "Complete the required vehicle procedure.": "Voer de vereiste voertuigprocedure uit.",
+    "Report a problem, accident, payment, or monthly inspection.": "Meld een probleem, ongeval of betaling, of voer de maandelijkse inspectie uit.",
+    "Report a problem, accident, or monthly inspection.": "Meld een probleem of ongeval, of voer de maandelijkse inspectie uit.",
+    "Complete the assigned handover or vehicle movement.": "Voer de toegewezen overdracht of voertuigverplaatsing uit.",
+    Start: "Starten",
+    Urgent: "Dringend",
+    "Your recent work": "Uw recente activiteiten",
+    "Your submitted records appear here.": "Uw ingediende registraties verschijnen hier.",
+    "Vehicles available for your work": "Voertuigen beschikbaar voor uw opdracht",
+    "No work recorded yet": "Nog geen activiteit geregistreerd",
+    "Complete an action and it will appear here.": "Voer een actie uit; daarna verschijnt ze hier.",
     Access: "Toegang",
     Rental: "Verhuur",
     Report: "Melding",
@@ -1056,6 +1100,24 @@ function allowedViews() {
   return roleViews[state.data.account.role] || ["overview"];
 }
 
+function navigationLabel(view, role) {
+  if (view === "overview" && role !== "admin") return "Home";
+  if (view === "operations" && role !== "admin") return "My actions";
+  if (view === "fleet" && ["customer", "driver"].includes(role)) return "My vehicles";
+  return viewCopy[view]?.[0] || view;
+}
+
+function workspaceLabel(role) {
+  return {
+    admin: "Operations",
+    employee: "Team operations",
+    mechanic: "Mechanic workspace",
+    contractor: "External work",
+    customer: "Customer portal",
+    driver: "Driver portal",
+  }[role] || "Operations";
+}
+
 const state = {
   token: localStorage.getItem(TOKEN_KEY) || "",
   data: null,
@@ -1280,12 +1342,12 @@ function renderNavigation() {
   el.profileName.textContent = account.displayName;
   el.profileRole.textContent = tr(roles[account.role] || account.role);
   el.profileAvatar.textContent = initials(account.displayName);
-  el.workspace.textContent = account.role === "customer" ? "Customer space" : account.role === "driver" ? "Driver space" : "Operations";
+  el.workspace.textContent = workspaceLabel(account.role);
   el.navigation.innerHTML = allowedViews()
     .map(
       (view, index) => `<button class="nav-button ${state.view === view ? "active" : ""}" data-view="${view}">
         <span class="nav-icon">${String(index + 1).padStart(2, "0")}</span>
-        <strong>${clean(viewCopy[view][0])}</strong>
+        <strong>${clean(navigationLabel(view, account.role))}</strong>
       </button>`,
     )
     .join("");
@@ -1293,7 +1355,7 @@ function renderNavigation() {
 }
 
 function header(actions = "") {
-  const [title] = viewCopy[state.view];
+  const title = navigationLabel(state.view, state.data.account.role);
   return `<header class="view-header">
     <div><h1>${clean(title)}</h1></div>
     ${actions ? `<div class="view-actions">${actions}</div>` : ""}
@@ -1301,7 +1363,7 @@ function header(actions = "") {
 }
 
 function empty(title, description, action = "") {
-  return `<div class="empty-state"><span>YB</span><h3>${clean(title)}</h3>${action}</div>`;
+  return `<div class="empty-state"><span>YB</span><h3>${clean(tr(title))}</h3>${description ? `<p>${clean(tr(description))}</p>` : ""}${action}</div>`;
 }
 
 function table(head, rows) {
@@ -1373,14 +1435,15 @@ function quickActions() {
       ["Report", "Flag a problem", "report"],
     ],
     customer: [
-      ["Problem or damage", "Tell us about a vehicle problem", "problem_report"],
       ["Report an accident", "Record an accident immediately", "accident_report"],
-      ["Payment proof", "Send proof to accounting", "payment_proof"],
+      ["Problem or damage", "Tell us about a vehicle problem", "problem_report"],
       ["Monthly inspection", "Inspect an assigned vehicle", "monthly_inspection"],
+      ["Payment proof", "Send proof to accounting", "payment_proof"],
+      ["Drivers", "Manage company drivers and their personal access.", "drivers"],
     ],
     driver: [
-      ["Problem or damage", "Tell us about a vehicle problem", "problem_report"],
       ["Report an accident", "Record an accident immediately", "accident_report"],
+      ["Problem or damage", "Tell us about a vehicle problem", "problem_report"],
       ["Monthly inspection", "Inspect an assigned vehicle", "monthly_inspection"],
     ],
   };
@@ -1388,8 +1451,93 @@ function quickActions() {
   return (choices[role] || []).filter(([, , target]) => !workflows[target] || allowed.includes(target));
 }
 
+function roleIntroduction(role) {
+  return {
+    mechanic: "Record maintenance or report a concern.",
+    employee: "Complete the required vehicle procedure.",
+    contractor: "Complete the assigned handover or vehicle movement.",
+    customer: "Report a problem, accident, payment, or monthly inspection.",
+    driver: "Report a problem, accident, or monthly inspection.",
+  }[role] || "Choose an action below. The form will guide you step by step.";
+}
+
+function actionCards(actions, role) {
+  return `<div class="role-task-grid role-task-grid-${clean(role)}">${actions
+    .map(([title, description, target], index) => {
+      const isUrgent = target === "accident_report";
+      const isPrimary = (role === "mechanic" && target === "maintenance") ||
+        (role === "employee" && index === 0);
+      const number = workflows[target]?.[0] || String(index + 1).padStart(2, "0");
+      const supportingCopy = workflows[target]?.[2] || description;
+      return `<button class="role-task-card${isPrimary ? " is-primary" : ""}${isUrgent ? " is-urgent" : ""}" ${workflows[target] ? `data-workflow="${target}"` : `data-view="${target}"`}>
+        <span class="role-task-number">${clean(number)}</span>
+        ${isUrgent ? `<span class="role-task-flag">${clean(tr("Urgent"))}</span>` : ""}
+        <strong>${clean(tr(title))}</strong>
+        <small>${clean(tr(supportingCopy))}</small>
+        <span class="role-task-cta">${clean(tr("Start"))} <b aria-hidden="true">&rarr;</b></span>
+      </button>`;
+    })
+    .join("")}</div>`;
+}
+
+function vehicleCards(vehicles) {
+  return `<div class="role-vehicle-grid">${vehicles.slice(0, 4).map((vehicle) => `<article class="role-vehicle-card">
+    <div><strong>${clean(vehicle.registrationPlate)}</strong>${badge(vehicle.status)}</div>
+    <p>${clean(vehicle.make)} ${clean(vehicle.model)}</p>
+    <small>${clean(vehicle.currentMileage.toLocaleString(languageLocales[state.language]))} km</small>
+  </article>`).join("")}</div>`;
+}
+
+function recentRecordCards(records) {
+  if (!records.length) return empty("No work recorded yet", "Complete an action and it will appear here.");
+  const dataMaps = maps();
+  return `<div class="role-record-list">${records.slice(0, 5).map((record) => {
+    const vehicle = dataMaps.vehicles.get(record.vehicleId);
+    return `<article class="role-record-card">
+      <div><strong>${clean(tr(workflows[record.type]?.[1] || record.type))}</strong><small>${clean(record.reference)}</small></div>
+      <div class="role-record-meta"><span>${clean(vehicle?.registrationPlate || record.licensePlate || "—")}</span><span>${clean(date(record.occurredAt, true))}</span>${badge(record.status)}</div>
+      <button class="icon-button" data-action="view-record" data-id="${record.id}">${clean(tr("View"))}</button>
+    </article>`;
+  }).join("")}</div>`;
+}
+
+function renderRoleOverview() {
+  const { account } = state.data;
+  const role = account.role;
+  const actions = quickActions();
+  const vehicles = state.data.vehicles || [];
+  const records = (state.data.workflows || []).filter((record) =>
+    role === "customer" || record.actorAccountId === account.id,
+  );
+  const vehicleHeading = ["customer", "driver"].includes(role)
+    ? "Assigned vehicles"
+    : "Vehicles available for your work";
+
+  el.view.innerHTML = `<section class="role-home-hero">
+      <span>${clean(tr(roles[role] || role))}</span>
+      <h1>${clean(tr("What do you need to do?"))}</h1>
+      <p>${clean(tr(roleIntroduction(role)))}</p>
+    </section>
+    <section class="role-home-section role-actions-section">
+      <header><div><span>01</span><h2>${clean(tr("My actions"))}</h2></div><p>${clean(tr("Choose an action below. The form will guide you step by step."))}</p></header>
+      ${actionCards(actions, role)}
+    </section>
+    ${vehicles.length ? `<section class="role-home-section">
+      <header><div><span>02</span><h2>${clean(tr(vehicleHeading))}</h2></div><button class="text-button" data-view="fleet">${clean(tr("View all"))}</button></header>
+      ${vehicleCards(vehicles)}
+    </section>` : ""}
+    <section class="role-home-section">
+      <header><div><span>${vehicles.length ? "03" : "02"}</span><h2>${clean(tr("Your recent work"))}</h2></div><p>${clean(tr("Your submitted records appear here."))}</p></header>
+      ${recentRecordCards(records)}
+    </section>`;
+}
+
 function renderOverview() {
   const role = state.data.account.role;
+  if (role !== "admin") {
+    renderRoleOverview();
+    return;
+  }
   const vehicles = state.data.vehicles;
   const rentals = state.data.rentals;
   const records = state.data.workflows;
@@ -1514,6 +1662,23 @@ function renderRentals() {
 
 function renderOperations() {
   const allowed = allowedWorkflows();
+  const role = state.data.account.role;
+  if (role !== "admin") {
+    const actions = quickActions().filter(([, , target]) => workflows[target] && allowed.includes(target));
+    const records = (state.data.workflows || []).filter((record) =>
+      role === "customer" || record.actorAccountId === state.data.account.id,
+    );
+    el.view.innerHTML = `${header()}
+      <section class="role-home-section role-actions-section role-actions-page">
+        <header><div><span>01</span><h2>${clean(tr("My actions"))}</h2></div><p>${clean(tr("Choose an action below. The form will guide you step by step."))}</p></header>
+        ${actionCards(actions, role)}
+      </section>
+      <section class="role-home-section">
+        <header><div><span>02</span><h2>${clean(tr("Your recent work"))}</h2></div><p>${clean(tr("Your submitted records appear here."))}</p></header>
+        ${recentRecordCards(records)}
+      </section>`;
+    return;
+  }
   el.view.innerHTML = `${header()}
     <section class="workflow-grid">${allowed
       .map((type) => `<button class="workflow-card" data-workflow="${type}"><span>${workflows[type][0]}</span><strong>${clean(workflows[type][1])}</strong></button>`)
@@ -2565,6 +2730,10 @@ el.code.addEventListener("input", () => {
 el.navigation.addEventListener("click", (event) => {
   const button = event.target.closest("[data-view]");
   if (button) navigate(button.dataset.view);
+});
+
+document.querySelector("#profile-button").addEventListener("click", () => {
+  navigate(allowedViews().includes("profile") ? "profile" : "overview");
 });
 
 el.view.addEventListener("click", async (event) => {
