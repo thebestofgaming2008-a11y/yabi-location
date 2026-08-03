@@ -7,6 +7,8 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import {
+  accidentLiabilityValidator,
+  belgianProvinceValidator,
   captureSourceValidator,
   maintenanceInterventionTypeValidator,
   mediaCategoryValidator,
@@ -31,6 +33,7 @@ const accountPublicValidator = v.object({
   codeHint: v.string(),
   active: v.boolean(),
   linkedCustomerId: v.optional(v.id("customers")),
+  linkedDriverId: v.optional(v.id("customerDrivers")),
   allowedWorkflowTypes: v.optional(v.array(workflowTypeValidator)),
   lastLoginAt: v.optional(v.number()),
   createdAt: v.number(),
@@ -40,16 +43,44 @@ const customerPublicValidator = v.object({
   id: v.id("customers"),
   fullName: v.string(),
   company: v.optional(v.string()),
+  companyVatNumber: v.optional(v.string()),
   email: v.string(),
   phone: v.string(),
   address: v.optional(v.string()),
+  street: v.optional(v.string()),
+  houseNumber: v.optional(v.string()),
+  addressBox: v.optional(v.string()),
   postalCode: v.optional(v.string()),
   city: v.optional(v.string()),
+  province: v.optional(v.string()),
+  identityCardNumber: v.optional(v.string()),
+  nationalRegisterNumber: v.optional(v.string()),
   drivingLicenseNumber: v.optional(v.string()),
   emergencyContact: v.optional(v.string()),
   notes: v.optional(v.string()),
   status: v.union(v.literal("lead"), v.literal("active"), v.literal("inactive")),
   portalAccountId: v.optional(v.id("portalAccounts")),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
+
+const driverPublicValidator = v.object({
+  id: v.id("customerDrivers"),
+  customerId: v.id("customers"),
+  portalAccountId: v.optional(v.id("portalAccounts")),
+  firstName: v.optional(v.string()),
+  lastName: v.optional(v.string()),
+  fullName: v.string(),
+  email: v.optional(v.string()),
+  phone: v.string(),
+  identityCardNumber: v.string(),
+  dateOfBirth: v.optional(v.string()),
+  drivingLicenceNumber: v.string(),
+  licenceIssueDate: v.string(),
+  licenceValidSince: v.string(),
+  active: v.boolean(),
+  accountActive: v.optional(v.boolean()),
+  codeHint: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),
 });
@@ -98,6 +129,7 @@ const workflowPublicValidator = v.object({
   vehicleId: v.optional(v.id("operationalVehicles")),
   customerId: v.optional(v.id("customers")),
   rentalId: v.optional(v.id("rentals")),
+  driverId: v.optional(v.id("customerDrivers")),
   licensePlate: v.optional(v.string()),
   occurredAt: v.number(),
   mileage: v.optional(v.number()),
@@ -119,6 +151,12 @@ const workflowPublicValidator = v.object({
   maintenanceOtherDetails: v.optional(v.string()),
   roadTestPerformed: v.optional(v.boolean()),
   readyForService: v.optional(v.boolean()),
+  eventOccurredAt: v.optional(v.number()),
+  accidentLiability: v.optional(accidentLiabilityValidator),
+  amicableSettlement: v.optional(v.boolean()),
+  invoiceReference: v.optional(v.string()),
+  inspectionMonth: v.optional(v.string()),
+  performedByName: v.optional(v.string()),
   maintenanceWork: v.optional(v.string()),
   changesMade: v.optional(v.string()),
   reportCategory: v.optional(
@@ -138,6 +176,14 @@ const workflowPublicValidator = v.object({
   resolution: v.optional(v.string()),
   resolvedAt: v.optional(v.number()),
   resolvedBy: v.optional(v.id("portalAccounts")),
+  notificationEmailStatus: v.optional(
+    v.union(
+      v.literal("not_configured"),
+      v.literal("pending"),
+      v.literal("sent"),
+      v.literal("failed"),
+    ),
+  ),
   createdAt: v.number(),
   updatedAt: v.number(),
 });
@@ -175,6 +221,7 @@ function publicAccount(account: Doc<"portalAccounts">) {
     codeHint: account.codeHint,
     active: account.active,
     linkedCustomerId: account.linkedCustomerId,
+    linkedDriverId: account.linkedDriverId,
     allowedWorkflowTypes: account.allowedWorkflowTypes,
     lastLoginAt: account.lastLoginAt,
     createdAt: account.createdAt,
@@ -186,11 +233,18 @@ function publicCustomer(customer: Doc<"customers">) {
     id: customer._id,
     fullName: customer.fullName,
     company: customer.company,
+    companyVatNumber: customer.companyVatNumber,
     email: customer.email,
     phone: customer.phone,
     address: customer.address,
+    street: customer.street,
+    houseNumber: customer.houseNumber,
+    addressBox: customer.addressBox,
     postalCode: customer.postalCode,
     city: customer.city,
+    province: customer.province,
+    identityCardNumber: customer.identityCardNumber,
+    nationalRegisterNumber: customer.nationalRegisterNumber,
     drivingLicenseNumber: customer.drivingLicenseNumber,
     emergencyContact: customer.emergencyContact,
     notes: customer.notes,
@@ -201,7 +255,33 @@ function publicCustomer(customer: Doc<"customers">) {
   };
 }
 
-function publicVehicle(vehicle: Doc<"operationalVehicles">) {
+function publicDriver(
+  driver: Doc<"customerDrivers">,
+  account?: Doc<"portalAccounts"> | null,
+) {
+  return {
+    id: driver._id,
+    customerId: driver.customerId,
+    portalAccountId: driver.portalAccountId,
+    firstName: driver.firstName,
+    lastName: driver.lastName,
+    fullName: driver.fullName,
+    email: driver.email,
+    phone: driver.phone,
+    identityCardNumber: driver.identityCardNumber,
+    dateOfBirth: driver.dateOfBirth,
+    drivingLicenceNumber: driver.drivingLicenceNumber,
+    licenceIssueDate: driver.licenceIssueDate,
+    licenceValidSince: driver.licenceValidSince,
+    active: driver.active,
+    accountActive: account?.active,
+    codeHint: account?.codeHint,
+    createdAt: driver.createdAt,
+    updatedAt: driver.updatedAt,
+  };
+}
+
+function publicVehicle(vehicle: Doc<"operationalVehicles">, restricted = false) {
   return {
     id: vehicle._id,
     registrationPlate: vehicle.registrationPlate,
@@ -210,11 +290,11 @@ function publicVehicle(vehicle: Doc<"operationalVehicles">) {
     year: vehicle.year,
     format: vehicle.format,
     color: vehicle.color,
-    vin: vehicle.vin,
+    vin: restricted ? undefined : vehicle.vin,
     status: vehicle.status,
     currentMileage: vehicle.currentMileage,
-    fuelPercent: vehicle.fuelPercent,
-    notes: vehicle.notes,
+    fuelPercent: restricted ? undefined : vehicle.fuelPercent,
+    notes: restricted ? undefined : vehicle.notes,
     createdAt: vehicle.createdAt,
     updatedAt: vehicle.updatedAt,
   };
@@ -250,6 +330,7 @@ function publicWorkflow(record: Doc<"workflowRecords">) {
     vehicleId: record.vehicleId,
     customerId: record.customerId,
     rentalId: record.rentalId,
+    driverId: record.driverId,
     licensePlate: record.licensePlate,
     occurredAt: record.occurredAt,
     mileage: record.mileage,
@@ -271,6 +352,12 @@ function publicWorkflow(record: Doc<"workflowRecords">) {
     maintenanceOtherDetails: record.maintenanceOtherDetails,
     roadTestPerformed: record.roadTestPerformed,
     readyForService: record.readyForService,
+    eventOccurredAt: record.eventOccurredAt,
+    accidentLiability: record.accidentLiability,
+    amicableSettlement: record.amicableSettlement,
+    invoiceReference: record.invoiceReference,
+    inspectionMonth: record.inspectionMonth,
+    performedByName: record.performedByName,
     maintenanceWork: record.maintenanceWork,
     changesMade: record.changesMade,
     reportCategory: record.reportCategory,
@@ -280,6 +367,7 @@ function publicWorkflow(record: Doc<"workflowRecords">) {
     resolution: record.resolution,
     resolvedAt: record.resolvedAt,
     resolvedBy: record.resolvedBy,
+    notificationEmailStatus: record.notificationEmailStatus,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,
   };
@@ -318,6 +406,29 @@ async function audit(
   });
 }
 
+async function customerHasVehicle(
+  ctx: QueryCtx | MutationCtx,
+  customerId: Id<"customers">,
+  vehicleId: Id<"operationalVehicles">,
+): Promise<boolean> {
+  const rentals = await ctx.db
+    .query("rentals")
+    .withIndex("by_customer_id", (q) => q.eq("customerId", customerId))
+    .order("desc")
+    .take(100);
+  return rentals.some(
+    (rental) =>
+      rental.vehicleId === vehicleId &&
+      ["draft", "scheduled", "active"].includes(rental.status),
+  );
+}
+
+function yearsBeforeToday(years: number): string {
+  const date = new Date();
+  date.setUTCFullYear(date.getUTCFullYear() - years);
+  return date.toISOString().slice(0, 10);
+}
+
 const workflowRoles: Record<WorkflowType, PortalRole[]> = {
   customer_onboarding: ["admin", "employee", "customer"],
   check_in: ["admin", "employee", "contractor"],
@@ -329,11 +440,26 @@ const workflowRoles: Record<WorkflowType, PortalRole[]> = {
   breakdown_replacement: ["admin", "employee", "contractor"],
   vehicle_transfer: ["admin", "employee", "contractor"],
   report: ["admin", "employee", "customer", "mechanic", "contractor"],
+  problem_report: ["admin", "customer", "driver"],
+  accident_report: ["admin", "customer", "driver"],
+  payment_proof: ["admin", "customer"],
+  monthly_inspection: ["admin", "customer", "driver"],
 };
+
+const customerWorkflowTypes: WorkflowType[] = [
+  "problem_report",
+  "accident_report",
+  "payment_proof",
+  "monthly_inspection",
+];
 
 const standardPhotoSlots = ["front", "right", "left", "rear", "interior"];
 
-function requiredMediaSlots(type: WorkflowType, disposition?: Doc<"workflowRecords">["disposition"]) {
+function requiredMediaSlots(
+  type: WorkflowType,
+  disposition?: Doc<"workflowRecords">["disposition"],
+  amicableSettlement = false,
+) {
   if (type === "wash") {
     return standardPhotoSlots.flatMap((slot) => [`before_${slot}`, `after_${slot}`]);
   }
@@ -355,6 +481,23 @@ function requiredMediaSlots(type: WorkflowType, disposition?: Doc<"workflowRecor
   }
   if (type === "maintenance") {
     return ["mechanic_signature"];
+  }
+  if (type === "problem_report") {
+    return ["problem_photo_1"];
+  }
+  if (type === "accident_report") {
+    return [
+      "own_vehicle_damage_1",
+      "third_party_damage_1",
+      "accident_form",
+      ...(amicableSettlement ? ["amicable_agreement"] : []),
+    ];
+  }
+  if (type === "payment_proof") {
+    return ["payment_proof"];
+  }
+  if (type === "monthly_inspection") {
+    return ["interior", "front", "right", "left", "rear", "dashboard_started"];
   }
   return [];
 }
@@ -528,6 +671,7 @@ export const getPortalData = internalQuery({
     account: accountPublicValidator,
     accounts: v.array(accountPublicValidator),
     customers: v.array(customerPublicValidator),
+    drivers: v.array(driverPublicValidator),
     vehicles: v.array(operationalVehiclePublicValidator),
     rentals: v.array(rentalPublicValidator),
     workflows: v.array(workflowPublicValidator),
@@ -537,20 +681,22 @@ export const getPortalData = internalQuery({
     const actor = await requireActor(ctx, args.actorAccountId);
 
     let vehicles =
-      actor.role === "customer"
+      actor.role === "customer" || actor.role === "driver"
         ? []
         : await ctx.db.query("operationalVehicles").order("desc").take(100);
 
     let accounts: Doc<"portalAccounts">[] = [];
     let customers: Doc<"customers">[] = [];
+    let drivers: Doc<"customerDrivers">[] = [];
     let rentals: Doc<"rentals">[] = [];
     let workflows: Doc<"workflowRecords">[] = [];
     let auditEvents: Doc<"auditEvents">[] = [];
 
     if (actor.role === "admin") {
-      [accounts, customers, rentals, workflows, auditEvents] = await Promise.all([
+      [accounts, customers, drivers, rentals, workflows, auditEvents] = await Promise.all([
         ctx.db.query("portalAccounts").order("desc").take(100),
         ctx.db.query("customers").order("desc").take(100),
+        ctx.db.query("customerDrivers").order("desc").take(100),
         ctx.db.query("rentals").order("desc").take(100),
         ctx.db.query("workflowRecords").order("desc").take(100),
         ctx.db.query("auditEvents").order("desc").take(100),
@@ -586,18 +732,24 @@ export const getPortalData = internalQuery({
         .withIndex("by_status", (q) => q.eq("status", "active"))
         .order("desc")
         .take(100);
-    } else if (actor.linkedCustomerId) {
+    } else if (
+      (actor.role === "customer" || actor.role === "driver") &&
+      actor.linkedCustomerId
+    ) {
       const linkedCustomer = await ctx.db.get(actor.linkedCustomerId);
-      if (linkedCustomer) customers = [linkedCustomer];
-      rentals = await ctx.db
+      if (linkedCustomer && actor.role === "customer") customers = [linkedCustomer];
+      const customerRentals = await ctx.db
         .query("rentals")
         .withIndex("by_customer_id", (q) =>
           q.eq("customerId", actor.linkedCustomerId!),
         )
         .order("desc")
         .take(50);
+      const openRentals = customerRentals.filter((rental) =>
+        ["draft", "scheduled", "active"].includes(rental.status),
+      );
       const customerVehicleIds = [
-        ...new Set(rentals.map((rental) => rental.vehicleId)),
+        ...new Set(openRentals.map((rental) => rental.vehicleId)),
       ];
       vehicles = (
         await Promise.all(
@@ -606,20 +758,53 @@ export const getPortalData = internalQuery({
       ).filter(
         (vehicle): vehicle is Doc<"operationalVehicles"> => vehicle !== null,
       );
-      workflows = await ctx.db
-        .query("workflowRecords")
-        .withIndex("by_customer_id", (q) =>
-          q.eq("customerId", actor.linkedCustomerId!),
-        )
-        .order("desc")
-        .take(100);
+      rentals = [];
+      if (actor.role === "customer") {
+        workflows = await ctx.db
+          .query("workflowRecords")
+          .withIndex("by_customer_id", (q) =>
+            q.eq("customerId", actor.linkedCustomerId!),
+          )
+          .order("desc")
+          .take(100);
+        drivers = await ctx.db
+          .query("customerDrivers")
+          .withIndex("by_customer_id", (q) =>
+            q.eq("customerId", actor.linkedCustomerId!),
+          )
+          .order("desc")
+          .take(100);
+      } else {
+        workflows = await ctx.db
+          .query("workflowRecords")
+          .withIndex("by_actor_account_id", (q) =>
+            q.eq("actorAccountId", actor._id),
+          )
+          .order("desc")
+          .take(100);
+        if (actor.linkedDriverId) {
+          const linkedDriver = await ctx.db.get(actor.linkedDriverId);
+          if (linkedDriver && linkedDriver.customerId === actor.linkedCustomerId) {
+            drivers = [linkedDriver];
+          }
+        }
+      }
     }
+
+    const driverAccounts = await Promise.all(
+      drivers.map((driver) =>
+        driver.portalAccountId ? ctx.db.get(driver.portalAccountId) : null,
+      ),
+    );
 
     return {
       account: publicAccount(actor),
       accounts: accounts.map(publicAccount),
       customers: customers.map(publicCustomer),
-      vehicles: vehicles.map(publicVehicle),
+      drivers: drivers.map((driver, index) =>
+        publicDriver(driver, driverAccounts[index]),
+      ),
+      vehicles: vehicles.map((vehicle) => publicVehicle(vehicle, actor.role === "customer" || actor.role === "driver")),
       rentals: rentals.map(publicRental),
       workflows: workflows.map(publicWorkflow),
       auditEvents: auditEvents.map((event) => ({
@@ -644,6 +829,7 @@ export const createAccount = internalMutation({
     codeHash: v.string(),
     codeHint: v.string(),
     linkedCustomerId: v.optional(v.id("customers")),
+    linkedDriverId: v.optional(v.id("customerDrivers")),
     allowedWorkflowTypes: v.optional(v.array(workflowTypeValidator)),
   },
   returns: v.id("portalAccounts"),
@@ -660,10 +846,22 @@ export const createAccount = internalMutation({
     if (args.role === "customer" && !args.linkedCustomerId) {
       throw new Error("customer_link_required");
     }
+    if (args.role === "driver" && (!args.linkedCustomerId || !args.linkedDriverId)) {
+      throw new Error("driver_link_required");
+    }
     if (args.linkedCustomerId) {
       const customer = await ctx.db.get(args.linkedCustomerId);
       if (!customer) throw new Error("customer_not_found");
-      if (customer.portalAccountId) throw new Error("customer_already_linked");
+      if (args.role === "customer" && customer.portalAccountId) {
+        throw new Error("customer_already_linked");
+      }
+    }
+    if (args.linkedDriverId) {
+      const driver = await ctx.db.get(args.linkedDriverId);
+      if (!driver || driver.customerId !== args.linkedCustomerId) {
+        throw new Error("driver_not_found");
+      }
+      if (driver.portalAccountId) throw new Error("driver_already_linked");
     }
 
     const now = Date.now();
@@ -674,13 +872,20 @@ export const createAccount = internalMutation({
       codeHint: args.codeHint,
       active: true,
       linkedCustomerId: args.linkedCustomerId,
+      linkedDriverId: args.linkedDriverId,
       allowedWorkflowTypes: args.allowedWorkflowTypes,
       createdBy: actor._id,
       createdAt: now,
       updatedAt: now,
     });
-    if (args.linkedCustomerId) {
+    if (args.role === "customer" && args.linkedCustomerId) {
       await ctx.db.patch(args.linkedCustomerId, {
+        portalAccountId: accountId,
+        updatedAt: now,
+      });
+    }
+    if (args.role === "driver" && args.linkedDriverId) {
+      await ctx.db.patch(args.linkedDriverId, {
         portalAccountId: accountId,
         updatedAt: now,
       });
@@ -694,6 +899,90 @@ export const createAccount = internalMutation({
       `${args.displayName} created as ${args.role}`,
     );
     return accountId;
+  },
+});
+
+export const updateAccount = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    targetAccountId: v.id("portalAccounts"),
+    displayName: v.string(),
+    role: portalRoleValidator,
+    linkedCustomerId: v.optional(v.id("customers")),
+    allowedWorkflowTypes: v.optional(v.array(workflowTypeValidator)),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const target = await ctx.db.get(args.targetAccountId);
+    if (!target) throw new Error("account_not_found");
+    if (target._id === actor._id && args.role !== "admin") {
+      throw new Error("cannot_change_self_role");
+    }
+    if (args.role === "customer" && !args.linkedCustomerId) {
+      throw new Error("customer_link_required");
+    }
+    if (args.role === "driver") {
+      if (!target.linkedDriverId || !args.linkedCustomerId) {
+        throw new Error("driver_link_required");
+      }
+      const driver = await ctx.db.get(target.linkedDriverId);
+      if (!driver || driver.customerId !== args.linkedCustomerId) {
+        throw new Error("driver_not_found");
+      }
+    }
+    const newCustomer = args.linkedCustomerId
+      ? await ctx.db.get(args.linkedCustomerId)
+      : null;
+    if (args.linkedCustomerId && !newCustomer) throw new Error("customer_not_found");
+    if (
+      args.role === "customer" &&
+      newCustomer?.portalAccountId &&
+      newCustomer.portalAccountId !== target._id
+    ) {
+      throw new Error("customer_already_linked");
+    }
+
+    const now = Date.now();
+    if (
+      target.role === "customer" &&
+      target.linkedCustomerId &&
+      target.linkedCustomerId !== args.linkedCustomerId
+    ) {
+      const oldCustomer = await ctx.db.get(target.linkedCustomerId);
+      if (oldCustomer?.portalAccountId === target._id) {
+        await ctx.db.patch(oldCustomer._id, {
+          portalAccountId: undefined,
+          updatedAt: now,
+        });
+      }
+    }
+    if (args.role === "customer" && newCustomer) {
+      await ctx.db.patch(newCustomer._id, {
+        portalAccountId: target._id,
+        updatedAt: now,
+      });
+    }
+    await ctx.db.patch(target._id, {
+      displayName: args.displayName,
+      role: args.role,
+      linkedCustomerId: args.linkedCustomerId,
+      linkedDriverId: args.role === "driver" ? target.linkedDriverId : undefined,
+      allowedWorkflowTypes: ["employee", "contractor"].includes(args.role)
+        ? args.allowedWorkflowTypes
+        : undefined,
+      updatedAt: now,
+    });
+    await audit(
+      ctx,
+      actor._id,
+      "portal.account_updated",
+      "portalAccount",
+      String(target._id),
+      `${args.displayName} account updated`,
+    );
+    return null;
   },
 });
 
@@ -815,6 +1104,68 @@ export const createCustomer = internalMutation({
   },
 });
 
+export const updateCustomer = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    customerId: v.id("customers"),
+    fullName: v.string(),
+    company: v.optional(v.string()),
+    companyVatNumber: v.optional(v.string()),
+    email: v.string(),
+    phone: v.string(),
+    address: v.optional(v.string()),
+    street: v.optional(v.string()),
+    houseNumber: v.optional(v.string()),
+    addressBox: v.optional(v.string()),
+    postalCode: v.optional(v.string()),
+    city: v.optional(v.string()),
+    province: v.optional(belgianProvinceValidator),
+    identityCardNumber: v.optional(v.string()),
+    nationalRegisterNumber: v.optional(v.string()),
+    drivingLicenseNumber: v.optional(v.string()),
+    emergencyContact: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    status: v.union(v.literal("lead"), v.literal("active"), v.literal("inactive")),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const customer = await ctx.db.get(args.customerId);
+    if (!customer) throw new Error("customer_not_found");
+    await ctx.db.patch(customer._id, {
+      fullName: args.fullName,
+      company: args.company,
+      companyVatNumber: args.companyVatNumber,
+      email: args.email,
+      phone: args.phone,
+      address: args.address,
+      street: args.street,
+      houseNumber: args.houseNumber,
+      addressBox: args.addressBox,
+      postalCode: args.postalCode,
+      city: args.city,
+      province: args.province,
+      identityCardNumber: args.identityCardNumber,
+      nationalRegisterNumber: args.nationalRegisterNumber,
+      drivingLicenseNumber: args.drivingLicenseNumber,
+      emergencyContact: args.emergencyContact,
+      notes: args.notes,
+      status: args.status,
+      updatedAt: Date.now(),
+    });
+    await audit(
+      ctx,
+      actor._id,
+      "customer.updated",
+      "customer",
+      String(customer._id),
+      `Customer ${args.fullName} updated`,
+    );
+    return null;
+  },
+});
+
 export const updateOwnCustomerProfile = internalMutation({
   args: {
     actorAccountId: v.id("portalAccounts"),
@@ -858,6 +1209,247 @@ export const updateOwnCustomerProfile = internalMutation({
       "Customer completed or updated their profile",
     );
     return customer._id;
+  },
+});
+
+export const createDriverWithAccount = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    customerId: v.optional(v.id("customers")),
+    firstName: v.string(),
+    lastName: v.string(),
+    email: v.string(),
+    phone: v.string(),
+    identityCardNumber: v.string(),
+    dateOfBirth: v.string(),
+    drivingLicenceNumber: v.string(),
+    licenceIssueDate: v.string(),
+    licenceValidSince: v.string(),
+    uploadGroupId: v.string(),
+    mediaIds: v.array(v.id("mediaAssets")),
+    codeHash: v.string(),
+    codeHint: v.string(),
+  },
+  returns: v.object({
+    driverId: v.id("customerDrivers"),
+    accountId: v.id("portalAccounts"),
+  }),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin", "customer"]);
+    const customerId =
+      actor.role === "customer" ? actor.linkedCustomerId : args.customerId;
+    if (!customerId) throw new Error("customer_not_linked");
+    if (actor.role === "customer" && args.customerId && args.customerId !== customerId) {
+      throw new Error("forbidden");
+    }
+    const customer = await ctx.db.get(customerId);
+    if (!customer) throw new Error("customer_not_found");
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(args.dateOfBirth) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(args.licenceIssueDate) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(args.licenceValidSince) ||
+      args.dateOfBirth > yearsBeforeToday(23) ||
+      args.licenceValidSince > yearsBeforeToday(5) ||
+      args.licenceIssueDate > new Date().toISOString().slice(0, 10)
+    ) {
+      throw new Error("driver_eligibility_failed");
+    }
+    const existingCode = await ctx.db
+      .query("portalAccounts")
+      .withIndex("by_code_hash", (q) => q.eq("codeHash", args.codeHash))
+      .unique();
+    if (existingCode) throw new Error("code_collision");
+    if (args.mediaIds.length !== 4 || new Set(args.mediaIds.map(String)).size !== 4) {
+      throw new Error("driver_documents_required");
+    }
+    const media = await Promise.all(args.mediaIds.map((id) => ctx.db.get(id)));
+    if (
+      media.some(
+        (item) =>
+          !item ||
+          item.createdBy !== actor._id ||
+          item.uploadGroupId !== args.uploadGroupId ||
+          item.status !== "uploaded" ||
+          item.category !== "driver_document" ||
+          !item.contentType.startsWith("image/") ||
+          item.recordId !== undefined ||
+          item.driverId !== undefined,
+      )
+    ) {
+      throw new Error("invalid_media");
+    }
+    const uploadedMedia = media.filter(
+      (item): item is Doc<"mediaAssets"> => item !== null,
+    );
+    const requiredSlots = [
+      "driver_identity_front",
+      "driver_identity_back",
+      "driver_licence_front",
+      "driver_licence_back",
+    ];
+    const slots = uploadedMedia.map((item) => item.slot);
+    if (
+      new Set(slots).size !== slots.length ||
+      requiredSlots.some((slot) => !slots.includes(slot))
+    ) {
+      throw new Error("driver_documents_required");
+    }
+    const existingDrivers = await ctx.db
+      .query("customerDrivers")
+      .withIndex("by_customer_id", (q) => q.eq("customerId", customerId))
+      .take(100);
+    const now = Date.now();
+    const fullName = `${args.firstName} ${args.lastName}`.trim();
+    const driverId = await ctx.db.insert("customerDrivers", {
+      customerId,
+      kind: "additional",
+      sortOrder: existingDrivers.length,
+      firstName: args.firstName,
+      lastName: args.lastName,
+      fullName,
+      email: args.email,
+      phone: args.phone,
+      identityCardNumber: args.identityCardNumber,
+      dateOfBirth: args.dateOfBirth,
+      drivingLicenceNumber: args.drivingLicenceNumber,
+      licenceIssueDate: args.licenceIssueDate,
+      licenceValidSince: args.licenceValidSince,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    });
+    const accountId = await ctx.db.insert("portalAccounts", {
+      displayName: fullName,
+      role: "driver",
+      codeHash: args.codeHash,
+      codeHint: args.codeHint,
+      active: true,
+      linkedCustomerId: customerId,
+      linkedDriverId: driverId,
+      allowedWorkflowTypes: [
+        "problem_report",
+        "accident_report",
+        "monthly_inspection",
+      ],
+      createdBy: actor._id,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await ctx.db.patch(driverId, { portalAccountId: accountId, updatedAt: now });
+    await Promise.all(
+      uploadedMedia.map((item) => ctx.db.patch(item._id, { driverId })),
+    );
+    await audit(
+      ctx,
+      actor._id,
+      "driver.created",
+      "customerDriver",
+      String(driverId),
+      `${fullName} added as a driver`,
+    );
+    return { driverId, accountId };
+  },
+});
+
+export const createDriverAccess = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    driverId: v.id("customerDrivers"),
+    codeHash: v.string(),
+    codeHint: v.string(),
+  },
+  returns: v.id("portalAccounts"),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin", "customer"]);
+    const driver = await ctx.db.get(args.driverId);
+    if (!driver) throw new Error("driver_not_found");
+    if (actor.role === "customer" && driver.customerId !== actor.linkedCustomerId) {
+      throw new Error("forbidden");
+    }
+    if (driver.portalAccountId) throw new Error("driver_already_linked");
+    const existingCode = await ctx.db
+      .query("portalAccounts")
+      .withIndex("by_code_hash", (q) => q.eq("codeHash", args.codeHash))
+      .unique();
+    if (existingCode) throw new Error("code_collision");
+    const now = Date.now();
+    const accountId = await ctx.db.insert("portalAccounts", {
+      displayName: driver.fullName,
+      role: "driver",
+      codeHash: args.codeHash,
+      codeHint: args.codeHint,
+      active: driver.active,
+      linkedCustomerId: driver.customerId,
+      linkedDriverId: driver._id,
+      allowedWorkflowTypes: [
+        "problem_report",
+        "accident_report",
+        "monthly_inspection",
+      ],
+      createdBy: actor._id,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await ctx.db.patch(driver._id, { portalAccountId: accountId, updatedAt: now });
+    await audit(
+      ctx,
+      actor._id,
+      "driver.access_created",
+      "customerDriver",
+      String(driver._id),
+      `Driver access created for ${driver.fullName}`,
+    );
+    return accountId;
+  },
+});
+
+export const setDriverActive = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    driverId: v.id("customerDrivers"),
+    active: v.boolean(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin", "customer"]);
+    const driver = await ctx.db.get(args.driverId);
+    if (!driver) throw new Error("driver_not_found");
+    if (actor.role === "customer" && driver.customerId !== actor.linkedCustomerId) {
+      throw new Error("forbidden");
+    }
+    const now = Date.now();
+    await ctx.db.patch(driver._id, { active: args.active, updatedAt: now });
+    if (driver.portalAccountId) {
+      await ctx.db.patch(driver.portalAccountId, {
+        active: args.active,
+        updatedAt: now,
+      });
+      if (!args.active) {
+        const sessions = await ctx.db
+          .query("portalSessions")
+          .withIndex("by_account_id", (q) =>
+            q.eq("accountId", driver.portalAccountId!),
+          )
+          .take(100);
+        await Promise.all(
+          sessions
+            .filter((session) => session.revokedAt === undefined)
+            .map((session) => ctx.db.patch(session._id, { revokedAt: now })),
+        );
+      }
+    }
+    await audit(
+      ctx,
+      actor._id,
+      args.active ? "driver.activated" : "driver.deactivated",
+      "customerDriver",
+      String(driver._id),
+      `${driver.fullName} ${args.active ? "activated" : "deactivated"}`,
+    );
+    return null;
   },
 });
 
@@ -1084,7 +1676,11 @@ export const createPendingMedia = internalMutation({
     if (args.size <= 0 || args.size > 8_000_000) {
       throw new Error("invalid_file_size");
     }
-    if (!["image/jpeg", "image/png", "image/webp"].includes(args.contentType)) {
+    if (
+      !["image/jpeg", "image/png", "image/webp", "application/pdf"].includes(
+        args.contentType,
+      )
+    ) {
       throw new Error("invalid_file_type");
     }
     return await ctx.db.insert("mediaAssets", {
@@ -1159,6 +1755,11 @@ export const createWorkflowRecord = internalMutation({
     maintenanceOtherDetails: v.optional(v.string()),
     roadTestPerformed: v.optional(v.boolean()),
     readyForService: v.optional(v.boolean()),
+    eventOccurredAt: v.optional(v.number()),
+    accidentLiability: v.optional(accidentLiabilityValidator),
+    amicableSettlement: v.optional(v.boolean()),
+    invoiceReference: v.optional(v.string()),
+    inspectionMonth: v.optional(v.string()),
     maintenanceWork: v.optional(v.string()),
     changesMade: v.optional(v.string()),
     reportCategory: v.optional(reportCategoryValidator),
@@ -1187,9 +1788,23 @@ export const createWorkflowRecord = internalMutation({
     }
 
     let customerId = args.customerId;
-    if (actor.role === "customer") {
+    let driverId: Id<"customerDrivers"> | undefined;
+    if (actor.role === "customer" || actor.role === "driver") {
       if (!actor.linkedCustomerId) throw new Error("customer_not_linked");
       customerId = actor.linkedCustomerId;
+      if (actor.role === "driver") {
+        if (!actor.linkedDriverId) throw new Error("driver_not_linked");
+        const driver = await ctx.db.get(actor.linkedDriverId);
+        if (
+          !driver ||
+          !driver.active ||
+          driver.customerId !== actor.linkedCustomerId ||
+          driver.portalAccountId !== actor._id
+        ) {
+          throw new Error("driver_not_linked");
+        }
+        driverId = driver._id;
+      }
     }
 
     const vehicle = args.vehicleId ? await ctx.db.get(args.vehicleId) : null;
@@ -1197,23 +1812,18 @@ export const createWorkflowRecord = internalMutation({
     if (args.vehicleId && !vehicle) throw new Error("vehicle_not_found");
     if (args.rentalId && !rental) throw new Error("rental_not_found");
     if (
-      actor.role === "customer" &&
+      (actor.role === "customer" || actor.role === "driver") &&
       rental &&
       rental.customerId !== actor.linkedCustomerId
     ) {
       throw new Error("forbidden");
     }
-    if (actor.role === "customer" && vehicle && !rental) {
-      const ownRentals = await ctx.db
-        .query("rentals")
-        .withIndex("by_customer_id", (q) =>
-          q.eq("customerId", actor.linkedCustomerId!),
-        )
-        .order("desc")
-        .take(100);
-      if (!ownRentals.some((item) => item.vehicleId === vehicle._id)) {
+    if (
+      (actor.role === "customer" || actor.role === "driver") &&
+      vehicle &&
+      !(await customerHasVehicle(ctx, actor.linkedCustomerId!, vehicle._id))
+    ) {
         throw new Error("forbidden");
-      }
     }
     if (
       rental &&
@@ -1222,7 +1832,7 @@ export const createWorkflowRecord = internalMutation({
       throw new Error("rental_mismatch");
     }
     if (
-      ["check_in", "check_out", "wash", "maintenance", "handover_take", "handover_return", "breakdown_replacement", "vehicle_transfer"].includes(
+      ["check_in", "check_out", "wash", "maintenance", "handover_take", "handover_return", "breakdown_replacement", "vehicle_transfer", "problem_report", "accident_report", "monthly_inspection"].includes(
         args.type,
       ) &&
       !vehicle
@@ -1230,7 +1840,7 @@ export const createWorkflowRecord = internalMutation({
       throw new Error("vehicle_required");
     }
     if (
-      ["check_in", "check_out", "wash", "maintenance", "handover_take", "handover_return", "breakdown_replacement", "vehicle_transfer"].includes(
+      ["check_in", "check_out", "wash", "maintenance", "handover_take", "handover_return", "breakdown_replacement", "vehicle_transfer", "monthly_inspection"].includes(
         args.type,
       ) &&
       args.mileage === undefined
@@ -1254,6 +1864,39 @@ export const createWorkflowRecord = internalMutation({
       ) {
         throw new Error("maintenance_details_required");
       }
+    }
+    if (args.type === "problem_report" && !args.description) {
+      throw new Error("description_required");
+    }
+    if (args.type === "accident_report") {
+      if (
+        !args.description ||
+        args.eventOccurredAt === undefined ||
+        args.eventOccurredAt < 946684800000 ||
+        args.eventOccurredAt > args.occurredAt + 5 * 60 * 1000 ||
+        !args.accidentLiability ||
+        (args.accidentLiability === "at_fault" &&
+          args.amicableSettlement === undefined) ||
+        (args.accidentLiability === "not_at_fault" && args.amicableSettlement)
+      ) {
+        throw new Error("accident_details_required");
+      }
+    }
+    if (args.type === "payment_proof" && !args.invoiceReference) {
+      throw new Error("payment_details_required");
+    }
+    if (args.type === "monthly_inspection") {
+      const expectedMonth = new Date(args.occurredAt).toISOString().slice(0, 7);
+      if (args.inspectionMonth !== expectedMonth) {
+        throw new Error("inspection_details_required");
+      }
+      const existingInspection = await ctx.db
+        .query("workflowRecords")
+        .withIndex("by_vehicle_id_and_inspection_month", (q) =>
+          q.eq("vehicleId", args.vehicleId!).eq("inspectionMonth", expectedMonth),
+        )
+        .first();
+      if (existingInspection) throw new Error("inspection_already_submitted");
     }
     if (args.type === "report" && !args.description) {
       throw new Error("description_required");
@@ -1286,13 +1929,20 @@ export const createWorkflowRecord = internalMutation({
           item.createdBy !== actor._id ||
           item.uploadGroupId !== args.uploadGroupId ||
           item.status !== "uploaded" ||
-          item.recordId !== undefined,
+          item.recordId !== undefined ||
+          item.driverId !== undefined,
       )
     ) {
       throw new Error("invalid_media");
     }
     const uploadedMedia = media
       .filter((item): item is Doc<"mediaAssets"> => item !== null)
+    if (
+      args.type !== "payment_proof" &&
+      uploadedMedia.some((item) => !item.contentType.startsWith("image/"))
+    ) {
+      throw new Error("invalid_file_type");
+    }
     const categories = uploadedMedia.map((item) => item.category);
     if (
       ["check_in", "check_out"].includes(args.type) &&
@@ -1308,7 +1958,11 @@ export const createWorkflowRecord = internalMutation({
     }
     const slots = uploadedMedia.map((item) => item.slot).filter((slot): slot is string => Boolean(slot));
     if (new Set(slots).size !== slots.length) throw new Error("invalid_media");
-    const missingSlots = requiredMediaSlots(args.type, args.disposition).filter((slot) => !slots.includes(slot));
+    const missingSlots = requiredMediaSlots(
+      args.type,
+      args.disposition,
+      args.amicableSettlement,
+    ).filter((slot) => !slots.includes(slot));
     if (missingSlots.length) throw new Error("required_evidence_missing");
 
     const now = Date.now();
@@ -1319,6 +1973,7 @@ export const createWorkflowRecord = internalMutation({
       vehicleId: vehicle?._id,
       customerId,
       rentalId: rental?._id,
+      driverId,
       licensePlate: vehicle?.registrationPlate,
       occurredAt: args.occurredAt,
       mileage: args.mileage,
@@ -1340,6 +1995,14 @@ export const createWorkflowRecord = internalMutation({
       maintenanceOtherDetails: args.maintenanceOtherDetails,
       roadTestPerformed: args.roadTestPerformed,
       readyForService: args.readyForService,
+      eventOccurredAt: args.eventOccurredAt,
+      accidentLiability: args.accidentLiability,
+      amicableSettlement: args.amicableSettlement,
+      invoiceReference: args.invoiceReference,
+      inspectionMonth: args.inspectionMonth,
+      performedByName: customerWorkflowTypes.includes(args.type)
+        ? actor.displayName
+        : undefined,
       maintenanceWork:
         args.maintenanceWork ??
         (args.type === "maintenance" && args.maintenanceItems?.length
@@ -1350,6 +2013,9 @@ export const createWorkflowRecord = internalMutation({
       reportPriority: args.reportPriority,
       description: args.description,
       status: "submitted",
+      notificationEmailStatus: customerWorkflowTypes.includes(args.type)
+        ? "pending"
+        : undefined,
       createdAt: now,
       updatedAt: now,
     });
@@ -1398,6 +2064,79 @@ export const createWorkflowRecord = internalMutation({
   },
 });
 
+export const getWorkflowForNotification = internalQuery({
+  args: { recordId: v.id("workflowRecords") },
+  returns: v.union(
+    v.null(),
+    v.object({
+      reference: v.string(),
+      type: workflowTypeValidator,
+      occurredAt: v.number(),
+      performedByName: v.optional(v.string()),
+      description: v.optional(v.string()),
+      invoiceReference: v.optional(v.string()),
+      licensePlate: v.optional(v.string()),
+      customerName: v.optional(v.string()),
+      customerCompany: v.optional(v.string()),
+      customerEmail: v.optional(v.string()),
+      notificationEmailStatus: v.optional(
+        v.union(
+          v.literal("not_configured"),
+          v.literal("pending"),
+          v.literal("sent"),
+          v.literal("failed"),
+        ),
+      ),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const record = await ctx.db.get(args.recordId);
+    if (!record || !customerWorkflowTypes.includes(record.type)) return null;
+    const customer = record.customerId ? await ctx.db.get(record.customerId) : null;
+    return {
+      reference: record.reference,
+      type: record.type,
+      occurredAt: record.occurredAt,
+      performedByName: record.performedByName,
+      description: record.description,
+      invoiceReference: record.invoiceReference,
+      licensePlate: record.licensePlate,
+      customerName: customer?.fullName,
+      customerCompany: customer?.company,
+      customerEmail: customer?.email,
+      notificationEmailStatus: record.notificationEmailStatus,
+    };
+  },
+});
+
+export const setWorkflowNotificationStatus = internalMutation({
+  args: {
+    recordId: v.id("workflowRecords"),
+    notificationEmailStatus: v.union(
+      v.literal("not_configured"),
+      v.literal("pending"),
+      v.literal("sent"),
+      v.literal("failed"),
+    ),
+    notificationEmailProviderId: v.optional(v.string()),
+    notificationEmailLastError: v.optional(v.string()),
+    notificationEmailAttemptedAt: v.number(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const record = await ctx.db.get(args.recordId);
+    if (!record || !customerWorkflowTypes.includes(record.type)) return null;
+    await ctx.db.patch(record._id, {
+      notificationEmailStatus: args.notificationEmailStatus,
+      notificationEmailProviderId: args.notificationEmailProviderId,
+      notificationEmailLastError: args.notificationEmailLastError,
+      notificationEmailAttemptedAt: args.notificationEmailAttemptedAt,
+      updatedAt: Date.now(),
+    });
+    return null;
+  },
+});
+
 export const resolveReport = internalMutation({
   args: {
     actorAccountId: v.id("portalAccounts"),
@@ -1409,7 +2148,14 @@ export const resolveReport = internalMutation({
     const actor = await requireActor(ctx, args.actorAccountId);
     requireRole(actor, ["admin", "employee"]);
     const record = await ctx.db.get(args.recordId);
-    if (!record || record.type !== "report") throw new Error("report_not_found");
+    if (
+      !record ||
+      !["report", "problem_report", "accident_report", "payment_proof"].includes(
+        record.type,
+      )
+    ) {
+      throw new Error("report_not_found");
+    }
     const now = Date.now();
     await ctx.db.patch(record._id, {
       status: "resolved",
@@ -1454,6 +2200,9 @@ export const getRecordMedia = internalQuery({
     if (actor.role === "customer" && record.customerId !== actor.linkedCustomerId) {
       throw new Error("forbidden");
     }
+    if (actor.role === "driver" && record.actorAccountId !== actor._id) {
+      throw new Error("forbidden");
+    }
     if (actor.role === "mechanic" && record.type !== "maintenance") {
       throw new Error("forbidden");
     }
@@ -1474,6 +2223,51 @@ export const getRecordMedia = internalQuery({
       .query("mediaAssets")
       .withIndex("by_record_id", (q) => q.eq("recordId", record._id))
       .take(24);
+    return media
+      .filter((item) => item.status === "uploaded")
+      .map((item) => ({
+        id: item._id,
+        r2Key: item.r2Key,
+        fileName: item.fileName,
+        contentType: item.contentType,
+        category: item.category,
+        slot: item.slot,
+        captureSource: item.captureSource,
+        sortOrder: item.sortOrder,
+      }));
+  },
+});
+
+export const getDriverMedia = internalQuery({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    driverId: v.id("customerDrivers"),
+  },
+  returns: v.array(
+    v.object({
+      id: v.id("mediaAssets"),
+      r2Key: v.string(),
+      fileName: v.string(),
+      contentType: v.string(),
+      category: mediaCategoryValidator,
+      slot: v.optional(v.string()),
+      captureSource: v.optional(captureSourceValidator),
+      sortOrder: v.optional(v.number()),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    const driver = await ctx.db.get(args.driverId);
+    if (!driver) throw new Error("driver_not_found");
+    const allowed =
+      actor.role === "admin" ||
+      (actor.role === "customer" && driver.customerId === actor.linkedCustomerId) ||
+      (actor.role === "driver" && driver._id === actor.linkedDriverId);
+    if (!allowed) throw new Error("forbidden");
+    const media = await ctx.db
+      .query("mediaAssets")
+      .withIndex("by_driver_id", (q) => q.eq("driverId", driver._id))
+      .take(12);
     return media
       .filter((item) => item.status === "uploaded")
       .map((item) => ({

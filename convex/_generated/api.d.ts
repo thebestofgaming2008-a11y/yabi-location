@@ -16,6 +16,7 @@ import type * as http from "../http.js";
 import type * as maintenanceCatalog from "../maintenanceCatalog.js";
 import type * as portal from "../portal.js";
 import type * as portalHttp from "../portalHttp.js";
+import type * as portalNotifications from "../portalNotifications.js";
 import type * as quoteRequests from "../quoteRequests.js";
 import type * as rateLimits from "../rateLimits.js";
 
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   maintenanceCatalog: typeof maintenanceCatalog;
   portal: typeof portal;
   portalHttp: typeof portalHttp;
+  portalNotifications: typeof portalNotifications;
   quoteRequests: typeof quoteRequests;
   rateLimits: typeof rateLimits;
 }>;

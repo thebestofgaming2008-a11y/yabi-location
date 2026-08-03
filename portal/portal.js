@@ -311,6 +311,127 @@ const translations = {
     "Complete all required operation details.": "Complétez toutes les informations obligatoires de l’opération.",
     "You selected too many photos. Keep the total at 24 or fewer.": "Vous avez sélectionné trop de photos. Limitez le total à 24.",
     "Photo storage is temporarily unavailable.": "Le stockage des photos est temporairement indisponible.",
+    Driver: "Chauffeur",
+    Drivers: "Chauffeurs",
+    "Driver space": "Espace chauffeur",
+    "Manage company drivers and their personal access.": "Gérez les chauffeurs de l’entreprise et leurs accès personnels.",
+    "Problem or damage": "Problème ou dommage",
+    "Report an accident": "Signaler un accident",
+    "Payment proof": "Preuve de paiement",
+    "Monthly inspection": "Inspection mensuelle",
+    "Report a technical problem, damage or dashboard warning.": "Signalez un problème technique, un dommage ou un voyant du tableau de bord.",
+    "Record an accident and its supporting evidence.": "Enregistrez un accident et ses preuves.",
+    "Send an invoice payment proof to accounting.": "Envoyez une preuve de paiement à la comptabilité.",
+    "Complete the required monthly vehicle inspection.": "Effectuez l’inspection mensuelle obligatoire du véhicule.",
+    "Assigned vehicles": "Véhicules attribués",
+    "Monthly inspections": "Inspections mensuelles",
+    "Add driver": "Ajouter un chauffeur",
+    "Create driver access": "Créer l’accès chauffeur",
+    "Create code": "Créer un code",
+    Deactivate: "Désactiver",
+    Reactivate: "Réactiver",
+    "No access code": "Aucun code d’accès",
+    "No drivers": "Aucun chauffeur",
+    "Add a driver to create personal access.": "Ajoutez un chauffeur pour créer son accès personnel.",
+    "First name": "Prénom",
+    "Last name": "Nom",
+    "Date of birth": "Date de naissance",
+    "Identity-card number": "Numéro de carte d’identité",
+    "National-register number": "Numéro de registre national",
+    "Driving-licence number": "Numéro de permis de conduire",
+    "Licence issue date": "Date de délivrance du permis",
+    "Licence valid since": "Permis valide depuis",
+    "Identity and driving-licence photographs": "Photos d’identité et du permis de conduire",
+    Eligibility: "Conditions d’accès",
+    "Clear photographs are required. Only authorised administrators and the linked customer can view them.": "Des photos nettes sont obligatoires. Seuls les administrateurs autorisés et le client lié peuvent les consulter.",
+    "ID card — front": "Carte d’identité — recto",
+    "ID card — back": "Carte d’identité — verso",
+    "Driving licence — front": "Permis de conduire — recto",
+    "Driving licence — back": "Permis de conduire — verso",
+    "Protected documents": "Documents protégés",
+    "Customer / company": "Client / entreprise",
+    "Linked customer": "Client lié",
+    "Edit account": "Modifier le compte",
+    Edit: "Modifier",
+    "View / edit": "Voir / modifier",
+    "View / edit customer": "Voir / modifier le client",
+    "Save changes": "Enregistrer les modifications",
+    "Belgian VAT number": "Numéro de TVA belge",
+    Street: "Rue",
+    "House number": "Numéro",
+    Box: "Boîte",
+    Province: "Province",
+    Antwerp: "Anvers",
+    "East Flanders": "Flandre-Orientale",
+    "Flemish Brabant": "Brabant flamand",
+    Hainaut: "Hainaut",
+    Liège: "Liège",
+    Limburg: "Limbourg",
+    Luxembourg: "Luxembourg",
+    Namur: "Namur",
+    "Walloon Brabant": "Brabant wallon",
+    "West Flanders": "Flandre-Occidentale",
+    Brussels: "Bruxelles",
+    Lead: "Prospect",
+    "Emergency contact": "Contact d’urgence",
+    "Internal notes": "Notes internes",
+    "Assigned operations": "Opérations attribuées",
+    "Describe the problem or damage": "Décrivez le problème ou le dommage",
+    "Photographic evidence": "Preuves photographiques",
+    "Problem or dashboard warning": "Problème ou voyant du tableau de bord",
+    "Accident date and time": "Date et heure de l’accident",
+    Liability: "Responsabilité",
+    "At fault": "En tort",
+    "Not at fault": "Pas en tort",
+    "Accident description": "Description de l’accident",
+    "Accident evidence": "Preuves de l’accident",
+    "Damage to our vehicle": "Dommages à notre véhicule",
+    "Damage to the other party": "Dommages au véhicule adverse",
+    "Signed European accident statement": "Constat européen signé",
+    "Extra accident photos (optional)": "Photos supplémentaires de l’accident (facultatif)",
+    "Possible amicable settlement": "Règlement amiable possible",
+    "Will the accident be settled amicably?": "L’accident sera-t-il réglé à l’amiable ?",
+    "Important responsibility": "Responsabilité importante",
+    "If settled amicably, the customer or driver remains responsible for repairing the YABI vehicle.": "En cas de règlement amiable, le client ou le chauffeur reste responsable de la réparation du véhicule YABI.",
+    "Joint written amicable agreement": "Accord amiable écrit conjointement",
+    "Invoice number or reference": "Numéro ou référence de facture",
+    "Proof for accounting": "Justificatif pour la comptabilité",
+    "Choose a photo or PDF": "Choisir une photo ou un PDF",
+    "Photo or PDF": "Photo ou PDF",
+    "No file selected": "Aucun fichier sélectionné",
+    "file selected": "fichier sélectionné",
+    "files selected": "fichiers sélectionnés",
+    "Performed by": "Effectué par",
+    "Required monthly photographs": "Photos mensuelles obligatoires",
+    "The dashboard photo must clearly show the current mileage while the engine is running.": "La photo du tableau de bord doit montrer clairement le kilométrage actuel lorsque le moteur tourne.",
+    "Amicable settlement": "Règlement amiable",
+    "Inspection month": "Mois de l’inspection",
+    "Company notification": "Notification à l’entreprise",
+    "Open document": "Ouvrir le document",
+    pending: "en attente",
+    sent: "envoyée",
+    failed: "échouée",
+    not_configured: "non configurée",
+    "Deactivate this driver? Access stops immediately.": "Désactiver ce chauffeur ? Son accès sera immédiatement bloqué.",
+    "Reactivate this driver?": "Réactiver ce chauffeur ?",
+    "The driver must be at least 23 and must have held a valid licence for at least five years.": "Le chauffeur doit avoir au moins 23 ans et détenir un permis valide depuis au moins cinq ans.",
+    "All four identity and driving-licence photos are required.": "Les quatre photos d’identité et du permis sont obligatoires.",
+    "This monthly inspection has already been submitted for this vehicle.": "L’inspection mensuelle de ce véhicule a déjà été envoyée.",
+    "This account is not linked to a customer.": "Ce compte n’est lié à aucun client.",
+    "This driver account is not linked correctly.": "Ce compte chauffeur n’est pas lié correctement.",
+    "Choose the linked customer for this driver.": "Choisissez le client lié à ce chauffeur.",
+    "This driver already has an access account.": "Ce chauffeur possède déjà un compte d’accès.",
+    "Complete the accident details and liability choice.": "Complétez les informations sur l’accident et la responsabilité.",
+    "Enter the invoice number or reference.": "Saisissez le numéro ou la référence de facture.",
+    "Complete the mileage and monthly inspection details.": "Complétez le kilométrage et les informations de l’inspection mensuelle.",
+    "Add all six required monthly inspection photos.": "Ajoutez les six photos obligatoires de l’inspection mensuelle.",
+    "One or more uploaded files could not be verified. Please upload them again.": "Un ou plusieurs fichiers n’ont pas pu être vérifiés. Téléchargez-les à nouveau.",
+    "You cannot change your own administrator role.": "Vous ne pouvez pas modifier votre propre rôle d’administrateur.",
+    "Account updated.": "Compte mis à jour.",
+    "Customer updated.": "Client mis à jour.",
+    "Driver deactivated.": "Chauffeur désactivé.",
+    "Driver reactivated.": "Chauffeur réactivé.",
+    "Add a customer before adding a driver.": "Ajoutez un client avant d’ajouter un chauffeur.",
     "Something went wrong. Please try again.": "Une erreur s’est produite. Réessayez.",
   },
   nl: {
@@ -619,6 +740,127 @@ const translations = {
     "Complete all required operation details.": "Vul alle verplichte gegevens van de werkzaamheid in.",
     "You selected too many photos. Keep the total at 24 or fewer.": "U hebt te veel foto’s geselecteerd. Beperk het totaal tot 24.",
     "Photo storage is temporarily unavailable.": "Foto-opslag is tijdelijk niet beschikbaar.",
+    Driver: "Chauffeur",
+    Drivers: "Chauffeurs",
+    "Driver space": "Chauffeursportaal",
+    "Manage company drivers and their personal access.": "Beheer de chauffeurs van het bedrijf en hun persoonlijke toegang.",
+    "Problem or damage": "Probleem of schade",
+    "Report an accident": "Ongeval melden",
+    "Payment proof": "Betalingsbewijs",
+    "Monthly inspection": "Maandelijkse inspectie",
+    "Report a technical problem, damage or dashboard warning.": "Meld een technisch probleem, schade of een dashboardwaarschuwing.",
+    "Record an accident and its supporting evidence.": "Registreer een ongeval met het nodige bewijs.",
+    "Send an invoice payment proof to accounting.": "Stuur een betalingsbewijs naar de boekhouding.",
+    "Complete the required monthly vehicle inspection.": "Voer de verplichte maandelijkse voertuiginspectie uit.",
+    "Assigned vehicles": "Toegewezen voertuigen",
+    "Monthly inspections": "Maandelijkse inspecties",
+    "Add driver": "Chauffeur toevoegen",
+    "Create driver access": "Chauffeurstoegang aanmaken",
+    "Create code": "Code aanmaken",
+    Deactivate: "Deactiveren",
+    Reactivate: "Heractiveren",
+    "No access code": "Geen toegangscode",
+    "No drivers": "Geen chauffeurs",
+    "Add a driver to create personal access.": "Voeg een chauffeur toe om persoonlijke toegang aan te maken.",
+    "First name": "Voornaam",
+    "Last name": "Achternaam",
+    "Date of birth": "Geboortedatum",
+    "Identity-card number": "Identiteitskaartnummer",
+    "National-register number": "Rijksregisternummer",
+    "Driving-licence number": "Rijbewijsnummer",
+    "Licence issue date": "Afgiftedatum rijbewijs",
+    "Licence valid since": "Rijbewijs geldig sinds",
+    "Identity and driving-licence photographs": "Foto’s van identiteitskaart en rijbewijs",
+    Eligibility: "Toelatingsvoorwaarden",
+    "Clear photographs are required. Only authorised administrators and the linked customer can view them.": "Duidelijke foto’s zijn verplicht. Alleen bevoegde beheerders en de gekoppelde klant kunnen ze bekijken.",
+    "ID card — front": "Identiteitskaart — voorkant",
+    "ID card — back": "Identiteitskaart — achterkant",
+    "Driving licence — front": "Rijbewijs — voorkant",
+    "Driving licence — back": "Rijbewijs — achterkant",
+    "Protected documents": "Beveiligde documenten",
+    "Customer / company": "Klant / bedrijf",
+    "Linked customer": "Gekoppelde klant",
+    "Edit account": "Account wijzigen",
+    Edit: "Wijzigen",
+    "View / edit": "Bekijken / wijzigen",
+    "View / edit customer": "Klant bekijken / wijzigen",
+    "Save changes": "Wijzigingen opslaan",
+    "Belgian VAT number": "Belgisch btw-nummer",
+    Street: "Straat",
+    "House number": "Huisnummer",
+    Box: "Bus",
+    Province: "Provincie",
+    Antwerp: "Antwerpen",
+    "East Flanders": "Oost-Vlaanderen",
+    "Flemish Brabant": "Vlaams-Brabant",
+    Hainaut: "Henegouwen",
+    Liège: "Luik",
+    Limburg: "Limburg",
+    Luxembourg: "Luxemburg",
+    Namur: "Namen",
+    "Walloon Brabant": "Waals-Brabant",
+    "West Flanders": "West-Vlaanderen",
+    Brussels: "Brussel",
+    Lead: "Prospect",
+    "Emergency contact": "Noodcontact",
+    "Internal notes": "Interne notities",
+    "Assigned operations": "Toegewezen werkzaamheden",
+    "Describe the problem or damage": "Beschrijf het probleem of de schade",
+    "Photographic evidence": "Fotobewijs",
+    "Problem or dashboard warning": "Probleem of dashboardwaarschuwing",
+    "Accident date and time": "Datum en tijd van het ongeval",
+    Liability: "Aansprakelijkheid",
+    "At fault": "In fout",
+    "Not at fault": "Niet in fout",
+    "Accident description": "Beschrijving van het ongeval",
+    "Accident evidence": "Bewijs van het ongeval",
+    "Damage to our vehicle": "Schade aan ons voertuig",
+    "Damage to the other party": "Schade aan de tegenpartij",
+    "Signed European accident statement": "Ondertekend Europees aanrijdingsformulier",
+    "Extra accident photos (optional)": "Extra ongevalsfoto’s (optioneel)",
+    "Possible amicable settlement": "Mogelijke minnelijke schikking",
+    "Will the accident be settled amicably?": "Wordt het ongeval onderling geregeld?",
+    "Important responsibility": "Belangrijke verantwoordelijkheid",
+    "If settled amicably, the customer or driver remains responsible for repairing the YABI vehicle.": "Bij een minnelijke regeling blijft de klant of chauffeur verantwoordelijk voor de herstelling van het YABI-voertuig.",
+    "Joint written amicable agreement": "Gezamenlijke schriftelijke overeenkomst",
+    "Invoice number or reference": "Factuurnummer of referentie",
+    "Proof for accounting": "Bewijs voor de boekhouding",
+    "Choose a photo or PDF": "Kies een foto of PDF",
+    "Photo or PDF": "Foto of PDF",
+    "No file selected": "Geen bestand geselecteerd",
+    "file selected": "bestand geselecteerd",
+    "files selected": "bestanden geselecteerd",
+    "Performed by": "Uitgevoerd door",
+    "Required monthly photographs": "Verplichte maandelijkse foto’s",
+    "The dashboard photo must clearly show the current mileage while the engine is running.": "De dashboardfoto moet de huidige kilometerstand duidelijk tonen terwijl de motor draait.",
+    "Amicable settlement": "Minnelijke schikking",
+    "Inspection month": "Inspectiemaand",
+    "Company notification": "Bedrijfskennisgeving",
+    "Open document": "Document openen",
+    pending: "in afwachting",
+    sent: "verzonden",
+    failed: "mislukt",
+    not_configured: "niet geconfigureerd",
+    "Deactivate this driver? Access stops immediately.": "Deze chauffeur deactiveren? De toegang stopt onmiddellijk.",
+    "Reactivate this driver?": "Deze chauffeur heractiveren?",
+    "The driver must be at least 23 and must have held a valid licence for at least five years.": "De chauffeur moet minstens 23 jaar zijn en al minstens vijf jaar een geldig rijbewijs hebben.",
+    "All four identity and driving-licence photos are required.": "Alle vier foto’s van identiteitskaart en rijbewijs zijn verplicht.",
+    "This monthly inspection has already been submitted for this vehicle.": "De maandelijkse inspectie voor dit voertuig is al ingediend.",
+    "This account is not linked to a customer.": "Dit account is niet aan een klant gekoppeld.",
+    "This driver account is not linked correctly.": "Dit chauffeursaccount is niet correct gekoppeld.",
+    "Choose the linked customer for this driver.": "Kies de gekoppelde klant voor deze chauffeur.",
+    "This driver already has an access account.": "Deze chauffeur heeft al een toegangsaccount.",
+    "Complete the accident details and liability choice.": "Vul de ongevalsgegevens en aansprakelijkheidskeuze in.",
+    "Enter the invoice number or reference.": "Voer het factuurnummer of de referentie in.",
+    "Complete the mileage and monthly inspection details.": "Vul de kilometerstand en gegevens van de maandelijkse inspectie in.",
+    "Add all six required monthly inspection photos.": "Voeg alle zes verplichte foto’s van de maandelijkse inspectie toe.",
+    "One or more uploaded files could not be verified. Please upload them again.": "Een of meer geüploade bestanden konden niet worden geverifieerd. Upload ze opnieuw.",
+    "You cannot change your own administrator role.": "U kunt uw eigen beheerdersrol niet wijzigen.",
+    "Account updated.": "Account bijgewerkt.",
+    "Customer updated.": "Klant bijgewerkt.",
+    "Driver deactivated.": "Chauffeur gedeactiveerd.",
+    "Driver reactivated.": "Chauffeur geheractiveerd.",
+    "Add a customer before adding a driver.": "Voeg eerst een klant toe voordat u een chauffeur toevoegt.",
     "Something went wrong. Please try again.": "Er is iets misgegaan. Probeer opnieuw.",
   },
 };
@@ -627,24 +869,27 @@ const roles = {
   admin: "Administrator",
   employee: "Employee",
   customer: "Customer",
+  driver: "Driver",
   mechanic: "Mechanic",
   contractor: "External worker",
 };
 
 const roleViews = {
-  admin: ["overview", "applications", "access", "customers", "fleet", "rentals", "operations", "audit"],
+  admin: ["overview", "applications", "access", "customers", "drivers", "fleet", "rentals", "operations", "audit"],
   employee: ["overview", "customers", "fleet", "rentals", "operations"],
   mechanic: ["overview", "fleet", "operations"],
   contractor: ["overview", "rentals", "operations"],
-  customer: ["overview", "profile", "rentals", "operations"],
+  customer: ["overview", "profile", "fleet", "drivers", "operations"],
+  driver: ["overview", "fleet", "operations"],
 };
 
 const roleWorkflows = {
-  admin: ["check_in", "check_out", "wash", "breakdown_replacement", "vehicle_transfer", "maintenance", "handover_take", "handover_return", "report"],
+  admin: ["check_in", "check_out", "wash", "breakdown_replacement", "vehicle_transfer", "maintenance", "handover_take", "handover_return", "report", "problem_report", "accident_report", "payment_proof", "monthly_inspection"],
   employee: ["check_in", "check_out", "wash", "breakdown_replacement", "vehicle_transfer", "handover_take", "handover_return", "report"],
   mechanic: ["maintenance", "report"],
   contractor: ["check_in", "check_out", "breakdown_replacement", "vehicle_transfer", "handover_take", "handover_return", "report"],
-  customer: ["customer_onboarding", "report"],
+  customer: ["problem_report", "accident_report", "payment_proof", "monthly_inspection"],
+  driver: ["problem_report", "accident_report", "monthly_inspection"],
 };
 
 const viewCopy = {
@@ -652,6 +897,7 @@ const viewCopy = {
   applications: ["Applications", "Review new rental requests and create access after agreement."],
   access: ["Access & roles", "Create personal access codes and control permissions."],
   customers: ["Customers", "Customer records used by rentals and inspections."],
+  drivers: ["Drivers", "Manage company drivers and their personal access."],
   fleet: ["Fleet", "Availability, mileage, and vehicle status at a glance."],
   rentals: ["Rentals", "Follow every rental from planning to closure."],
   operations: ["Operations", "Guided procedures with time-stamped evidence."],
@@ -670,6 +916,10 @@ const workflows = {
   breakdown_replacement: ["08", "Breakdown replacement", "Document the replacement vehicle and the defective vehicle."],
   vehicle_transfer: ["09", "Move vehicle", "Document a vehicle transfer from point A to point B."],
   report: ["07", "Report an issue", "Report damage, a problem or a modification."],
+  problem_report: ["10", "Problem or damage", "Report a technical problem, damage or dashboard warning."],
+  accident_report: ["11", "Report an accident", "Record an accident and its supporting evidence."],
+  payment_proof: ["12", "Payment proof", "Send an invoice payment proof to accounting."],
+  monthly_inspection: ["13", "Monthly inspection", "Complete the required monthly vehicle inspection."],
 };
 
 const maintenanceCopy = (en, fr, nl) => ({ en, fr, nl });
@@ -946,6 +1196,19 @@ function messageFor(error) {
     media_service_unavailable: "Photo storage is temporarily unavailable.",
     customer_link_required: "Choose a customer for this customer account.",
     customer_already_linked: "That customer already has an access account.",
+    customer_not_linked: "This account is not linked to a customer.",
+    driver_not_linked: "This driver account is not linked correctly.",
+    driver_link_required: "Choose the linked customer for this driver.",
+    driver_already_linked: "This driver already has an access account.",
+    driver_documents_required: "All four identity and driving-licence photos are required.",
+    driver_eligibility_failed: "The driver must be at least 23 and must have held a valid licence for at least five years.",
+    accident_details_required: "Complete the accident details and liability choice.",
+    payment_details_required: "Enter the invoice number or reference.",
+    inspection_details_required: "Complete the mileage and monthly inspection details.",
+    inspection_already_submitted: "This monthly inspection has already been submitted for this vehicle.",
+    inspection_media_required: "Add all six required monthly inspection photos.",
+    invalid_media: "One or more uploaded files could not be verified. Please upload them again.",
+    cannot_change_self_role: "You cannot change your own administrator role.",
     vehicle_unavailable: "That vehicle is not available for a new rental.",
     vehicle_has_open_rental: "This vehicle still has a scheduled or active rental.",
   };
@@ -1015,9 +1278,9 @@ async function refresh() {
 function renderNavigation() {
   const account = state.data.account;
   el.profileName.textContent = account.displayName;
-  el.profileRole.textContent = roles[account.role] || account.role;
+  el.profileRole.textContent = tr(roles[account.role] || account.role);
   el.profileAvatar.textContent = initials(account.displayName);
-  el.workspace.textContent = account.role === "customer" ? "Customer space" : "Operations";
+  el.workspace.textContent = account.role === "customer" ? "Customer space" : account.role === "driver" ? "Driver space" : "Operations";
   el.navigation.innerHTML = allowedViews()
     .map(
       (view, index) => `<button class="nav-button ${state.view === view ? "active" : ""}" data-view="${view}">
@@ -1050,10 +1313,11 @@ function table(head, rows) {
 
 function maps() {
   return {
-    accounts: new Map(state.data.accounts.map((item) => [item.id, item])),
-    customers: new Map(state.data.customers.map((item) => [item.id, item])),
-    vehicles: new Map(state.data.vehicles.map((item) => [item.id, item])),
-    rentals: new Map(state.data.rentals.map((item) => [item.id, item])),
+    accounts: new Map((state.data.accounts || []).map((item) => [item.id, item])),
+    customers: new Map((state.data.customers || []).map((item) => [item.id, item])),
+    drivers: new Map((state.data.drivers || []).map((item) => [item.id, item])),
+    vehicles: new Map((state.data.vehicles || []).map((item) => [item.id, item])),
+    rentals: new Map((state.data.rentals || []).map((item) => [item.id, item])),
   };
 }
 
@@ -1063,6 +1327,7 @@ function render() {
     applications: renderApplications,
     access: renderAccess,
     customers: renderCustomers,
+    drivers: renderDrivers,
     fleet: renderFleet,
     rentals: renderRentals,
     operations: renderOperations,
@@ -1108,9 +1373,15 @@ function quickActions() {
       ["Report", "Flag a problem", "report"],
     ],
     customer: [
-      ["My details", "Complete personal information", "profile"],
-      ["My rentals", "Review rental history", "rentals"],
-      ["Report", "Tell us about a problem", "report"],
+      ["Problem or damage", "Tell us about a vehicle problem", "problem_report"],
+      ["Report an accident", "Record an accident immediately", "accident_report"],
+      ["Payment proof", "Send proof to accounting", "payment_proof"],
+      ["Monthly inspection", "Inspect an assigned vehicle", "monthly_inspection"],
+    ],
+    driver: [
+      ["Problem or damage", "Tell us about a vehicle problem", "problem_report"],
+      ["Report an accident", "Record an accident immediately", "accident_report"],
+      ["Monthly inspection", "Inspect an assigned vehicle", "monthly_inspection"],
     ],
   };
   const allowed = allowedWorkflows();
@@ -1122,12 +1393,13 @@ function renderOverview() {
   const vehicles = state.data.vehicles;
   const rentals = state.data.rentals;
   const records = state.data.workflows;
-  const openReports = records.filter((item) => item.type === "report" && item.status !== "resolved");
+  const reportTypes = ["report", "problem_report", "accident_report"];
+  const openReports = records.filter((item) => reportTypes.includes(item.type) && item.status !== "resolved");
   const metrics =
-    role === "customer"
+    ["customer", "driver"].includes(role)
       ? [
-          ["My rentals", rentals.length],
-          ["Active", rentals.filter((r) => ["scheduled", "active"].includes(r.status)).length],
+          ["Assigned vehicles", vehicles.length],
+          ["Monthly inspections", records.filter((r) => r.type === "monthly_inspection").length],
           ["Open reports", openReports.length],
         ]
       : [
@@ -1165,7 +1437,7 @@ function renderAccess() {
         <td><strong>${clean(account.displayName)}</strong><small>•••• ${clean(account.codeHint)}</small></td>
         <td>${clean(roles[account.role])}</td><td>${badge(account.active ? "active" : "inactive")}</td>
         <td>${date(account.lastLoginAt, true)}</td>
-        <td><div class="table-actions"><button class="icon-button" data-action="rotate-code" data-id="${account.id}">New code</button>
+        <td><div class="table-actions"><button class="icon-button" data-action="edit-account" data-id="${account.id}">Edit</button><button class="icon-button" data-action="rotate-code" data-id="${account.id}">New code</button>
         ${account.id !== state.data.account.id ? `<button class="icon-button" data-action="toggle-account" data-id="${account.id}" data-active="${account.active}">${account.active ? "Disable" : "Enable"}</button>` : ""}</div></td>
       </tr>`,
     )
@@ -1180,11 +1452,30 @@ function renderCustomers() {
   const rows = customers
     .map(
       (customer) => `<tr><td><strong>${clean(customer.fullName)}</strong><small>${clean(customer.company || "")}</small></td>
-      <td>${clean(customer.email)}</td><td>${clean(customer.phone)}</td><td>${clean([customer.address, customer.postalCode, customer.city].filter(Boolean).join(", ") || "Not completed")}</td><td>${badge(customer.status)}</td></tr>`,
+      <td>${clean(customer.email)}</td><td>${clean(customer.phone)}</td><td>${clean([customer.address, customer.postalCode, customer.city].filter(Boolean).join(", ") || "Not completed")}</td><td>${badge(customer.status)}</td>
+      <td><button class="icon-button" data-action="edit-customer" data-id="${customer.id}">${state.data.account.role === "admin" ? "View / edit" : "View"}</button></td></tr>`,
     )
     .join("");
   el.view.innerHTML = `${header(canCreate ? '<button class="primary-button" data-action="create-customer">Add customer</button>' : "")}
-    ${customers.length ? table(["Customer", "Email", "Phone", "Address", "Status"], rows) : empty("No customers", "Add a customer before creating a rental.")}`;
+    ${customers.length ? table(["Customer", "Email", "Phone", "Address", "Status", ""], rows) : empty("No customers", "Add a customer before creating a rental.")}`;
+}
+
+function renderDrivers() {
+  const drivers = state.data.drivers || [];
+  const dataMaps = maps();
+  const canManage = ["admin", "customer"].includes(state.data.account.role);
+  const rows = drivers.map((driver) => {
+    const customer = dataMaps.customers.get(driver.customerId);
+    return `<tr><td><strong>${clean(driver.fullName)}</strong><small>${clean(driver.email)}</small></td>
+      ${state.data.account.role === "admin" ? `<td>${clean(customer?.company || customer?.fullName || "—")}</td>` : ""}
+      <td>${clean(driver.phone)}</td><td>${badge(driver.active && driver.accountActive !== false ? "active" : "inactive")}</td>
+      <td>${driver.codeHint ? `•••• ${clean(driver.codeHint)}` : clean(tr("No access code"))}</td>
+      <td><div class="table-actions"><button class="icon-button" data-action="view-driver" data-id="${driver.id}">View</button>
+      ${canManage && !driver.portalAccountId ? `<button class="icon-button" data-action="driver-access" data-id="${driver.id}">Create code</button>` : ""}
+      ${canManage ? `<button class="icon-button" data-action="toggle-driver" data-id="${driver.id}" data-active="${driver.active && driver.accountActive !== false}">${driver.active && driver.accountActive !== false ? "Deactivate" : "Reactivate"}</button>` : ""}</div></td></tr>`;
+  }).join("");
+  el.view.innerHTML = `${header(canManage ? '<button class="primary-button" data-action="create-driver">Add driver</button>' : "")}
+    ${drivers.length ? table(["Driver", ...(state.data.account.role === "admin" ? ["Customer"] : []), "Phone", "Status", "Access", ""], rows) : empty("No drivers", "Add a driver to create personal access.")}`;
 }
 
 function renderFleet() {
@@ -1239,9 +1530,9 @@ function recordTable(records, compact = false) {
       const account = dataMaps.accounts.get(record.actorAccountId);
       return `<tr><td><strong>${clean(workflows[record.type]?.[1] || record.type)}</strong><small>${clean(record.reference)}</small></td>
         <td>${clean(vehicle ? vehicle.registrationPlate : record.licensePlate || "—")}</td>
-        ${compact ? "" : `<td>${clean(account?.displayName || "Portal user")}</td>`}<td>${date(record.occurredAt, true)}</td>
+        ${compact ? "" : `<td>${clean(record.performedByName || account?.displayName || "Portal user")}</td>`}<td>${date(record.occurredAt, true)}</td>
         <td>${badge(record.status)}</td><td><div class="table-actions"><button class="icon-button" data-action="view-record" data-id="${record.id}">View</button>
-        ${record.type === "report" && record.status !== "resolved" && ["admin", "employee"].includes(state.data.account.role) ? `<button class="icon-button" data-action="resolve-report" data-id="${record.id}">Resolve</button>` : ""}</div></td></tr>`;
+        ${["report", "problem_report", "accident_report", "payment_proof"].includes(record.type) && record.status !== "resolved" && ["admin", "employee"].includes(state.data.account.role) ? `<button class="icon-button" data-action="resolve-report" data-id="${record.id}">Resolve</button>` : ""}</div></td></tr>`;
     })
     .join("");
   return table(["Operation", "Vehicle", ...(compact ? [] : ["Person"]), "Date", "Status", ""], rows);
@@ -1438,7 +1729,7 @@ function closeModal() {
 
 function revealCode(person, code) {
   modal({
-    title: `Access for ${person}`,
+    title: `${tr("Access for")} ${person}`,
     content: `<div class="code-reveal"><p>This code is shown only once.</p><strong>${clean(code)}</strong><small>Share it privately. Anyone with this code can sign in.</small></div>
       <div class="form-submit-row"><button class="ghost-button" id="copy-code">Copy code</button><button class="primary-button" data-close>Done</button></div>`,
   });
@@ -1459,7 +1750,7 @@ function createAccount() {
     title: "Create personal access",
     submit: "Create access",
     content: `<form class="portal-form">${field("Display name", "displayName", "", true)}
-      ${select("Role", "role", Object.entries(roles), true)}
+      ${select("Role", "role", Object.entries(roles).filter(([role]) => role !== "driver"), true)}
       <fieldset id="workflow-access" class="permission-field" hidden><legend>Assigned operations</legend><div class="permission-grid">${permissionOptions}</div></fieldset>
       <div id="customer-link" hidden>${select("Linked customer", "linkedCustomerId", state.data.customers.map((c) => [c.id, c.fullName]), true)}</div></form>`,
     handler: async (data) => {
@@ -1484,6 +1775,39 @@ function createAccount() {
   });
 }
 
+function editAccount(id) {
+  const account = state.data.accounts.find((item) => item.id === id);
+  if (!account) return;
+  const allowedRoles = account.role === "driver" ? [["driver", "Driver"]] : Object.entries(roles).filter(([role]) => role !== "driver");
+  const permissionOptions = operationalWorkflowDefaults.map((type) => `<label class="permission-option"><input type="checkbox" name="workflowAccess" value="${type}" ${account.allowedWorkflowTypes?.includes(type) ? "checked" : ""}><span><strong>${clean(workflows[type][1])}</strong></span></label>`).join("");
+  modal({
+    title: "Edit account",
+    submit: "Update account",
+    content: `<form class="portal-form">${field("Display name", "displayName", account.displayName, true)}
+      ${select("Role", "role", allowedRoles, true)}
+      <fieldset id="workflow-access" class="permission-field" ${["employee", "contractor"].includes(account.role) ? "" : "hidden"}><legend>${clean(tr("Assigned operations"))}</legend><div class="permission-grid">${permissionOptions}</div></fieldset>
+      <div id="customer-link" ${["customer", "driver"].includes(account.role) ? "" : "hidden"}>${select("Linked customer", "linkedCustomerId", state.data.customers.map((c) => [c.id, c.company || c.fullName]), ["customer", "driver"].includes(account.role))}</div></form>`,
+    handler: async (data) => {
+      const body = { operation: "update_account", targetAccountId: id, displayName: data.get("displayName"), role: data.get("role") };
+      if (["customer", "driver"].includes(body.role)) body.linkedCustomerId = data.get("linkedCustomerId");
+      if (["employee", "contractor"].includes(body.role)) body.allowedWorkflowTypes = data.getAll("workflowAccess");
+      await api("/api/portal/admin", { method: "POST", body });
+      closeModal();
+      toast("Account updated.");
+      await refresh();
+    },
+  });
+  setCustomValue(el.modalBody, "role", account.role);
+  setCustomValue(el.modalBody, "linkedCustomerId", account.linkedCustomerId || "");
+  const roleInput = el.modalBody.querySelector('[name="role"]');
+  roleInput.addEventListener("change", () => {
+    const linked = ["customer", "driver"].includes(roleInput.value);
+    el.modalBody.querySelector("#customer-link").hidden = !linked;
+    el.modalBody.querySelector("#customer-link [data-custom-select]").dataset.required = String(linked);
+    el.modalBody.querySelector("#workflow-access").hidden = !["employee", "contractor"].includes(roleInput.value);
+  });
+}
+
 function createCustomer() {
   modal({
     title: "Add a customer",
@@ -1498,6 +1822,113 @@ function createCustomer() {
       await refresh();
     },
   });
+}
+
+const provinceOptions = [
+  ["antwerp", "Antwerp"], ["east_flanders", "East Flanders"], ["flemish_brabant", "Flemish Brabant"],
+  ["hainaut", "Hainaut"], ["liege", "Liège"], ["limburg", "Limburg"], ["luxembourg", "Luxembourg"],
+  ["namur", "Namur"], ["walloon_brabant", "Walloon Brabant"], ["west_flanders", "West Flanders"], ["brussels_capital", "Brussels"],
+];
+
+function editCustomer(id) {
+  const customer = state.data.customers.find((item) => item.id === id);
+  if (!customer) return;
+  const admin = state.data.account.role === "admin";
+  const detail = (label, value) => `<div class="field readonly-field"><label>${clean(tr(label))}</label><div class="readonly-value">${clean(value || "—")}</div></div>`;
+  if (!admin) {
+    modal({ title: customer.fullName, content: `<div class="portal-form"><div class="form-grid">${detail("Company", customer.company)}${detail("Email", customer.email)}${detail("Phone", customer.phone)}${detail("Address", [customer.street, customer.houseNumber, customer.addressBox, customer.postalCode, customer.city].filter(Boolean).join(" "))}</div></div>` });
+    return;
+  }
+  modal({
+    title: "View / edit customer",
+    submit: "Save changes",
+    content: `<form class="portal-form"><div class="form-grid">
+      ${field("Full name", "fullName", customer.fullName, true)}${field("Company", "company", customer.company || "")}
+      ${field("Belgian VAT number", "companyVatNumber", customer.companyVatNumber || "")}${field("Email", "email", customer.email, true, "email")}${field("Phone", "phone", customer.phone, true, "tel")}
+      ${field("Street", "street", customer.street || "")}${field("House number", "houseNumber", customer.houseNumber || "")}${field("Box", "addressBox", customer.addressBox || "")}
+      ${field("Postal code", "postalCode", customer.postalCode || "")}${field("City", "city", customer.city || "")}${select("Province", "province", provinceOptions)}
+      ${field("Identity-card number", "identityCardNumber", customer.identityCardNumber || "")}${field("National-register number", "nationalRegisterNumber", customer.nationalRegisterNumber || "")}
+      ${field("Driving licence number", "drivingLicenseNumber", customer.drivingLicenseNumber || "")}${field("Emergency contact", "emergencyContact", customer.emergencyContact || "")}
+      ${select("Status", "status", [["lead", "Lead"], ["active", "Active"], ["inactive", "Inactive"]], true)}</div>
+      <div class="field"><label>${clean(tr("Internal notes"))}</label><textarea name="notes">${clean(customer.notes || "")}</textarea></div></form>`,
+    handler: async (data) => {
+      await api("/api/portal/admin", { method: "POST", body: { operation: "update_customer", customerId: id, ...Object.fromEntries(data) } });
+      closeModal();
+      toast("Customer updated.");
+      await refresh();
+    },
+  });
+  setCustomValue(el.modalBody, "province", customer.province || "");
+  setCustomValue(el.modalBody, "status", customer.status);
+}
+
+function createDriver() {
+  if (state.data.account.role === "admin" && !state.data.customers.length) {
+    toast("Add a customer before adding a driver.", "error");
+    return;
+  }
+  const customerField = state.data.account.role === "admin"
+    ? select("Customer / company", "customerId", state.data.customers.filter((c) => c.status === "active").map((c) => [c.id, c.company || c.fullName]), true)
+    : "";
+  modal({
+    title: "Add driver",
+    submit: "Create driver access",
+    content: `<form class="portal-form">${customerField}<div class="form-grid">
+      ${field("First name", "firstName", "", true)}${field("Last name", "lastName", "", true)}${field("Phone", "phone", "", true, "tel")}${field("Email", "email", "", true, "email")}
+      ${field("Date of birth", "dateOfBirth", "", true, "date")}${field("Identity-card number", "identityCardNumber", "", true)}
+      ${field("Driving-licence number", "drivingLicenceNumber", "", true)}${field("Licence issue date", "licenceIssueDate", "", true, "date")}${field("Licence valid since", "licenceValidSince", "", true, "date")}</div>
+      <div class="started-vehicle-note"><strong>${clean(tr("Eligibility"))}</strong><span>${clean(tr("The driver must be at least 23 and must have held a valid licence for at least five years."))}</span></div>
+      <section class="form-section"><h3>${clean(tr("Identity and driving-licence photographs"))}</h3><p>${clean(tr("Clear photographs are required. Only authorised administrators and the linked customer can view them."))}</p>
+      <div class="evidence-grid">${uploadField("ID card — front", "driver_identity_front", "driver_document", true, "driver_identity_front")}${uploadField("ID card — back", "driver_identity_back", "driver_document", true, "driver_identity_back")}${uploadField("Driving licence — front", "driver_licence_front", "driver_document", true, "driver_licence_front")}${uploadField("Driving licence — back", "driver_licence_back", "driver_document", true, "driver_licence_back")}</div></section></form>`,
+    handler: async (data, form) => {
+      const files = [...form.querySelectorAll('input[type="file"]')].map((input, sortOrder) => ({ file: input.files[0], category: "driver_document", slot: input.dataset.slot, captureSource: "gallery", sortOrder }));
+      if (files.some((item) => !item.file)) throw new Error("driver_documents_required");
+      const progress = document.createElement("div");
+      progress.className = "upload-progress visible";
+      progress.innerHTML = `<div class="progress-track"><i></i></div><span>${clean(tr("Preparing evidence…"))}</span>`;
+      form.querySelector(".form-submit-row").before(progress);
+      const uploadGroupId = crypto.randomUUID();
+      const mediaIds = await upload(files, uploadGroupId, (done, total) => {
+        progress.querySelector("i").style.width = `${Math.round((done / Math.max(1, total)) * 100)}%`;
+        progress.querySelector("span").textContent = `${tr("Uploading evidence")} ${Math.ceil(done)} ${tr("of")} ${total}`;
+      });
+      const values = Object.fromEntries(data);
+      const result = await api("/api/portal/drivers", { method: "POST", body: { operation: "create", uploadGroupId, mediaIds, ...values } });
+      closeModal();
+      await refresh();
+      revealCode(`${values.firstName} ${values.lastName}`, result.accessCode);
+    },
+  });
+  bindUploads();
+}
+
+async function createDriverAccess(id) {
+  const driver = state.data.drivers.find((item) => item.id === id);
+  try {
+    const result = await api("/api/portal/drivers", { method: "POST", body: { operation: "create_access", driverId: id } });
+    await refresh();
+    revealCode(driver?.fullName || "Driver", result.accessCode);
+  } catch (error) { toast(messageFor(error), "error"); }
+}
+
+async function toggleDriver(id, active) {
+  if (!confirm(active ? tr("Deactivate this driver? Access stops immediately.") : tr("Reactivate this driver?"))) return;
+  try {
+    await api("/api/portal/drivers", { method: "POST", body: { operation: "set_active", driverId: id, active: !active } });
+    toast(active ? "Driver deactivated." : "Driver reactivated.");
+    await refresh();
+  } catch (error) { toast(messageFor(error), "error"); }
+}
+
+async function viewDriver(id) {
+  const driver = state.data.drivers.find((item) => item.id === id);
+  if (!driver) return;
+  try {
+    const result = await api("/api/portal/driver-media", { method: "POST", body: { driverId: id } });
+    const details = [["Full name", driver.fullName], ["Email", driver.email], ["Phone", driver.phone], ["Date of birth", driver.dateOfBirth], ["Identity-card number", driver.identityCardNumber], ["Driving-licence number", driver.drivingLicenceNumber], ["Licence issue date", driver.licenceIssueDate], ["Licence valid since", driver.licenceValidSince]];
+    modal({ title: driver.fullName, content: `<div class="portal-form"><div class="form-grid">${details.map(([label, value]) => readonlyField(label, value)).join("")}</div>
+      <section class="form-section"><h3>${clean(tr("Protected documents"))}</h3><div class="media-gallery">${result.items.sort((a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99)).map((item) => `<figure><img src="${clean(item.url)}" alt="${clean(mediaSlotLabel(item.slot, item.category))}" loading="lazy"><figcaption>${clean(mediaSlotLabel(item.slot, item.category))}</figcaption></figure>`).join("")}</div></section></div>` });
+  } catch (error) { toast(messageFor(error), "error"); }
 }
 
 function createVehicle() {
@@ -1605,10 +2036,11 @@ function updateVehicle(id) {
   setCustomValue(el.modalBody, "status", vehicle.status);
 }
 
-function uploadField(label, name, category, required = false, slot = name, multiple = false) {
+function uploadField(label, name, category, required = false, slot = name, multiple = false, accept = "image/jpeg,image/png,image/webp") {
+  const documentAllowed = accept.includes("application/pdf");
   return `<div class="upload-field"><label>${clean(tr(label))}${required ? " *" : ""}</label><label class="upload-drop">
-    <input type="file" name="${clean(name)}" accept="image/jpeg,image/png,image/webp" data-category="${clean(category)}" data-slot="${clean(slot)}" ${multiple ? "multiple" : ""} ${required ? "required" : ""}>
-    <strong>${clean(tr("Choose or take a photo"))}</strong><span>${clean(tr("Camera or gallery"))} · JPG, PNG, WebP</span></label><div class="file-summary">${clean(tr("No photo selected"))}</div></div>`;
+    <input type="file" name="${clean(name)}" accept="${clean(accept)}" data-category="${clean(category)}" data-slot="${clean(slot)}" ${multiple ? "multiple" : ""} ${required ? "required" : ""}>
+    <strong>${clean(tr(documentAllowed ? "Choose a photo or PDF" : "Choose or take a photo"))}</strong><span>${clean(tr(documentAllowed ? "Photo or PDF" : "Camera or gallery"))} · ${documentAllowed ? "JPG, PNG, WebP, PDF" : "JPG, PNG, WebP"}</span></label><div class="file-summary">${clean(tr(documentAllowed ? "No file selected" : "No photo selected"))}</div></div>`;
 }
 
 function signature(slot, label, required = true) {
@@ -1641,6 +2073,16 @@ function mediaSlotLabel(slot, category) {
   if (slot === "customer_signature") return tr("Customer signature");
   if (slot === "employee_signature") return tr("Employee signature");
   if (slot === "mechanic_signature") return tr("Mechanic signature");
+  if (slot?.startsWith("problem_photo_")) return `${tr("Problem or dashboard warning")} ${slot.slice(14)}`;
+  if (slot?.startsWith("own_vehicle_damage_")) return `${tr("Damage to our vehicle")} ${slot.slice(19)}`;
+  if (slot?.startsWith("third_party_damage_")) return `${tr("Damage to the other party")} ${slot.slice(19)}`;
+  if (slot === "accident_form") return tr("Signed European accident statement");
+  if (slot === "amicable_agreement") return tr("Joint written amicable agreement");
+  if (slot === "payment_proof") return tr("Payment proof");
+  if (slot === "driver_identity_front") return tr("ID card — front");
+  if (slot === "driver_identity_back") return tr("ID card — back");
+  if (slot === "driver_licence_front") return tr("Driving licence — front");
+  if (slot === "driver_licence_back") return tr("Driving licence — back");
   if (slot?.startsWith("before_")) return `${tr("Before washing")} — ${tr(standardLabels[slot.slice(7)] || slot.slice(7))}`;
   if (slot?.startsWith("after_")) return `${tr("After washing")} — ${tr(standardLabels[slot.slice(6)] || slot.slice(6))}`;
   if (slot === "outgoing_dashboard_started") return `${tr("YABI replacement vehicle")} — ${tr("Dashboard photo — vehicle started")}`;
@@ -1676,6 +2118,27 @@ function workflowForm(type) {
   const vehicle = select("Vehicle", "vehicleId", vehicles, true);
   const rental = select("Rental (optional)", "rentalId", rentals);
   const mileage = field("Mileage (km)", "mileage", "", true, "number", 'min="0"');
+  if (type === "problem_report") {
+    return `<form class="portal-form">${vehicle}${readonlyField("Date and time", date(Date.now(), true), "Recorded automatically by the server.")}
+      <div class="field"><label>${clean(tr("Describe the problem or damage"))} *</label><textarea name="description" required></textarea></div>
+      <section class="form-section"><h3>${clean(tr("Photographic evidence"))}</h3>${uploadField("Problem or dashboard warning", "problem_photo", "damage", true, "problem_photo", true)}${uploadField("Extra photos (optional)", "extra", "damage", false, "extra", true)}</section></form>`;
+  }
+  if (type === "accident_report") {
+    const localNow = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    return `<form class="portal-form">${vehicle}<div class="form-grid">${field("Accident date and time", "eventOccurredAt", localNow, true, "datetime-local")}${select("Liability", "accidentLiability", [["at_fault", "At fault"], ["not_at_fault", "Not at fault"]], true)}</div>
+      <div class="field"><label>${clean(tr("Accident description"))} *</label><textarea name="description" required></textarea></div>
+      <section class="form-section"><h3>${clean(tr("Accident evidence"))}</h3><div class="evidence-grid">${uploadField("Damage to our vehicle", "own_vehicle_damage", "accident", true, "own_vehicle_damage", true)}${uploadField("Damage to the other party", "third_party_damage", "accident", true, "third_party_damage", true)}${uploadField("Signed European accident statement", "accident_form", "accident", true, "accident_form")}</div>${uploadField("Extra accident photos (optional)", "extra", "accident", false, "extra", true)}</section>
+      <section class="form-section" data-amicable-section hidden><h3>${clean(tr("Possible amicable settlement"))}</h3>${select("Will the accident be settled amicably?", "amicableSettlement", [["true", "Yes"], ["false", "No"]])}<div class="responsibility-warning"><strong>${clean(tr("Important responsibility"))}</strong><span>${clean(tr("If settled amicably, the customer or driver remains responsible for repairing the YABI vehicle."))}</span></div><div data-amicable-upload hidden>${uploadField("Joint written amicable agreement", "amicable_agreement", "accident", false, "amicable_agreement")}</div></section></form>`;
+  }
+  if (type === "payment_proof") {
+    return `<form class="portal-form">${field("Invoice number or reference", "invoiceReference", "", true)}${readonlyField("Date and time", date(Date.now(), true), "Recorded automatically by the server.")}
+      <section class="form-section"><h3>${clean(tr("Proof for accounting"))}</h3>${uploadField("Payment proof", "payment_proof", "payment", true, "payment_proof", false, "image/jpeg,image/png,image/webp,application/pdf")}</section></form>`;
+  }
+  if (type === "monthly_inspection") {
+    return `<form class="portal-form">${vehicle}<div class="form-grid">${mileage}${readonlyField("Performed by", state.data.account.displayName, "Taken from the signed-in account.")}${readonlyField("Date and time", date(Date.now(), true), "Recorded automatically by the server.")}</div>
+      <section class="form-section"><h3>${clean(tr("Required monthly photographs"))}</h3><div class="evidence-grid">${uploadField("Interior", "interior", "inspection", true, "interior")}${uploadField("Front", "front", "inspection", true, "front")}${uploadField("Right side", "right", "inspection", true, "right")}${uploadField("Left side", "left", "inspection", true, "left")}${uploadField("Rear", "rear", "inspection", true, "rear")}</div>
+      <div class="started-vehicle-note"><strong>${clean(tr("Vehicle must be started"))}</strong><span>${clean(tr("The dashboard photo must clearly show the current mileage while the engine is running."))}</span></div>${uploadField("Dashboard photo — vehicle started", "dashboard_started", "inspection", true, "dashboard_started")}</section></form>`;
+  }
   if (["check_in", "check_out"].includes(type)) {
     return `<form class="portal-form">${vehicle}${rentals.length ? rental : ""}<div class="form-grid">${field("Driver / guest full name", "personName", "", true)}${mileage}${field("Autonomy (km)", "autonomyKm", "", true, "number", 'min="0" max="5000"')}</div>
       <section class="form-section"><h3>${clean(tr("Dashboard"))}</h3>${dashboardEvidence()}</section>
@@ -1798,6 +2261,12 @@ function openWorkflow(type) {
         values.roadTestPerformed = values.roadTestPerformed === "true";
         values.readyForService = values.readyForService === "true";
       }
+      if (type === "accident_report") {
+        values.eventOccurredAt = new Date(String(values.eventOccurredAt)).getTime();
+        if (!Number.isFinite(values.eventOccurredAt)) throw new Error("validation_failed");
+        if (values.accidentLiability === "at_fault") values.amicableSettlement = values.amicableSettlement === "true";
+        else delete values.amicableSettlement;
+      }
       ["mileage", "mileageAfter", "fuelPercent", "autonomyKm", "secondaryMileage", "secondaryAutonomyKm"].forEach((key) => {
         if (values[key]) values[key] = Number(values[key]);
         else delete values[key];
@@ -1817,6 +2286,31 @@ function openWorkflow(type) {
   bindUploads();
   bindSignature();
   if (type === "maintenance") bindMaintenanceForm();
+  if (type === "accident_report") bindAccidentForm();
+}
+
+function bindAccidentForm() {
+  const liability = el.modalBody.querySelector('[name="accidentLiability"]');
+  const amicable = el.modalBody.querySelector('[name="amicableSettlement"]');
+  const section = el.modalBody.querySelector("[data-amicable-section]");
+  const uploadWrap = el.modalBody.querySelector("[data-amicable-upload]");
+  const uploadInput = uploadWrap.querySelector('input[type="file"]');
+  const syncLiability = () => {
+    const atFault = liability.value === "at_fault";
+    section.hidden = !atFault;
+    amicable.closest("[data-custom-select]").dataset.required = String(atFault);
+    if (!atFault) setCustomValue(section, "amicableSettlement", "");
+  };
+  const syncAgreement = () => {
+    const required = liability.value === "at_fault" && amicable.value === "true";
+    uploadWrap.hidden = !required;
+    uploadInput.required = required;
+    if (!required) uploadInput.value = "";
+  };
+  liability.addEventListener("change", () => { syncLiability(); syncAgreement(); });
+  amicable.addEventListener("change", syncAgreement);
+  syncLiability();
+  syncAgreement();
 }
 
 function bindMaintenanceForm() {
@@ -1836,8 +2330,8 @@ function bindUploads() {
     input.addEventListener("change", () => {
       input.closest(".upload-field").querySelector(".file-summary").textContent =
         input.files.length
-          ? `${input.files.length} ${tr(input.files.length === 1 ? "photo selected" : "photos selected")}`
-          : tr("No photos selected");
+          ? `${input.files.length} ${tr(input.accept.includes("application/pdf") ? (input.files.length === 1 ? "file selected" : "files selected") : (input.files.length === 1 ? "photo selected" : "photos selected"))}`
+          : tr(input.accept.includes("application/pdf") ? "No file selected" : "No photos selected");
     });
   });
 }
@@ -1882,6 +2376,10 @@ function bindSignature() {
 
 async function optimise(file) {
   if (file.size > 20_000_000) throw new Error("upload_failed");
+  if (file.type === "application/pdf") {
+    if (file.size > 8_000_000) throw new Error("upload_failed");
+    return file;
+  }
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, 2200 / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
@@ -1944,6 +2442,8 @@ async function viewRecord(id) {
       : "";
     const details = [
       ["Server date and time", date(record.occurredAt, true)],
+      ["Accident date and time", record.eventOccurredAt ? date(record.eventOccurredAt, true) : ""],
+      ["Performed by", record.performedByName],
       ["Registration plate", record.licensePlate],
       ["Mileage", record.mileage != null ? `${record.mileage} km` : ""],
       ["Mileage after", record.mileageAfter != null ? `${record.mileageAfter} km` : ""],
@@ -1958,6 +2458,11 @@ async function viewRecord(id) {
       ["Point A / origin", record.originAddress],
       ["Point B / destination", record.destinationAddress],
       ["Disposition", record.disposition ? tr({ self: "Moved by me", towing: "Towing service", mechanic: "Mechanic came", other: "Other" }[record.disposition]) : ""],
+      ["Liability", record.accidentLiability ? tr(record.accidentLiability === "at_fault" ? "At fault" : "Not at fault") : ""],
+      ["Amicable settlement", record.amicableSettlement == null ? "" : tr(record.amicableSettlement ? "Yes" : "No")],
+      ["Invoice number or reference", record.invoiceReference],
+      ["Inspection month", record.inspectionMonth],
+      ["Company notification", record.notificationEmailStatus ? tr(record.notificationEmailStatus) : ""],
       ["Mechanic name", record.mechanicName],
       ["Intervention type", interventionLabel],
       ["Parts / work completed", record.maintenanceItems?.length ? record.maintenanceItems.map((code) => maintenanceLabel(maintenanceItemsByCode.get(code)) || code) : ""],
@@ -1975,7 +2480,7 @@ async function viewRecord(id) {
       content: `<div class="portal-form">${details.map(([label, value]) => `<div class="field"><label>${clean(tr(label))}</label>${recordDetailValue(value)}</div>`).join("")}
         ${result.items.length ? `<div class="media-gallery">${result.items.sort((a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99)).map((item) => {
           const caption = mediaSlotLabel(item.slot, item.category);
-          return `<figure><img src="${clean(item.url)}" alt="${clean(caption)}" loading="lazy"><figcaption>${clean(caption)}</figcaption></figure>`;
+          return `<figure>${item.contentType === "application/pdf" ? `<a class="document-link" href="${clean(item.url)}" target="_blank" rel="noopener"><strong>PDF</strong><span>${clean(tr("Open document"))}</span></a>` : `<img src="${clean(item.url)}" alt="${clean(caption)}" loading="lazy">`}<figcaption>${clean(caption)}</figcaption></figure>`;
         }).join("")}</div>` : `<p>${clean(tr("No media attached."))}</p>`}</div>`,
     });
   } catch (error) {
@@ -2071,7 +2576,13 @@ el.view.addEventListener("click", async (event) => {
   if (!button) return;
   const { action, id } = button.dataset;
   if (action === "create-account") createAccount();
+  if (action === "edit-account") editAccount(id);
   if (action === "create-customer") createCustomer();
+  if (action === "edit-customer") editCustomer(id);
+  if (action === "create-driver") createDriver();
+  if (action === "view-driver") viewDriver(id);
+  if (action === "driver-access") createDriverAccess(id);
+  if (action === "toggle-driver") toggleDriver(id, button.dataset.active === "true");
   if (action === "create-vehicle") createVehicle();
   if (action === "create-rental") createRental();
   if (action === "vehicle-status") updateVehicle(id);

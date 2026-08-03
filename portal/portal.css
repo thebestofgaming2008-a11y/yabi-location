@@ -235,6 +235,12 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .started-vehicle-note { padding: .75rem .85rem; display: grid; gap: .2rem; border-left: 4px solid var(--blue); background: var(--blue-light); }
 .started-vehicle-note strong { color: var(--navy); font-size: .68rem; text-transform: uppercase; }
 .started-vehicle-note span { color: var(--muted); font-size: .62rem; line-height: 1.45; }
+.responsibility-warning { padding: .8rem .9rem; display: grid; gap: .25rem; border-left: 4px solid #b56a00; background: #fff7e8; }
+.responsibility-warning strong { color: #754300; font-size: .68rem; text-transform: uppercase; }
+.responsibility-warning span { color: #5d4b31; font-size: .62rem; line-height: 1.5; }
+.document-link { min-height: 180px; padding: 1rem; display: grid; place-content: center; justify-items: center; gap: .45rem; background: var(--blue-light); color: var(--blue); text-decoration: none; }
+.document-link strong { font: 800 1.8rem var(--display); }
+.document-link span { font-size: .65rem; font-weight: 800; }
 .permission-field { margin: 0; padding: .85rem; border: 1px solid var(--line); }
 .permission-field legend { padding: 0 .35rem; color: #43566b; font-size: .59rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .permission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }

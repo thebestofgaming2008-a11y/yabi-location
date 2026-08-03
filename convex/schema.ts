@@ -32,6 +32,7 @@ export const portalRoleValidator = v.union(
   v.literal("admin"),
   v.literal("employee"),
   v.literal("customer"),
+  v.literal("driver"),
   v.literal("mechanic"),
   v.literal("contractor"),
 );
@@ -71,6 +72,15 @@ export const workflowTypeValidator = v.union(
   v.literal("breakdown_replacement"),
   v.literal("vehicle_transfer"),
   v.literal("report"),
+  v.literal("problem_report"),
+  v.literal("accident_report"),
+  v.literal("payment_proof"),
+  v.literal("monthly_inspection"),
+);
+
+export const accidentLiabilityValidator = v.union(
+  v.literal("at_fault"),
+  v.literal("not_at_fault"),
 );
 
 export const vehicleDispositionValidator = v.union(
@@ -103,6 +113,10 @@ export const mediaCategoryValidator = v.union(
   v.literal("signature"),
   v.literal("damage"),
   v.literal("maintenance"),
+  v.literal("accident"),
+  v.literal("payment"),
+  v.literal("inspection"),
+  v.literal("driver_document"),
   v.literal("other"),
 );
 
@@ -189,6 +203,7 @@ export default defineSchema({
     codeHint: v.string(),
     active: v.boolean(),
     linkedCustomerId: v.optional(v.id("customers")),
+    linkedDriverId: v.optional(v.id("customerDrivers")),
     allowedWorkflowTypes: v.optional(v.array(workflowTypeValidator)),
     createdBy: v.optional(v.id("portalAccounts")),
     lastLoginAt: v.optional(v.number()),
@@ -246,8 +261,11 @@ export default defineSchema({
   customerDrivers: defineTable({
     customerId: v.id("customers"),
     sourceApplicationDriverId: v.optional(v.id("applicationDrivers")),
+    portalAccountId: v.optional(v.id("portalAccounts")),
     kind: applicationDriverKindValidator,
     sortOrder: v.number(),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
     fullName: v.string(),
     address: v.optional(v.string()),
     street: v.optional(v.string()),
@@ -270,6 +288,7 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_customer_id", ["customerId"])
+    .index("by_portal_account_id", ["portalAccountId"])
     .index("by_source_application_driver_id", ["sourceApplicationDriverId"]),
 
   rentalApplications: defineTable({
@@ -425,6 +444,7 @@ export default defineSchema({
     vehicleId: v.optional(v.id("operationalVehicles")),
     customerId: v.optional(v.id("customers")),
     rentalId: v.optional(v.id("rentals")),
+    driverId: v.optional(v.id("customerDrivers")),
     licensePlate: v.optional(v.string()),
     occurredAt: v.number(),
     mileage: v.optional(v.number()),
@@ -446,6 +466,12 @@ export default defineSchema({
     maintenanceOtherDetails: v.optional(v.string()),
     roadTestPerformed: v.optional(v.boolean()),
     readyForService: v.optional(v.boolean()),
+    eventOccurredAt: v.optional(v.number()),
+    accidentLiability: v.optional(accidentLiabilityValidator),
+    amicableSettlement: v.optional(v.boolean()),
+    invoiceReference: v.optional(v.string()),
+    inspectionMonth: v.optional(v.string()),
+    performedByName: v.optional(v.string()),
     maintenanceWork: v.optional(v.string()),
     changesMade: v.optional(v.string()),
     reportCategory: v.optional(
@@ -465,13 +491,26 @@ export default defineSchema({
     resolution: v.optional(v.string()),
     resolvedAt: v.optional(v.number()),
     resolvedBy: v.optional(v.id("portalAccounts")),
+    notificationEmailStatus: v.optional(
+      v.union(
+        v.literal("not_configured"),
+        v.literal("pending"),
+        v.literal("sent"),
+        v.literal("failed"),
+      ),
+    ),
+    notificationEmailProviderId: v.optional(v.string()),
+    notificationEmailLastError: v.optional(v.string()),
+    notificationEmailAttemptedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_reference", ["reference"])
     .index("by_type", ["type"])
     .index("by_actor_account_id", ["actorAccountId"])
+    .index("by_driver_id", ["driverId"])
     .index("by_vehicle_id", ["vehicleId"])
+    .index("by_vehicle_id_and_inspection_month", ["vehicleId", "inspectionMonth"])
     .index("by_customer_id", ["customerId"])
     .index("by_rental_id", ["rentalId"])
     .index("by_status", ["status"]),
@@ -480,6 +519,7 @@ export default defineSchema({
     r2Key: v.string(),
     uploadGroupId: v.string(),
     recordId: v.optional(v.id("workflowRecords")),
+    driverId: v.optional(v.id("customerDrivers")),
     createdBy: v.id("portalAccounts"),
     fileName: v.string(),
     contentType: v.string(),
@@ -501,6 +541,7 @@ export default defineSchema({
     .index("by_r2_key", ["r2Key"])
     .index("by_upload_group_id", ["uploadGroupId"])
     .index("by_record_id", ["recordId"])
+    .index("by_driver_id", ["driverId"])
     .index("by_created_by", ["createdBy"])
     .index("by_status", ["status"]),
 

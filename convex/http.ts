@@ -5,6 +5,8 @@ import {
   portalAdmin,
   portalBootstrap,
   portalData,
+  portalDriverMedia,
+  portalDrivers,
   portalLogin,
   portalLogout,
   portalMediaCallback,
@@ -311,6 +313,12 @@ http.route({ path: "/api/portal/login", method: "POST", handler: portalLogin });
 http.route({ path: "/api/portal/logout", method: "POST", handler: portalLogout });
 http.route({ path: "/api/portal/data", method: "GET", handler: portalData });
 http.route({ path: "/api/portal/admin", method: "POST", handler: portalAdmin });
+http.route({ path: "/api/portal/drivers", method: "POST", handler: portalDrivers });
+http.route({
+  path: "/api/portal/driver-media",
+  method: "POST",
+  handler: portalDriverMedia,
+});
 http.route({
   path: "/api/portal/profile",
   method: "POST",
@@ -372,6 +380,8 @@ for (const path of [
   "/api/portal/logout",
   "/api/portal/data",
   "/api/portal/admin",
+  "/api/portal/drivers",
+  "/api/portal/driver-media",
   "/api/portal/profile",
   "/api/portal/workflows",
   "/api/portal/uploads",

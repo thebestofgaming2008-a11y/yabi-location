@@ -15,7 +15,12 @@ interface MediaToken {
   size?: number;
 }
 
-const allowedContentTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+const allowedContentTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+]);
 const maximumUploadSize = 8_000_000;
 
 function base64UrlBytes(value: string): Uint8Array {

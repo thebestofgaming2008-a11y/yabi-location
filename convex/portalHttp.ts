@@ -10,6 +10,7 @@ const allowedRoles = new Set([
   "admin",
   "employee",
   "customer",
+  "driver",
   "mechanic",
   "contractor",
 ]);
@@ -30,6 +31,11 @@ const allowedRentalStatuses = new Set([
   "closed",
   "cancelled",
 ]);
+const allowedCustomerStatuses = new Set(["lead", "active", "inactive"]);
+const allowedBelgianProvinces = new Set([
+  "antwerp", "east_flanders", "flemish_brabant", "hainaut", "liege",
+  "limburg", "luxembourg", "namur", "walloon_brabant", "west_flanders", "brussels_capital",
+]);
 const allowedWorkflowTypes = new Set([
   "customer_onboarding",
   "check_in",
@@ -41,8 +47,13 @@ const allowedWorkflowTypes = new Set([
   "breakdown_replacement",
   "vehicle_transfer",
   "report",
+  "problem_report",
+  "accident_report",
+  "payment_proof",
+  "monthly_inspection",
 ]);
 const allowedDispositions = new Set(["self", "towing", "mechanic", "other"]);
+const allowedAccidentLiabilities = new Set(["at_fault", "not_at_fault"]);
 const allowedMaintenanceInterventionTypes = new Set<string>(maintenanceInterventionTypes);
 const allowedMaintenanceItemCodes = new Set<string>(maintenanceItemCodes);
 const allowedCaptureSources = new Set(["camera", "gallery", "signature"]);
@@ -57,6 +68,10 @@ const allowedMediaCategories = new Set([
   "signature",
   "damage",
   "maintenance",
+  "accident",
+  "payment",
+  "inspection",
+  "driver_document",
   "other",
 ]);
 const allowedReportCategories = new Set([
@@ -67,7 +82,12 @@ const allowedReportCategories = new Set([
   "other",
 ]);
 const allowedPriorities = new Set(["low", "normal", "urgent"]);
-const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+const allowedUploadTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+]);
 const codeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 type JsonBody = Record<string, unknown>;
@@ -257,6 +277,12 @@ function safeError(error: unknown): string {
     "customer_already_linked",
     "customer_link_required",
     "customer_not_linked",
+    "driver_not_found",
+    "driver_not_linked",
+    "driver_link_required",
+    "driver_already_linked",
+    "driver_documents_required",
+    "driver_eligibility_failed",
     "vehicle_not_found",
     "vehicle_exists",
     "vehicle_unavailable",
@@ -276,11 +302,16 @@ function safeError(error: unknown): string {
     "description_required",
     "maintenance_details_required",
     "invalid_maintenance_items",
+    "accident_details_required",
+    "payment_details_required",
+    "inspection_details_required",
+    "inspection_already_submitted",
     "inspection_media_required",
     "before_after_media_required",
     "operation_details_required",
     "required_evidence_missing",
     "cannot_deactivate_self",
+    "cannot_change_self_role",
     "code_collision",
     "media_service_unavailable",
     "portal_not_configured",
@@ -454,14 +485,17 @@ export const portalAdmin = httpAction(async (ctx, request) => {
       const accountId = await ctx.runMutation(internal.portal.createAccount, {
         actorAccountId: session.account.id,
         displayName,
-        role: role as "admin" | "employee" | "customer" | "mechanic" | "contractor",
+        role: role as "admin" | "employee" | "customer" | "driver" | "mechanic" | "contractor",
         codeHash: await codeHash(access.normalized),
         codeHint: access.normalized.slice(-4),
         linkedCustomerId: optionalString(body.linkedCustomerId, 80) as
           | Id<"customers">
           | undefined,
+        linkedDriverId: optionalString(body.linkedDriverId, 80) as
+          | Id<"customerDrivers">
+          | undefined,
         allowedWorkflowTypes: workflowAccess as
-          | Array<"customer_onboarding" | "check_in" | "check_out" | "wash" | "maintenance" | "handover_take" | "handover_return" | "breakdown_replacement" | "vehicle_transfer" | "report">
+          | Array<"customer_onboarding" | "check_in" | "check_out" | "wash" | "maintenance" | "handover_take" | "handover_return" | "breakdown_replacement" | "vehicle_transfer" | "report" | "problem_report" | "accident_report" | "payment_proof" | "monthly_inspection">
           | undefined,
       });
       return json(
@@ -482,6 +516,31 @@ export const portalAdmin = httpAction(async (ctx, request) => {
         codeHint: access.normalized.slice(-4),
       });
       return json({ ok: true, accessCode: access.formatted }, 200, origin);
+    }
+
+    if (operation === "update_account") {
+      const targetAccountId = clean(body.targetAccountId, 80);
+      const displayName = clean(body.displayName, 100);
+      const role = clean(body.role, 20);
+      if (!targetAccountId || !displayName || !allowedRoles.has(role)) {
+        throw new Error("validation_failed");
+      }
+      const workflowAccess = Array.isArray(body.allowedWorkflowTypes)
+        ? [...new Set(body.allowedWorkflowTypes.map((item) => clean(item, 40)).filter((item) => allowedWorkflowTypes.has(item)))].slice(0, 16)
+        : undefined;
+      await ctx.runMutation(internal.portal.updateAccount, {
+        actorAccountId: session.account.id,
+        targetAccountId: targetAccountId as Id<"portalAccounts">,
+        displayName,
+        role: role as "admin" | "employee" | "customer" | "driver" | "mechanic" | "contractor",
+        linkedCustomerId: optionalString(body.linkedCustomerId, 80) as
+          | Id<"customers">
+          | undefined,
+        allowedWorkflowTypes: workflowAccess as
+          | Array<"customer_onboarding" | "check_in" | "check_out" | "wash" | "maintenance" | "handover_take" | "handover_return" | "breakdown_replacement" | "vehicle_transfer" | "report" | "problem_report" | "accident_report" | "payment_proof" | "monthly_inspection">
+          | undefined,
+      });
+      return json({ ok: true }, 200, origin);
     }
 
     if (operation === "set_account_active") {
@@ -511,6 +570,49 @@ export const portalAdmin = httpAction(async (ctx, request) => {
         notes: optionalString(body.notes, 2000),
       });
       return json({ ok: true, customerId }, 201, origin);
+    }
+
+    if (operation === "update_customer") {
+      const customerId = clean(body.customerId, 80);
+      const fullName = clean(body.fullName, 100);
+      const email = clean(body.email, 254).toLowerCase();
+      const phone = clean(body.phone, 40);
+      const status = clean(body.status, 20);
+      const province = clean(body.province, 30);
+      if (
+        !customerId ||
+        !fullName ||
+        !email ||
+        !phone ||
+        !allowedCustomerStatuses.has(status)
+      ) {
+        throw new Error("validation_failed");
+      }
+      await ctx.runMutation(internal.portal.updateCustomer, {
+        actorAccountId: session.account.id,
+        customerId: customerId as Id<"customers">,
+        fullName,
+        company: optionalString(body.company, 120),
+        companyVatNumber: optionalString(body.companyVatNumber, 40),
+        email,
+        phone,
+        address: optionalString(body.address, 300),
+        street: optionalString(body.street, 160),
+        houseNumber: optionalString(body.houseNumber, 20),
+        addressBox: optionalString(body.addressBox, 20),
+        postalCode: optionalString(body.postalCode, 20),
+        city: optionalString(body.city, 80),
+        province: allowedBelgianProvinces.has(province)
+          ? province as "antwerp" | "east_flanders" | "flemish_brabant" | "hainaut" | "liege" | "limburg" | "luxembourg" | "namur" | "walloon_brabant" | "west_flanders" | "brussels_capital"
+          : undefined,
+        identityCardNumber: optionalString(body.identityCardNumber, 80),
+        nationalRegisterNumber: optionalString(body.nationalRegisterNumber, 40),
+        drivingLicenseNumber: optionalString(body.drivingLicenseNumber, 80),
+        emergencyContact: optionalString(body.emergencyContact, 200),
+        notes: optionalString(body.notes, 2000),
+        status: status as "lead" | "active" | "inactive",
+      });
+      return json({ ok: true }, 200, origin);
     }
 
     if (operation === "create_vehicle") {
@@ -682,6 +784,107 @@ export const portalProfile = httpAction(async (ctx, request) => {
   }
 });
 
+export const portalDrivers = httpAction(async (ctx, request) => {
+  const origin = originFor(request);
+  if (origin === "") return json({ ok: false, error: "origin_not_allowed" }, 403, null);
+  try {
+    const session = await requireSession(ctx, request);
+    const body = await parseBody(request);
+    const operation = clean(body.operation, 40);
+
+    if (operation === "create") {
+      const firstName = clean(body.firstName, 80);
+      const lastName = clean(body.lastName, 80);
+      const email = clean(body.email, 254).toLowerCase();
+      const phone = clean(body.phone, 40);
+      const identityCardNumber = clean(body.identityCardNumber, 80);
+      const dateOfBirth = clean(body.dateOfBirth, 10);
+      const drivingLicenceNumber = clean(body.drivingLicenceNumber, 80);
+      const licenceIssueDate = clean(body.licenceIssueDate, 10);
+      const licenceValidSince = clean(body.licenceValidSince, 10);
+      const uploadGroupId = clean(body.uploadGroupId, 80);
+      const mediaIds = Array.isArray(body.mediaIds)
+        ? body.mediaIds.map((item) => clean(item, 80)).filter(Boolean).slice(0, 4)
+        : [];
+      if (
+        !firstName ||
+        !lastName ||
+        !email ||
+        !phone ||
+        !identityCardNumber ||
+        !dateOfBirth ||
+        !drivingLicenceNumber ||
+        !licenceIssueDate ||
+        !licenceValidSince ||
+        !uploadGroupId ||
+        mediaIds.length !== 4
+      ) {
+        throw new Error("validation_failed");
+      }
+      const access = generateAccessCode();
+      const result = await ctx.runMutation(internal.portal.createDriverWithAccount, {
+        actorAccountId: session.account.id,
+        customerId: optionalString(body.customerId, 80) as
+          | Id<"customers">
+          | undefined,
+        firstName,
+        lastName,
+        email,
+        phone,
+        identityCardNumber,
+        dateOfBirth,
+        drivingLicenceNumber,
+        licenceIssueDate,
+        licenceValidSince,
+        uploadGroupId,
+        mediaIds: mediaIds as Id<"mediaAssets">[],
+        codeHash: await codeHash(access.normalized),
+        codeHint: access.normalized.slice(-4),
+      });
+      return json(
+        { ok: true, ...result, accessCode: access.formatted },
+        201,
+        origin,
+      );
+    }
+
+    if (operation === "create_access") {
+      const driverId = clean(body.driverId, 80);
+      if (!driverId) throw new Error("validation_failed");
+      const access = generateAccessCode();
+      const accountId = await ctx.runMutation(internal.portal.createDriverAccess, {
+        actorAccountId: session.account.id,
+        driverId: driverId as Id<"customerDrivers">,
+        codeHash: await codeHash(access.normalized),
+        codeHint: access.normalized.slice(-4),
+      });
+      return json(
+        { ok: true, accountId, accessCode: access.formatted },
+        201,
+        origin,
+      );
+    }
+
+    if (operation === "set_active") {
+      const driverId = clean(body.driverId, 80);
+      if (!driverId || typeof body.active !== "boolean") {
+        throw new Error("validation_failed");
+      }
+      await ctx.runMutation(internal.portal.setDriverActive, {
+        actorAccountId: session.account.id,
+        driverId: driverId as Id<"customerDrivers">,
+        active: body.active,
+      });
+      return json({ ok: true }, 200, origin);
+    }
+
+    throw new Error("validation_failed");
+  } catch (error) {
+    const code = safeError(error);
+    return json({ ok: false, error: code }, statusFor(code), origin);
+  }
+});
+
 export const portalUpload = httpAction(async (ctx, request) => {
   const origin = originFor(request);
   if (origin === "") return json({ ok: false, error: "origin_not_allowed" }, 403, null);
@@ -701,7 +904,7 @@ export const portalUpload = httpAction(async (ctx, request) => {
     if (
       !fileName ||
       !uploadGroupId ||
-      !allowedImageTypes.has(contentType) ||
+      !allowedUploadTypes.has(contentType) ||
       !allowedMediaCategories.has(category) ||
       (slot && !/^[a-z0-9_]{1,80}$/.test(slot)) ||
       (captureSource && !allowedCaptureSources.has(captureSource)) ||
@@ -710,7 +913,9 @@ export const portalUpload = httpAction(async (ctx, request) => {
       throw new Error("validation_failed");
     }
     const extension =
-      contentType === "image/png"
+      contentType === "application/pdf"
+        ? "pdf"
+        : contentType === "image/png"
         ? "png"
         : contentType === "image/webp"
           ? "webp"
@@ -735,6 +940,10 @@ export const portalUpload = httpAction(async (ctx, request) => {
         | "signature"
         | "damage"
         | "maintenance"
+        | "accident"
+        | "payment"
+        | "inspection"
+        | "driver_document"
         | "other",
       expiresAt,
       slot: slot || undefined,
@@ -826,6 +1035,12 @@ export const portalWorkflow = httpAction(async (ctx, request) => {
     const maintenanceItems = Array.isArray(body.maintenanceItems)
       ? body.maintenanceItems.map((item) => clean(item, 80))
       : undefined;
+    const accidentLiability = clean(body.accidentLiability, 30);
+    const eventOccurredAt = boundedNumber(
+      body.eventOccurredAt,
+      946684800000,
+      Date.now() + 5 * 60 * 1000,
+    );
     if (reportCategory && !allowedReportCategories.has(reportCategory)) {
       throw new Error("validation_failed");
     }
@@ -853,7 +1068,11 @@ export const portalWorkflow = httpAction(async (ctx, request) => {
         | "handover_return"
         | "breakdown_replacement"
         | "vehicle_transfer"
-        | "report",
+        | "report"
+        | "problem_report"
+        | "accident_report"
+        | "payment_proof"
+        | "monthly_inspection",
       uploadGroupId,
       mediaIds: mediaIds as Id<"mediaAssets">[],
       vehicleId: optionalString(body.vehicleId, 80) as
@@ -888,6 +1107,19 @@ export const portalWorkflow = httpAction(async (ctx, request) => {
         typeof body.roadTestPerformed === "boolean" ? body.roadTestPerformed : undefined,
       readyForService:
         typeof body.readyForService === "boolean" ? body.readyForService : undefined,
+      eventOccurredAt,
+      accidentLiability: allowedAccidentLiabilities.has(accidentLiability)
+        ? accidentLiability as "at_fault" | "not_at_fault"
+        : undefined,
+      amicableSettlement:
+        typeof body.amicableSettlement === "boolean"
+          ? body.amicableSettlement
+          : undefined,
+      invoiceReference: optionalString(body.invoiceReference, 120),
+      inspectionMonth:
+        type === "monthly_inspection"
+          ? new Date().toISOString().slice(0, 7)
+          : undefined,
       maintenanceWork: optionalString(body.maintenanceWork, 4000),
       changesMade: optionalString(body.changesMade, 4000),
       reportCategory: reportCategory as
@@ -904,6 +1136,20 @@ export const portalWorkflow = httpAction(async (ctx, request) => {
         | undefined,
       description: optionalString(body.description, 4000),
     });
+    if (
+      [
+        "problem_report",
+        "accident_report",
+        "payment_proof",
+        "monthly_inspection",
+      ].includes(type)
+    ) {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.portalNotifications.sendWorkflowNotification,
+        { recordId: result.recordId, attempt: 0 },
+      );
+    }
     return json({ ok: true, ...result }, 201, origin);
   } catch (error) {
     const code = safeError(error);
@@ -924,6 +1170,42 @@ export const portalRecordMedia = httpAction(async (ctx, request) => {
     const media = await ctx.runQuery(internal.portal.getRecordMedia, {
       actorAccountId: session.account.id,
       recordId: recordId as Id<"workflowRecords">,
+    });
+    const expiresAt = Date.now() + 10 * 60 * 1000;
+    const items = await Promise.all(
+      media.map(async (item) => ({
+        id: item.id,
+        fileName: item.fileName,
+        contentType: item.contentType,
+        category: item.category,
+        slot: item.slot,
+        captureSource: item.captureSource,
+        sortOrder: item.sortOrder,
+        url: `${workerUrl}/object/${encodeURIComponent(item.r2Key)}?token=${encodeURIComponent(
+          await mediaToken({ op: "get", key: item.r2Key, exp: expiresAt }),
+        )}`,
+      })),
+    );
+    return json({ ok: true, items, expiresAt }, 200, origin);
+  } catch (error) {
+    const code = safeError(error);
+    return json({ ok: false, error: code }, statusFor(code), origin);
+  }
+});
+
+export const portalDriverMedia = httpAction(async (ctx, request) => {
+  const origin = originFor(request);
+  if (origin === "") return json({ ok: false, error: "origin_not_allowed" }, 403, null);
+  try {
+    const session = await requireSession(ctx, request);
+    const workerUrl = process.env.MEDIA_WORKER_URL?.replace(/\/+$/, "");
+    if (!workerUrl) throw new Error("media_service_unavailable");
+    const body = await parseBody(request);
+    const driverId = clean(body.driverId, 80);
+    if (!driverId) throw new Error("validation_failed");
+    const media = await ctx.runQuery(internal.portal.getDriverMedia, {
+      actorAccountId: session.account.id,
+      driverId: driverId as Id<"customerDrivers">,
     });
     const expiresAt = Date.now() + 10 * 60 * 1000;
     const items = await Promise.all(
