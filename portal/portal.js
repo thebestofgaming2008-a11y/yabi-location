@@ -260,6 +260,10 @@ const translations = {
     "Document a vehicle transfer from point A to point B.": "Documentez le transfert d’un véhicule du point A au point B.",
     "Report damage, a problem or a modification.": "Signalez un dommage, un problème ou une modification.",
     "No photos selected": "Aucune photo sélectionnée",
+    "Ready to upload": "Prêt à envoyer",
+    Remove: "Supprimer",
+    "Accepted evidence": "Preuves acceptées",
+    "These files were securely accepted with this record.": "Ces fichiers ont été acceptés et sécurisés avec cet enregistrement.",
     "Complete operation": "Terminer l’opération",
     Procedure: "Procédure",
     "Operation recorded.": "Opération enregistrée.",
@@ -711,6 +715,10 @@ const translations = {
     "Document a vehicle transfer from point A to point B.": "Documenteer een voertuigverplaatsing van punt A naar punt B.",
     "Report damage, a problem or a modification.": "Meld schade, een probleem of een wijziging.",
     "No photos selected": "Geen foto’s geselecteerd",
+    "Ready to upload": "Klaar om te uploaden",
+    Remove: "Verwijderen",
+    "Accepted evidence": "Geaccepteerd bewijs",
+    "These files were securely accepted with this record.": "Deze bestanden zijn veilig geaccepteerd bij deze registratie.",
     "Complete operation": "Werkzaamheid voltooien",
     Procedure: "Procedure",
     "Operation recorded.": "Werkzaamheid geregistreerd.",
@@ -1888,6 +1896,7 @@ function modal({ kicker = "YABI", title, content, submit = "Save", handler }) {
 }
 
 function closeModal() {
+  el.modalBody.querySelectorAll('input[type="file"]').forEach(releaseUploadPreviewUrls);
   if (el.modal.open) el.modal.close();
   el.modalBody.innerHTML = "";
 }
@@ -2205,7 +2214,7 @@ function uploadField(label, name, category, required = false, slot = name, multi
   const documentAllowed = accept.includes("application/pdf");
   return `<div class="upload-field"><label>${clean(tr(label))}${required ? " *" : ""}</label><label class="upload-drop">
     <input type="file" name="${clean(name)}" accept="${clean(accept)}" data-category="${clean(category)}" data-slot="${clean(slot)}" ${multiple ? "multiple" : ""} ${required ? "required" : ""}>
-    <strong>${clean(tr(documentAllowed ? "Choose a photo or PDF" : "Choose or take a photo"))}</strong><span>${clean(tr(documentAllowed ? "Photo or PDF" : "Camera or gallery"))} · ${documentAllowed ? "JPG, PNG, WebP, PDF" : "JPG, PNG, WebP"}</span></label><div class="file-summary">${clean(tr(documentAllowed ? "No file selected" : "No photo selected"))}</div></div>`;
+    <strong>${clean(tr(documentAllowed ? "Choose a photo or PDF" : "Choose or take a photo"))}</strong><span>${clean(tr(documentAllowed ? "Photo or PDF" : "Camera or gallery"))} · ${documentAllowed ? "JPG, PNG, WebP, PDF" : "JPG, PNG, WebP"}</span></label><div class="file-summary" aria-live="polite">${clean(tr(documentAllowed ? "No file selected" : "No photo selected"))}</div><div class="file-preview-grid" data-file-previews></div></div>`;
 }
 
 function signature(slot, label, required = true) {
@@ -2441,11 +2450,12 @@ function openWorkflow(type) {
         values.vehicleId ||= selectedRental?.vehicleId;
         values.customerId = selectedRental?.customerId;
       }
-      await api("/api/portal/workflows", { method: "POST", body: { type, uploadGroupId, mediaIds, ...values } });
+      const result = await api("/api/portal/workflows", { method: "POST", body: { type, uploadGroupId, mediaIds, ...values } });
       closeModal();
       toast("Operation recorded.");
       await refresh();
       navigate("operations");
+      await viewRecord(result.recordId);
     },
   });
   bindUploads();
@@ -2492,12 +2502,59 @@ function bindMaintenanceForm() {
 
 function bindUploads() {
   el.modalBody.querySelectorAll('input[type="file"]').forEach((input) => {
-    input.addEventListener("change", () => {
-      input.closest(".upload-field").querySelector(".file-summary").textContent =
-        input.files.length
-          ? `${input.files.length} ${tr(input.accept.includes("application/pdf") ? (input.files.length === 1 ? "file selected" : "files selected") : (input.files.length === 1 ? "photo selected" : "photos selected"))}`
-          : tr(input.accept.includes("application/pdf") ? "No file selected" : "No photos selected");
-    });
+    input.addEventListener("change", () => renderUploadPreviews(input));
+  });
+}
+
+const uploadPreviewUrls = new WeakMap();
+
+function releaseUploadPreviewUrls(input) {
+  (uploadPreviewUrls.get(input) || []).forEach((url) => URL.revokeObjectURL(url));
+  uploadPreviewUrls.delete(input);
+}
+
+function fileSizeLabel(size) {
+  if (size < 1_000_000) return `${Math.max(1, Math.round(size / 1_000))} KB`;
+  return `${(size / 1_000_000).toFixed(1)} MB`;
+}
+
+function removeUploadFile(input, removeIndex) {
+  if (typeof DataTransfer !== "function") {
+    input.value = "";
+    renderUploadPreviews(input);
+    return;
+  }
+  const transfer = new DataTransfer();
+  [...input.files].forEach((file, index) => {
+    if (index !== removeIndex) transfer.items.add(file);
+  });
+  input.files = transfer.files;
+  renderUploadPreviews(input);
+}
+
+function renderUploadPreviews(input) {
+  const field = input.closest(".upload-field");
+  const previewGrid = field.querySelector("[data-file-previews]");
+  const files = [...input.files];
+  const documentAllowed = input.accept.includes("application/pdf");
+  releaseUploadPreviewUrls(input);
+  const urls = [];
+  uploadPreviewUrls.set(input, urls);
+  field.classList.toggle("has-files", files.length > 0);
+  field.querySelector(".file-summary").textContent = files.length
+    ? `${files.length} ${tr(documentAllowed ? (files.length === 1 ? "file selected" : "files selected") : (files.length === 1 ? "photo selected" : "photos selected"))}`
+    : tr(documentAllowed ? "No file selected" : "No photos selected");
+  previewGrid.innerHTML = files.map((file, index) => {
+    const isImage = file.type.startsWith("image/");
+    const previewUrl = isImage ? URL.createObjectURL(file) : "";
+    if (previewUrl) urls.push(previewUrl);
+    const visual = isImage
+      ? `<img src="${clean(previewUrl)}" alt="${clean(file.name)}">`
+      : `<div class="file-preview-document" aria-hidden="true">PDF</div>`;
+    return `<article class="file-preview-card">${visual}<div class="file-preview-info"><strong title="${clean(file.name)}">${clean(file.name)}</strong><span>${clean(fileSizeLabel(file.size))} · ${clean(tr("Ready to upload"))}</span></div><button type="button" data-remove-upload="${index}" aria-label="${clean(`${tr("Remove")} ${file.name}`)}">${clean(tr("Remove"))}</button></article>`;
+  }).join("");
+  previewGrid.querySelectorAll("[data-remove-upload]").forEach((button) => {
+    button.addEventListener("click", () => removeUploadFile(input, Number(button.dataset.removeUpload)));
   });
 }
 
@@ -2643,10 +2700,10 @@ async function viewRecord(id) {
       kicker: record.reference,
       title: workflows[record.type]?.[1] || "Operation",
       content: `<div class="portal-form">${details.map(([label, value]) => `<div class="field"><label>${clean(tr(label))}</label>${recordDetailValue(value)}</div>`).join("")}
-        ${result.items.length ? `<div class="media-gallery">${result.items.sort((a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99)).map((item) => {
+        ${result.items.length ? `<section class="accepted-evidence"><h3>${clean(tr("Accepted evidence"))}</h3><p>${clean(tr("These files were securely accepted with this record."))}</p><div class="media-gallery">${result.items.sort((a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99)).map((item) => {
           const caption = mediaSlotLabel(item.slot, item.category);
           return `<figure>${item.contentType === "application/pdf" ? `<a class="document-link" href="${clean(item.url)}" target="_blank" rel="noopener"><strong>PDF</strong><span>${clean(tr("Open document"))}</span></a>` : `<img src="${clean(item.url)}" alt="${clean(caption)}" loading="lazy">`}<figcaption>${clean(caption)}</figcaption></figure>`;
-        }).join("")}</div>` : `<p>${clean(tr("No media attached."))}</p>`}</div>`,
+        }).join("")}</div></section>` : `<p>${clean(tr("No media attached."))}</p>`}</div>`,
     });
   } catch (error) {
     toast(messageFor(error), "error");

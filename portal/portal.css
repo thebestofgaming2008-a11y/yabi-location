@@ -200,6 +200,15 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .upload-drop strong { color: var(--blue); font-size: .66rem; }
 .upload-drop span { font-size: .56rem; }
 .file-summary { min-height: 18px; color: var(--muted); font-size: .58rem; }
+.file-preview-grid { display: grid; gap: .45rem; }
+.file-preview-card { min-width: 0; padding: .45rem; display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: center; gap: .55rem; border: 1px solid #cfe0ef; background: white; }
+.file-preview-card img, .file-preview-document { width: 64px; height: 54px; object-fit: cover; background: var(--blue-light); }
+.file-preview-document { display: grid; place-items: center; color: var(--blue); font: 800 .9rem var(--display); }
+.file-preview-info { min-width: 0; display: grid; gap: .18rem; }
+.file-preview-info strong { overflow: hidden; color: var(--navy); font-size: .62rem; text-overflow: ellipsis; white-space: nowrap; }
+.file-preview-info span { color: #2d7a50; font-size: .56rem; font-weight: 700; }
+.file-preview-card button { padding: .45rem; border: 0; background: transparent; color: var(--danger); font-size: .56rem; font-weight: 800; cursor: pointer; }
+.upload-field.has-files .upload-drop { border-style: solid; border-color: #7fb296; background: #f4fbf7; }
 .signature-wrap { display: grid; gap: .45rem; }
 .signature-canvas { width: 100%; height: 150px; display: block; border: 1px solid #9eb4cb; background: #fbfdff; touch-action: none; cursor: crosshair; }
 .signature-controls { display: flex; justify-content: space-between; align-items: center; }
@@ -218,6 +227,9 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .media-gallery figure { margin: 0; border: 1px solid var(--line); }
 .media-gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--surface); }
 .media-gallery figcaption { padding: .5rem; color: var(--muted); font-size: .58rem; text-transform: capitalize; }
+.accepted-evidence { display: grid; gap: .65rem; padding: .85rem; border: 1px solid #add5be; background: #f4fbf7; }
+.accepted-evidence h3 { margin: 0; color: #185a38; font: 700 .9rem var(--display); text-transform: uppercase; }
+.accepted-evidence > p { margin: 0; color: #35664c; font-size: .62rem; }
 .form-section { display: grid; gap: .8rem; padding: 1rem; border: 1px solid var(--line); background: #fbfdff; }
 .form-section h3 { margin: 0; color: var(--navy); font: 700 1rem var(--display); letter-spacing: .02em; text-transform: uppercase; }
 .readonly-value { min-height: 46px; padding: .72rem .8rem; display: flex; align-items: center; border: 1px solid #d5e0eb; background: #f2f6fa; color: var(--navy); font-size: .75rem; font-weight: 700; }
