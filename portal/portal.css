@@ -1023,11 +1023,8 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .action-pictogram svg {
   width: 100%;
   height: 100%;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  fill: currentColor;
+  stroke: none;
 }
 .nav-pictogram { width: 22px; height: 22px; color: #88b6ea; }
 .nav-button.active .nav-pictogram { color: var(--lime); }
@@ -1043,8 +1040,9 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .role-task-heading .action-pictogram {
   width: 42px;
   height: 42px;
-  padding: .55rem;
+  padding: .6rem;
   background: var(--blue-light);
+  border-radius: 10px;
 }
 .role-task-card.is-primary .action-pictogram {
   background: rgba(255, 255, 255, .1);
@@ -1056,6 +1054,7 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
   padding: .45rem;
   background: var(--blue-light);
   color: var(--blue);
+  border-radius: 9px;
 }
 .workflow-card-top .action-pictogram {
   width: 42px;
@@ -1063,6 +1062,7 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
   padding: .5rem;
   background: var(--blue-light);
   color: var(--blue);
+  border-radius: 10px;
 }
 .workflow-card .workflow-card-top b {
   color: var(--blue);
@@ -1073,6 +1073,7 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
   height: 28px;
   padding: .3rem;
   background: var(--blue-light);
+  border-radius: 7px;
 }
 .record-operation-identity,
 .record-vehicle-identity,
@@ -1094,6 +1095,7 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
   height: 32px;
   padding: .35rem;
   background: var(--blue-light);
+  border-radius: 7px;
 }
 .vehicle-brand-mark {
   width: 32px;
