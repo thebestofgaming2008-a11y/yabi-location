@@ -260,6 +260,9 @@ const translations = {
     "Document a vehicle transfer from point A to point B.": "Documentez le transfert d’un véhicule du point A au point B.",
     "Report damage, a problem or a modification.": "Signalez un dommage, un problème ou une modification.",
     "No photos selected": "Aucune photo sélectionnée",
+    "Choose one or more": "Choisissez un ou plusieurs éléments",
+    "item selected": "élément sélectionné",
+    "items selected": "éléments sélectionnés",
     "Ready to upload": "Prêt à envoyer",
     Remove: "Supprimer",
     "Accepted evidence": "Preuves acceptées",
@@ -715,6 +718,9 @@ const translations = {
     "Document a vehicle transfer from point A to point B.": "Documenteer een voertuigverplaatsing van punt A naar punt B.",
     "Report damage, a problem or a modification.": "Meld schade, een probleem of een wijziging.",
     "No photos selected": "Geen foto’s geselecteerd",
+    "Choose one or more": "Kies één of meer items",
+    "item selected": "item geselecteerd",
+    "items selected": "items geselecteerd",
     "Ready to upload": "Klaar om te uploaden",
     Remove: "Verwijderen",
     "Accepted evidence": "Geaccepteerd bewijs",
@@ -1169,6 +1175,71 @@ const clean = (value = "") =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 
+const pictogramPaths = {
+  home: '<path d="M3 11 12 3l9 8v10h-6v-6H9v6H3Z"/>',
+  applications: '<path d="M7 3h10l4 4v14H7Z"/><path d="M17 3v5h5M10 12h8M10 16h8"/>',
+  access: '<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M15 12v2"/>',
+  customers: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c.5-4 2.5-6 6-6s5.5 2 6 6M14 15c3.5-.5 6 1 7 5"/>',
+  drivers: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M4 11h5M15 11h5M12 15v5"/>',
+  fleet: '<path d="M4 8h12l4 5v6H4Z"/><path d="M16 8v5h4M7 19a2 2 0 1 0 4 0M15 19a2 2 0 1 0 4 0"/>',
+  rentals: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M8 14h3M13 14h3"/>',
+  operations: '<path d="M9 4h6l1 3h4v14H4V7h4Z"/><path d="m8 14 2.5 2.5L16 11"/>',
+  audit: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2M4 4l2 2"/>',
+  profile: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 3.5-7 8-7s7 2 8 7"/>',
+  accident_report: '<path d="M3 18h18l-2-7H5Z"/><path d="M8 11l2-4h4l2 4M7 18a2 2 0 1 0 4 0M15 18a2 2 0 1 0 4 0M12 2v3M4 5l2 2M20 5l-2 2"/>',
+  problem_report: '<path d="M12 3 22 21H2Z"/><path d="M12 9v5M12 18h.01"/>',
+  report: '<path d="M5 3h14v18H5Z"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  check_in: '<path d="M3 8h12l4 5v6H3Z"/><path d="M15 8v5h4M6 19a2 2 0 1 0 4 0M14 19a2 2 0 1 0 4 0M22 4h-7m3-3-3 3 3 3"/>',
+  check_out: '<path d="M3 8h12l4 5v6H3Z"/><path d="M15 8v5h4M6 19a2 2 0 1 0 4 0M14 19a2 2 0 1 0 4 0M15 4h7m-3-3 3 3-3 3"/>',
+  wash: '<path d="M7 10h10l3 5v5H4v-5Z"/><path d="M7 20a2 2 0 1 0 4 0M15 20a2 2 0 1 0 4 0M7 3c0 2-2 3-2 5M12 2c0 2-2 3-2 5M17 3c0 2-2 3-2 5"/>',
+  breakdown_replacement: '<path d="M4 7h12l3 4v5H4Z"/><path d="M7 16a2 2 0 1 0 4 0M14 16a2 2 0 1 0 4 0M5 21h14m-3-3 3 3-3 3M8 24l-3-3 3-3"/>',
+  vehicle_transfer: '<path d="M4 9h11l4 4v5H4Z"/><path d="M7 18a2 2 0 1 0 4 0M14 18a2 2 0 1 0 4 0M3 4h15m-3-3 3 3-3 3"/>',
+  maintenance: '<path d="m14 5 5-3 3 3-3 5-4 1-7 7-3-3 7-7Z"/><path d="m4 17 3 3-3 2-2-2Z"/>',
+  handover_take: '<path d="M4 12h7l2 2h7v5H8l-4-3Z"/><circle cx="17" cy="7" r="3"/><path d="M14 7H8m2-2-2 2 2 2"/>',
+  handover_return: '<path d="M4 12h7l2 2h7v5H8l-4-3Z"/><circle cx="17" cy="7" r="3"/><path d="M14 7H8m-3 0h3m-1-2 2 2-2 2"/>',
+  payment_proof: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+  monthly_inspection: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 10l2 2 4-4M9 16h6"/>',
+};
+
+function pictogram(name, className = "pictogram") {
+  const path = pictogramPaths[name] || pictogramPaths.operations;
+  return `<span class="${clean(className)}" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false">${path}</svg></span>`;
+}
+
+function actionPictogram(target) {
+  return pictogram(target === "drivers" ? "drivers" : target, "action-pictogram");
+}
+
+function navigationPictogram(view) {
+  return pictogram(view, "nav-pictogram");
+}
+
+function vehicleBrandMark(make, className = "vehicle-brand-mark") {
+  const safeMake = clean(make || "Vehicle");
+  const brand = String(make || "").toLowerCase();
+  let mark;
+  let brandClass = "generic";
+  if (brand.includes("renault")) {
+    brandClass = "renault";
+    mark = '<svg viewBox="0 0 32 32"><path d="M16 2 27 16 16 30 5 16Zm0 6-6 8 6 8 6-8Z"/></svg>';
+  } else if (brand.includes("citro")) {
+    brandClass = "citroen";
+    mark = '<svg viewBox="0 0 32 32"><path d="m5 17 11-9 11 9M5 25l11-9 11 9"/></svg>';
+  } else if (brand.includes("opel")) {
+    brandClass = "opel";
+    mark = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="12"/><path d="M5 17h9l-3 4 16-7h-9l3-4Z"/></svg>';
+  } else if (brand.includes("fiat")) {
+    brandClass = "fiat";
+    mark = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13"/><text x="16" y="19" text-anchor="middle">FIAT</text></svg>';
+  } else if (brand.includes("peugeot")) {
+    brandClass = "peugeot";
+    mark = '<svg viewBox="0 0 32 32"><path d="M6 4h20v15c0 6-5 9-10 11-5-2-10-5-10-11Z"/><text x="16" y="21" text-anchor="middle">P</text></svg>';
+  } else {
+    mark = '<svg viewBox="0 0 32 32"><path d="M5 13h22l3 6v7H2v-7Zm4 13a3 3 0 1 0 6 0m6 0a3 3 0 1 0 6 0M8 13l3-6h10l4 6"/></svg>';
+  }
+  return `<span class="${clean(className)} brand-${brandClass}" title="${safeMake}" aria-label="${safeMake} logo">${mark}</span>`;
+}
+
 function tr(value = "") {
   return translations[state.language]?.[String(value)] || String(value);
 }
@@ -1353,8 +1424,8 @@ function renderNavigation() {
   el.workspace.textContent = workspaceLabel(account.role);
   el.navigation.innerHTML = allowedViews()
     .map(
-      (view, index) => `<button class="nav-button ${state.view === view ? "active" : ""}" data-view="${view}">
-        <span class="nav-icon">${String(index + 1).padStart(2, "0")}</span>
+      (view) => `<button class="nav-button ${state.view === view ? "active" : ""}" data-view="${view}">
+        ${navigationPictogram(view)}
         <strong>${clean(navigationLabel(view, account.role))}</strong>
       </button>`,
     )
@@ -1478,7 +1549,7 @@ function actionCards(actions, role) {
       const number = workflows[target]?.[0] || String(index + 1).padStart(2, "0");
       const supportingCopy = workflows[target]?.[2] || description;
       return `<button class="role-task-card${isPrimary ? " is-primary" : ""}${isUrgent ? " is-urgent" : ""}" ${workflows[target] ? `data-workflow="${target}"` : `data-view="${target}"`}>
-        <span class="role-task-number">${clean(number)}</span>
+        <span class="role-task-heading">${actionPictogram(target)}<span class="role-task-number">${clean(number)}</span></span>
         ${isUrgent ? `<span class="role-task-flag">${clean(tr("Urgent"))}</span>` : ""}
         <strong>${clean(tr(title))}</strong>
         <small>${clean(tr(supportingCopy))}</small>
@@ -1491,7 +1562,7 @@ function actionCards(actions, role) {
 function vehicleCards(vehicles) {
   return `<div class="role-vehicle-grid">${vehicles.slice(0, 4).map((vehicle) => `<article class="role-vehicle-card">
     <div><strong>${clean(vehicle.registrationPlate)}</strong>${badge(vehicle.status)}</div>
-    <p>${clean(vehicle.make)} ${clean(vehicle.model)}</p>
+    <p>${vehicleBrandMark(vehicle.make)}<span>${clean(vehicle.make)} ${clean(vehicle.model)}</span></p>
     <small>${clean(vehicle.currentMileage.toLocaleString(languageLocales[state.language]))} km</small>
   </article>`).join("")}</div>`;
 }
@@ -1502,8 +1573,8 @@ function recentRecordCards(records) {
   return `<div class="role-record-list">${records.slice(0, 5).map((record) => {
     const vehicle = dataMaps.vehicles.get(record.vehicleId);
     return `<article class="role-record-card">
-      <div><strong>${clean(tr(workflows[record.type]?.[1] || record.type))}</strong><small>${clean(record.reference)}</small></div>
-      <div class="role-record-meta"><span>${clean(vehicle?.registrationPlate || record.licensePlate || "—")}</span><span>${clean(date(record.occurredAt, true))}</span>${badge(record.status)}</div>
+      <div class="record-operation-identity">${actionPictogram(record.type)}<span><strong>${clean(tr(workflows[record.type]?.[1] || record.type))}</strong><small>${clean(record.reference)}</small></span></div>
+      <div class="role-record-meta"><span class="record-vehicle-identity">${vehicleBrandMark(vehicle?.make, "vehicle-brand-mark is-compact")}<span>${clean(vehicle?.registrationPlate || record.licensePlate || "—")}</span></span><span>${clean(date(record.occurredAt, true))}</span>${badge(record.status)}</div>
       <button class="icon-button" data-action="view-record" data-id="${record.id}">${clean(tr("View"))}</button>
     </article>`;
   }).join("")}</div>`;
@@ -1577,8 +1648,8 @@ function renderOverview() {
       <section class="panel">
         <div class="panel-head"><div><h2>Quick actions</h2></div></div>
         <div class="quick-actions">${actions
-          .map(([title, , target], index) => `<button class="quick-action" ${workflows[target] ? `data-workflow="${target}"` : `data-view="${target}"`}>
-            <span>${String(index + 1).padStart(2, "0")}</span><span><strong>${clean(title)}</strong></span><span>→</span>
+          .map(([title, , target]) => `<button class="quick-action" ${workflows[target] ? `data-workflow="${target}"` : `data-view="${target}"`}>
+            ${actionPictogram(target)}<span><strong>${clean(title)}</strong></span><span>→</span>
           </button>`)
           .join("")}</div>
       </section>
@@ -1639,7 +1710,7 @@ function renderFleet() {
   const canUpdate = ["admin", "employee"].includes(state.data.account.role);
   const rows = vehicles
     .map(
-      (vehicle) => `<tr><td><strong>${clean(vehicle.registrationPlate)}</strong><small>${clean(vehicle.make)} ${clean(vehicle.model)}</small></td>
+      (vehicle) => `<tr><td><span class="vehicle-table-identity">${vehicleBrandMark(vehicle.make)}<span><strong>${clean(vehicle.registrationPlate)}</strong><small>${clean(vehicle.make)} ${clean(vehicle.model)}</small></span></span></td>
       <td>${clean(vehicle.format.toUpperCase())}</td><td>${clean(vehicle.year)}</td><td>${clean(vehicle.color)}</td>
       <td>${vehicle.currentMileage.toLocaleString(languageLocales[state.language])} km</td><td>${badge(vehicle.status)}</td>
       ${canUpdate ? `<td><button class="icon-button" data-action="vehicle-status" data-id="${vehicle.id}">Update</button></td>` : ""}</tr>`,
@@ -1658,7 +1729,7 @@ function renderRentals() {
       const customer = dataMaps.customers.get(rental.customerId);
       const vehicle = dataMaps.vehicles.get(rental.vehicleId);
       return `<tr><td><strong>${clean(rental.reference)}</strong></td><td>${clean(customer?.fullName || "—")}</td>
-        <td>${clean(vehicle ? `${vehicle.registrationPlate} · ${vehicle.make} ${vehicle.model}` : "—")}</td>
+        <td>${vehicle ? `<span class="vehicle-table-identity">${vehicleBrandMark(vehicle.make)}<span>${clean(`${vehicle.registrationPlate} · ${vehicle.make} ${vehicle.model}`)}</span></span>` : "—"}</td>
         <td>${date(rental.startDate)} → ${date(rental.expectedEndDate)}</td>
         <td>${money(rental.monthlyPriceCents)}<small>excl. VAT / month</small></td><td>${badge(rental.status)}</td>
         ${admin ? `<td><button class="icon-button" data-action="rental-status" data-id="${rental.id}">Update</button></td>` : ""}</tr>`;
@@ -1689,7 +1760,7 @@ function renderOperations() {
   }
   el.view.innerHTML = `${header()}
     <section class="workflow-grid">${allowed
-      .map((type) => `<button class="workflow-card" data-workflow="${type}"><span>${workflows[type][0]}</span><strong>${clean(workflows[type][1])}</strong></button>`)
+      .map((type) => `<button class="workflow-card" data-workflow="${type}"><span class="workflow-card-top">${actionPictogram(type)}<b>${workflows[type][0]}</b></span><strong>${clean(workflows[type][1])}</strong></button>`)
       .join("")}</section>
     <section class="panel"><div class="panel-head"><div><h2>Recorded operations</h2></div></div>${recordTable(state.data.workflows)}</section>`;
 }
@@ -1701,8 +1772,8 @@ function recordTable(records, compact = false) {
     .map((record) => {
       const vehicle = dataMaps.vehicles.get(record.vehicleId);
       const account = dataMaps.accounts.get(record.actorAccountId);
-      return `<tr><td><strong>${clean(workflows[record.type]?.[1] || record.type)}</strong><small>${clean(record.reference)}</small></td>
-        <td>${clean(vehicle ? vehicle.registrationPlate : record.licensePlate || "—")}</td>
+      return `<tr><td><span class="record-operation-identity">${actionPictogram(record.type)}<span><strong>${clean(workflows[record.type]?.[1] || record.type)}</strong><small>${clean(record.reference)}</small></span></span></td>
+        <td><span class="record-vehicle-identity">${vehicleBrandMark(vehicle?.make, "vehicle-brand-mark is-compact")}<span>${clean(vehicle ? vehicle.registrationPlate : record.licensePlate || "—")}</span></span></td>
         ${compact ? "" : `<td>${clean(record.performedByName || account?.displayName || "Portal user")}</td>`}<td>${date(record.occurredAt, true)}</td>
         <td>${badge(record.status)}</td><td><div class="table-actions"><button class="icon-button" data-action="view-record" data-id="${record.id}">View</button>
         ${["report", "problem_report", "accident_report", "payment_proof"].includes(record.type) && record.status !== "resolved" && ["admin", "employee"].includes(state.data.account.role) ? `<button class="icon-button" data-action="resolve-report" data-id="${record.id}">Resolve</button>` : ""}</div></td></tr>`;
@@ -1760,7 +1831,7 @@ function select(label, name, options, required = false) {
         <span class="custom-select-chevron" aria-hidden="true"></span>
       </button>
       <div class="custom-select-menu" role="listbox" aria-labelledby="${id}-label" hidden>
-        ${options.map(([value, text]) => `<button class="custom-select-option" type="button" role="option" data-value="${clean(value)}" aria-selected="false">${clean(tr(text))}</button>`).join("")}
+        ${options.map(([value, text, leading = ""]) => `<button class="custom-select-option" type="button" role="option" data-value="${clean(value)}" aria-selected="false"><span class="custom-select-option-content">${leading}<span>${clean(tr(text))}</span></span></button>`).join("")}
       </div>
     </div>
   </div>`;
@@ -1790,7 +1861,7 @@ function chooseCustomOption(customSelect, option, notify = true) {
     item.setAttribute("aria-selected", String(item === option));
   });
   input.value = option.dataset.value;
-  value.textContent = option.textContent;
+  value.innerHTML = option.querySelector(".custom-select-option-content")?.innerHTML || clean(option.textContent);
   value.classList.remove("placeholder");
   customSelect.classList.remove("invalid");
   closeCustomSelect(customSelect, true);
@@ -1918,7 +1989,7 @@ window.yabiRevealAccessCode = (code) => revealCode("Customer", code);
 
 function createAccount() {
   const permissionOptions = operationalWorkflowDefaults
-    .map((type) => `<label class="permission-option"><input type="checkbox" name="workflowAccess" value="${type}" checked><span><strong>${clean(workflows[type][1])}</strong></span></label>`)
+    .map((type) => `<label class="permission-option"><input type="checkbox" name="workflowAccess" value="${type}" checked>${actionPictogram(type)}<span><strong>${clean(workflows[type][1])}</strong></span></label>`)
     .join("");
   modal({
     title: "Create personal access",
@@ -1953,7 +2024,7 @@ function editAccount(id) {
   const account = state.data.accounts.find((item) => item.id === id);
   if (!account) return;
   const allowedRoles = account.role === "driver" ? [["driver", "Driver"]] : Object.entries(roles).filter(([role]) => role !== "driver");
-  const permissionOptions = operationalWorkflowDefaults.map((type) => `<label class="permission-option"><input type="checkbox" name="workflowAccess" value="${type}" ${account.allowedWorkflowTypes?.includes(type) ? "checked" : ""}><span><strong>${clean(workflows[type][1])}</strong></span></label>`).join("");
+  const permissionOptions = operationalWorkflowDefaults.map((type) => `<label class="permission-option"><input type="checkbox" name="workflowAccess" value="${type}" ${account.allowedWorkflowTypes?.includes(type) ? "checked" : ""}>${actionPictogram(type)}<span><strong>${clean(workflows[type][1])}</strong></span></label>`).join("");
   modal({
     title: "Edit account",
     submit: "Update account",
@@ -2138,7 +2209,7 @@ function createRental() {
     submit: "Create rental",
     content: `<form class="portal-form"><div class="form-grid">
       ${select("Customer", "customerId", state.data.customers.filter((c) => c.status === "active").map((c) => [c.id, c.fullName]), true)}
-      ${select("Vehicle", "vehicleId", state.data.vehicles.filter((v) => ["available", "reserved"].includes(v.status)).map((v) => [v.id, `${v.registrationPlate} · ${v.make} ${v.model}`]), true)}
+      ${select("Vehicle", "vehicleId", state.data.vehicles.filter((v) => ["available", "reserved"].includes(v.status)).map((v) => [v.id, `${v.registrationPlate} · ${v.make} ${v.model}`, vehicleBrandMark(v.make, "vehicle-brand-mark is-select")]), true)}
       ${field("Start date", "startDate", "", true, "date")}${field("Expected end date", "expectedEndDate", "", false, "date")}
       ${field("Monthly price excl. VAT (€)", "monthlyPrice", "", true, "number", 'min="0" step="0.01"')}
       ${field("Deposit (€)", "deposit", "", false, "number", 'min="0" step="0.01"')}
@@ -2273,22 +2344,35 @@ function readonlyField(label, value, help = "", valueAttribute = "") {
   return `<div class="field readonly-field"><label>${clean(tr(label))}</label><div class="readonly-value" ${valueAttribute}>${clean(value || "—")}</div>${help ? `<small>${clean(tr(help))}</small>` : ""}</div>`;
 }
 
+function maintenanceSelectionLabel(count) {
+  if (!count) return tr("Choose one or more");
+  return `${count} ${tr(count === 1 ? "item selected" : "items selected")}`;
+}
+
 function maintenanceChecklist() {
-  return maintenanceCatalog.map((category, categoryIndex) => `
-    <section class="maintenance-category">
-      <h4><span>${String(categoryIndex + 1).padStart(2, "0")}</span>${clean(maintenanceLabel(category.title))}</h4>
-      <div class="maintenance-check-grid">
+  return `<div class="maintenance-accordion">${maintenanceCatalog.map((category, categoryIndex) => `
+    <details class="maintenance-category">
+      <summary>
+        <span class="maintenance-category-number">${String(categoryIndex + 1).padStart(2, "0")}</span>
+        <span class="maintenance-category-title">${clean(maintenanceLabel(category.title))}</span>
+        <span class="maintenance-category-count" data-maintenance-count>${clean(maintenanceSelectionLabel(0))}</span>
+        <span class="maintenance-category-chevron" aria-hidden="true"></span>
+      </summary>
+      <div class="maintenance-category-body"><div class="maintenance-check-grid">
         ${category.items.map(([code, label]) => `<label class="maintenance-check"><input type="checkbox" name="maintenanceItems" value="${clean(code)}"><span>${clean(maintenanceLabel(label))}</span></label>`).join("")}
-      </div>
-    </section>`).join("");
+      </div></div>
+    </details>`).join("")}</div>`;
 }
 
 function workflowForm(type) {
   const dataMaps = maps();
-  const vehicles = state.data.vehicles.map((v) => [v.id, `${v.registrationPlate} · ${v.make} ${v.model}`]);
+  const vehicles = state.data.vehicles.map((v) => [v.id, `${v.registrationPlate} · ${v.make} ${v.model}`, vehicleBrandMark(v.make, "vehicle-brand-mark is-select")]);
   const rentals = state.data.rentals
     .filter((r) => !["closed", "cancelled"].includes(r.status))
-    .map((r) => [r.id, `${r.reference} · ${dataMaps.vehicles.get(r.vehicleId)?.registrationPlate || "vehicle"}`]);
+    .map((r) => {
+      const rentalVehicle = dataMaps.vehicles.get(r.vehicleId);
+      return [r.id, `${r.reference} · ${rentalVehicle?.registrationPlate || "vehicle"}`, vehicleBrandMark(rentalVehicle?.make, "vehicle-brand-mark is-select")];
+    });
   const vehicle = select("Vehicle", "vehicleId", vehicles, true);
   const rental = select("Rental (optional)", "rentalId", rentals);
   const mileage = field("Mileage (km)", "mileage", "", true, "number", 'min="0"');
@@ -2489,6 +2573,15 @@ function bindAccidentForm() {
 }
 
 function bindMaintenanceForm() {
+  const updateCounts = () => {
+    el.modalBody.querySelectorAll(".maintenance-category").forEach((category) => {
+      const count = category.querySelectorAll('input[name="maintenanceItems"]:checked').length;
+      const counter = category.querySelector("[data-maintenance-count]");
+      if (counter) counter.textContent = maintenanceSelectionLabel(count);
+    });
+  };
+  el.modalBody.querySelectorAll('input[name="maintenanceItems"]').forEach((input) => input.addEventListener("change", updateCounts));
+  updateCounts();
   const vehicleInput = el.modalBody.querySelector('[name="vehicleId"]');
   const plate = el.modalBody.querySelector("[data-maintenance-plate]");
   if (!vehicleInput || !plate) return;
