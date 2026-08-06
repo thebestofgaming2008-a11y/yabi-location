@@ -1115,6 +1115,11 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+.vehicle-brand-mark img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
 .vehicle-brand-mark text {
   fill: currentColor;
   stroke: none;
@@ -1126,8 +1131,10 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .vehicle-brand-mark.brand-opel { color: #222a30; }
 .vehicle-brand-mark.is-select { width: 29px; height: 29px; }
 .vehicle-brand-mark.is-select svg { width: 20px; height: 20px; }
+.vehicle-brand-mark.is-select img { width: 19px; height: 19px; }
 .vehicle-brand-mark.is-compact { width: 26px; height: 26px; }
 .vehicle-brand-mark.is-compact svg { width: 18px; height: 18px; }
+.vehicle-brand-mark.is-compact img { width: 17px; height: 17px; }
 .role-vehicle-card p {
   display: flex;
   align-items: center;

@@ -1219,26 +1219,27 @@ function navigationPictogram(view) {
 function vehicleBrandMark(make, className = "vehicle-brand-mark") {
   const safeMake = clean(make || "Vehicle");
   const brand = String(make || "").toLowerCase();
-  let mark;
   let brandClass = "generic";
+  let asset = "";
   if (brand.includes("renault")) {
     brandClass = "renault";
-    mark = '<svg viewBox="0 0 32 32"><path d="M16 2 27 16 16 30 5 16Zm0 6-6 8 6 8 6-8Z"/></svg>';
+    asset = "renault";
   } else if (brand.includes("citro")) {
     brandClass = "citroen";
-    mark = '<svg viewBox="0 0 32 32"><path d="m5 17 11-9 11 9M5 25l11-9 11 9"/></svg>';
+    asset = "citroen";
   } else if (brand.includes("opel")) {
     brandClass = "opel";
-    mark = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="12"/><path d="M5 17h9l-3 4 16-7h-9l3-4Z"/></svg>';
+    asset = "opel";
   } else if (brand.includes("fiat")) {
     brandClass = "fiat";
-    mark = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13"/><text x="16" y="19" text-anchor="middle">FIAT</text></svg>';
+    asset = "fiat";
   } else if (brand.includes("peugeot")) {
     brandClass = "peugeot";
-    mark = '<svg viewBox="0 0 32 32"><path d="M6 4h20v15c0 6-5 9-10 11-5-2-10-5-10-11Z"/><text x="16" y="21" text-anchor="middle">P</text></svg>';
-  } else {
-    mark = '<svg viewBox="0 0 32 32"><path d="M5 13h22l3 6v7H2v-7Zm4 13a3 3 0 1 0 6 0m6 0a3 3 0 1 0 6 0M8 13l3-6h10l4 6"/></svg>';
+    asset = "peugeot";
   }
+  const mark = asset
+    ? `<img src="brand-icons/${asset}.svg" alt="" loading="lazy">`
+    : '<svg viewBox="0 0 32 32"><path d="M5 13h22l3 6v7H2v-7Zm4 13a3 3 0 1 0 6 0m6 0a3 3 0 1 0 6 0M8 13l3-6h10l4 6"/></svg>';
   return `<span class="${clean(className)} brand-${brandClass}" title="${safeMake}" aria-label="${safeMake} logo">${mark}</span>`;
 }
 
