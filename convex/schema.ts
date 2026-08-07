@@ -201,8 +201,6 @@ export default defineSchema({
     role: portalRoleValidator,
     codeHash: v.string(),
     codeHint: v.string(),
-    accessCodeCiphertext: v.optional(v.string()),
-    accessCodeIv: v.optional(v.string()),
     active: v.boolean(),
     linkedCustomerId: v.optional(v.id("customers")),
     linkedDriverId: v.optional(v.id("customerDrivers")),
