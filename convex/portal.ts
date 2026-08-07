@@ -509,6 +509,8 @@ export const bootstrapAdmin = internalMutation({
     displayName: v.string(),
     codeHash: v.string(),
     codeHint: v.string(),
+    accessCodeCiphertext: v.optional(v.string()),
+    accessCodeIv: v.optional(v.string()),
   },
   returns: v.object({
     created: v.boolean(),
@@ -527,6 +529,8 @@ export const bootstrapAdmin = internalMutation({
       role: "admin",
       codeHash: args.codeHash,
       codeHint: args.codeHint,
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
       active: true,
       createdAt: now,
       updatedAt: now,
@@ -838,6 +842,8 @@ export const createAccount = internalMutation({
     role: portalRoleValidator,
     codeHash: v.string(),
     codeHint: v.string(),
+    accessCodeCiphertext: v.optional(v.string()),
+    accessCodeIv: v.optional(v.string()),
     linkedCustomerId: v.optional(v.id("customers")),
     linkedDriverId: v.optional(v.id("customerDrivers")),
     allowedWorkflowTypes: v.optional(v.array(workflowTypeValidator)),
@@ -880,6 +886,8 @@ export const createAccount = internalMutation({
       role: args.role,
       codeHash: args.codeHash,
       codeHint: args.codeHint,
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
       active: true,
       linkedCustomerId: args.linkedCustomerId,
       linkedDriverId: args.linkedDriverId,
@@ -1091,6 +1099,8 @@ export const removeAccount = internalMutation({
       displayName: "Removed account",
       codeHash: `removed:${String(target._id)}:${now}`,
       codeHint: "----",
+      accessCodeCiphertext: undefined,
+      accessCodeIv: undefined,
       active: false,
       linkedCustomerId: undefined,
       linkedDriverId: undefined,
@@ -1118,6 +1128,8 @@ export const rotateAccountCode = internalMutation({
     targetAccountId: v.id("portalAccounts"),
     codeHash: v.string(),
     codeHint: v.string(),
+    accessCodeCiphertext: v.optional(v.string()),
+    accessCodeIv: v.optional(v.string()),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -1130,6 +1142,8 @@ export const rotateAccountCode = internalMutation({
     await ctx.db.patch(target._id, {
       codeHash: args.codeHash,
       codeHint: args.codeHint,
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
       updatedAt: now,
     });
     const sessions = await ctx.db
@@ -1152,6 +1166,80 @@ export const rotateAccountCode = internalMutation({
       `Access code rotated for ${target.displayName}`,
     );
     return null;
+  },
+});
+
+export const saveAccountAccessCode = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    targetAccountId: v.id("portalAccounts"),
+    accessCodeCiphertext: v.string(),
+    accessCodeIv: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const target = await ctx.db.get(args.targetAccountId);
+    if (!target || target.deletedAt !== undefined) {
+      throw new Error("account_not_found");
+    }
+    await ctx.db.patch(target._id, {
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
+      updatedAt: Date.now(),
+    });
+    await audit(
+      ctx,
+      actor._id,
+      "portal.account_code_saved",
+      "portalAccount",
+      String(target._id),
+      "Current access code saved to the administrator vault",
+    );
+    return null;
+  },
+});
+
+export const getAccountAccessCodeVault = internalQuery({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    targetAccountId: v.id("portalAccounts"),
+  },
+  returns: v.union(
+    v.null(),
+    v.object({
+      accessCodeCiphertext: v.string(),
+      accessCodeIv: v.string(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const target = await ctx.db.get(args.targetAccountId);
+    if (!target || target.deletedAt !== undefined) {
+      throw new Error("account_not_found");
+    }
+    if (!target.accessCodeCiphertext || !target.accessCodeIv) return null;
+    return {
+      accessCodeCiphertext: target.accessCodeCiphertext,
+      accessCodeIv: target.accessCodeIv,
+    };
+  },
+});
+
+export const getAccountCodeHashForAdmin = internalQuery({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    targetAccountId: v.id("portalAccounts"),
+  },
+  returns: v.union(v.null(), v.object({ codeHash: v.string() })),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const target = await ctx.db.get(args.targetAccountId);
+    if (!target || target.deletedAt !== undefined) return null;
+    return { codeHash: target.codeHash };
   },
 });
 
@@ -1359,6 +1447,8 @@ export const createDriverWithAccount = internalMutation({
     mediaIds: v.array(v.id("mediaAssets")),
     codeHash: v.string(),
     codeHint: v.string(),
+    accessCodeCiphertext: v.optional(v.string()),
+    accessCodeIv: v.optional(v.string()),
   },
   returns: v.object({
     driverId: v.id("customerDrivers"),
@@ -1454,6 +1544,8 @@ export const createDriverWithAccount = internalMutation({
       role: "driver",
       codeHash: args.codeHash,
       codeHint: args.codeHint,
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
       active: true,
       linkedCustomerId: customerId,
       linkedDriverId: driverId,
@@ -1488,6 +1580,8 @@ export const createDriverAccess = internalMutation({
     driverId: v.id("customerDrivers"),
     codeHash: v.string(),
     codeHint: v.string(),
+    accessCodeCiphertext: v.optional(v.string()),
+    accessCodeIv: v.optional(v.string()),
   },
   returns: v.id("portalAccounts"),
   handler: async (ctx, args) => {
@@ -1510,6 +1604,8 @@ export const createDriverAccess = internalMutation({
       role: "driver",
       codeHash: args.codeHash,
       codeHint: args.codeHint,
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
       active: driver.active,
       linkedCustomerId: driver.customerId,
       linkedDriverId: driver._id,
@@ -1743,6 +1839,35 @@ export const updateVehicleStatus = internalMutation({
   },
 });
 
+export const updateVehicle = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"), vehicleId: v.id("operationalVehicles"),
+    registrationPlate: v.string(), make: v.string(), model: v.string(), year: v.number(),
+    format: vehicleFormatValidator, color: v.string(), vin: v.optional(v.string()),
+    status: operationalVehicleStatusValidator, currentMileage: v.number(), fuelPercent: v.optional(v.number()), notes: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId); requireRole(actor, ["admin"]);
+    const vehicle = await ctx.db.get(args.vehicleId); if (!vehicle) throw new Error("vehicle_not_found");
+    const duplicate = await ctx.db.query("operationalVehicles").withIndex("by_registration_plate", q => q.eq("registrationPlate", args.registrationPlate)).unique();
+    if (duplicate && duplicate._id !== vehicle._id) throw new Error("vehicle_exists");
+    await ctx.db.patch(vehicle._id, { registrationPlate: args.registrationPlate, make: args.make, model: args.model, year: args.year, format: args.format, color: args.color, vin: args.vin, status: args.status, currentMileage: args.currentMileage, fuelPercent: args.fuelPercent, notes: args.notes, updatedAt: Date.now() });
+    await audit(ctx, actor._id, "vehicle.updated", "vehicle", String(vehicle._id), `${args.registrationPlate} updated`); return null;
+  },
+});
+
+export const removeVehicle = internalMutation({
+  args: { actorAccountId: v.id("portalAccounts"), vehicleId: v.id("operationalVehicles") }, returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId); requireRole(actor, ["admin"]);
+    const vehicle = await ctx.db.get(args.vehicleId); if (!vehicle) throw new Error("vehicle_not_found");
+    const rental = await ctx.db.query("rentals").withIndex("by_vehicle_id", q => q.eq("vehicleId", vehicle._id)).first();
+    if (rental) throw new Error("vehicle_has_rental_history");
+    await ctx.db.delete(vehicle._id); await audit(ctx, actor._id, "vehicle.removed", "vehicle", String(vehicle._id), `${vehicle.registrationPlate} removed`); return null;
+  },
+});
+
 export const updateRentalStatus = internalMutation({
   args: {
     actorAccountId: v.id("portalAccounts"),
@@ -1783,6 +1908,30 @@ export const updateRentalStatus = internalMutation({
       `${rental.reference} changed to ${args.status}`,
     );
     return null;
+  },
+});
+
+export const updateRental = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"), rentalId: v.id("rentals"), customerId: v.id("customers"), vehicleId: v.id("operationalVehicles"), status: rentalStatusValidator,
+    startDate: v.string(), expectedEndDate: v.optional(v.string()), actualEndDate: v.optional(v.string()), monthlyPriceCents: v.number(), depositCents: v.optional(v.number()), mileageAllowance: v.optional(v.number()), notes: v.optional(v.string()),
+  }, returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId); requireRole(actor, ["admin"]);
+    const rental = await ctx.db.get(args.rentalId); const customer = await ctx.db.get(args.customerId); const vehicle = await ctx.db.get(args.vehicleId);
+    if (!rental) throw new Error("rental_not_found"); if (!customer) throw new Error("customer_not_found"); if (!vehicle) throw new Error("vehicle_not_found");
+    await ctx.db.patch(rental._id, { customerId: customer._id, vehicleId: vehicle._id, status: args.status, startDate: args.startDate, expectedEndDate: args.expectedEndDate, actualEndDate: args.actualEndDate, monthlyPriceCents: args.monthlyPriceCents, depositCents: args.depositCents, mileageAllowance: args.mileageAllowance, notes: args.notes, updatedAt: Date.now() });
+    await audit(ctx, actor._id, "rental.updated", "rental", String(rental._id), `${rental.reference} updated`); return null;
+  },
+});
+
+export const removeRental = internalMutation({
+  args: { actorAccountId: v.id("portalAccounts"), rentalId: v.id("rentals") }, returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId); requireRole(actor, ["admin"]);
+    const rental = await ctx.db.get(args.rentalId); if (!rental) throw new Error("rental_not_found");
+    if (rental.status === "active") throw new Error("active_rental_cannot_be_removed");
+    await ctx.db.delete(rental._id); await audit(ctx, actor._id, "rental.removed", "rental", String(rental._id), `${rental.reference} removed`); return null;
   },
 });
 

@@ -140,6 +140,13 @@ const translations = {
     "Deposit (€)": "Caution (€)",
     "Mileage allowance": "Kilométrage inclus",
     "Update status": "Modifier le statut",
+    "Save rental": "Enregistrer la location",
+    "Save vehicle": "Enregistrer le véhicule",
+    "Actual end date": "Date de fin réelle",
+    "Rental updated.": "Location mise à jour.",
+    "Vehicle updated.": "Véhicule mis à jour.",
+    "Rental removed.": "Location supprimée.",
+    "Vehicle removed.": "Véhicule supprimé.",
     "Operational status": "Statut opérationnel",
     "Vehicle (optional)": "Véhicule (facultatif)",
     "Rental (optional)": "Location (facultatif)",
@@ -350,6 +357,11 @@ const translations = {
     "This code is shown only once.": "Ce code n’est affiché qu’une fois.",
     "Share it privately. Anyone with this code can sign in.": "Partagez-le de façon privée.",
     "Copy code": "Copier le code",
+    "This current code is available to administrators.": "Ce code actuel est disponible pour les administrateurs.",
+    "Save current access code": "Enregistrer le code d’accès actuel",
+    "Save code": "Enregistrer le code",
+    "Enter the existing code exactly as it is. It will not be changed.": "Saisissez le code existant exactement tel quel. Il ne sera pas modifié.",
+    "Current access code": "Code d’accès actuel",
     "Create personal access": "Créer un accès personnel",
     "Add a customer": "Ajouter un client",
     "Add a vehicle": "Ajouter un véhicule",
@@ -634,6 +646,13 @@ const translations = {
     "Deposit (€)": "Waarborg (€)",
     "Mileage allowance": "Kilometerlimiet",
     "Update status": "Status wijzigen",
+    "Save rental": "Verhuur opslaan",
+    "Save vehicle": "Voertuig opslaan",
+    "Actual end date": "Werkelijke einddatum",
+    "Rental updated.": "Verhuur bijgewerkt.",
+    "Vehicle updated.": "Voertuig bijgewerkt.",
+    "Rental removed.": "Verhuur verwijderd.",
+    "Vehicle removed.": "Voertuig verwijderd.",
     "Operational status": "Operationele status",
     "Vehicle (optional)": "Voertuig (optioneel)",
     "Rental (optional)": "Verhuur (optioneel)",
@@ -844,6 +863,11 @@ const translations = {
     "This code is shown only once.": "Deze code wordt maar één keer getoond.",
     "Share it privately. Anyone with this code can sign in.": "Deel de code uitsluitend privé.",
     "Copy code": "Code kopiëren",
+    "This current code is available to administrators.": "Deze huidige code is beschikbaar voor beheerders.",
+    "Save current access code": "Huidige toegangscode opslaan",
+    "Save code": "Code opslaan",
+    "Enter the existing code exactly as it is. It will not be changed.": "Voer de bestaande code exact in. Deze wordt niet gewijzigd.",
+    "Current access code": "Huidige toegangscode",
     "Create personal access": "Persoonlijke toegang aanmaken",
     "Add a customer": "Klant toevoegen",
     "Add a vehicle": "Voertuig toevoegen",
@@ -1741,10 +1765,10 @@ function renderAccess() {
   const rows = accounts
     .map(
       (account) => `<tr>
-        <td><strong>${clean(account.displayName)}</strong><small>•••• ${clean(account.codeHint)}</small></td>
+        <td><strong>${clean(account.displayName)}</strong><small>YABI-••••-••••-${clean(account.codeHint)}</small></td>
         <td>${clean(roles[account.role])}</td><td>${badge(account.active ? "active" : "inactive")}</td>
         <td>${date(account.lastLoginAt, true)}</td>
-        <td><div class="table-actions"><button class="icon-button" data-action="edit-account" data-id="${account.id}">Edit</button><button class="icon-button" data-action="rotate-code" data-id="${account.id}">New code</button>
+        <td><div class="table-actions"><button class="icon-button" data-action="edit-account" data-id="${account.id}">Edit</button><button class="icon-button" data-action="reveal-account-code" data-id="${account.id}">Code</button><button class="icon-button" data-action="rotate-code" data-id="${account.id}">New code</button>
         ${account.id !== state.data.account.id ? `<button class="icon-button" data-action="toggle-account" data-id="${account.id}" data-active="${account.active}">${account.active ? "Disable" : "Enable"}</button><button class="icon-button is-danger" data-action="remove-account" data-id="${account.id}">Remove</button>` : ""}</div></td>
       </tr>`,
     )
@@ -1793,7 +1817,7 @@ function renderFleet() {
       (vehicle) => `<tr><td><span class="vehicle-table-identity">${vehicleBrandMark(vehicle.make)}<span><strong>${clean(vehicle.registrationPlate)}</strong><small>${clean(vehicle.make)} ${clean(vehicle.model)}</small></span></span></td>
       <td>${clean(vehicle.format.toUpperCase())}</td><td>${clean(vehicle.year)}</td><td>${clean(vehicle.color)}</td>
       <td>${vehicle.currentMileage.toLocaleString(languageLocales[state.language])} km</td><td>${badge(vehicle.status)}</td>
-      ${canUpdate ? `<td><button class="icon-button" data-action="vehicle-status" data-id="${vehicle.id}">Update</button></td>` : ""}</tr>`,
+      ${canUpdate ? `<td><div class="table-actions"><button class="icon-button" data-action="vehicle-status" data-id="${vehicle.id}">Edit</button>${state.data.account.role === "admin" ? `<button class="icon-button danger" data-action="remove-vehicle" data-id="${vehicle.id}">Remove</button>` : ""}</div></td>` : ""}</tr>`,
     )
     .join("");
   el.view.innerHTML = `${header(state.data.account.role === "admin" ? '<button class="primary-button" data-action="create-vehicle">Add vehicle</button>' : "")}
@@ -1812,7 +1836,7 @@ function renderRentals() {
         <td>${vehicle ? `<span class="vehicle-table-identity">${vehicleBrandMark(vehicle.make)}<span>${clean(`${vehicle.registrationPlate} · ${vehicle.make} ${vehicle.model}`)}</span></span>` : "—"}</td>
         <td>${date(rental.startDate)} → ${date(rental.expectedEndDate)}</td>
         <td>${money(rental.monthlyPriceCents)}<small>excl. VAT / month</small></td><td>${badge(rental.status)}</td>
-        ${admin ? `<td><button class="icon-button" data-action="rental-status" data-id="${rental.id}">Update</button></td>` : ""}</tr>`;
+        ${admin ? `<td><div class="table-actions"><button class="icon-button" data-action="rental-status" data-id="${rental.id}">Edit</button><button class="icon-button danger" data-action="remove-rental" data-id="${rental.id}">Remove</button></div></td>` : ""}</tr>`;
     })
     .join("");
   el.view.innerHTML = `${header(admin ? '<button class="primary-button" data-action="create-rental">Create rental</button>' : "")}
@@ -2052,10 +2076,10 @@ function closeModal() {
   el.modalBody.innerHTML = "";
 }
 
-function revealCode(person, code) {
+function revealCode(person, code, persistent = false) {
   modal({
     title: `${tr("Access for")} ${person}`,
-    content: `<div class="code-reveal"><p>This code is shown only once.</p><strong>${clean(code)}</strong><small>Share it privately. Anyone with this code can sign in.</small></div>
+    content: `<div class="code-reveal"><p>${clean(tr(persistent ? "This current code is available to administrators." : "This code is shown only once."))}</p><strong>${clean(code)}</strong><small>${clean(tr("Share it privately. Anyone with this code can sign in."))}</small></div>
       <div class="form-submit-row"><button class="ghost-button" id="copy-code">Copy code</button><button class="primary-button" data-close>Done</button></div>`,
   });
   el.modalBody.querySelector("#copy-code").addEventListener("click", async () => {
@@ -2063,6 +2087,26 @@ function revealCode(person, code) {
     toast("Access code copied.");
   });
   el.modalBody.querySelector("[data-close]").addEventListener("click", closeModal);
+}
+
+function manageAccountCode(id) {
+  const account = state.data.accounts.find((item) => item.id === id);
+  if (!account) return;
+  api("/api/portal/admin", { method: "POST", body: { operation: "reveal_code", targetAccountId: id } })
+    .then((result) => revealCode(account.displayName, result.accessCode, true))
+    .catch((error) => {
+      if (error?.message !== "code_recovery_unavailable") throw error;
+      modal({
+        title: tr("Save current access code"),
+        submit: tr("Save code"),
+        content: `<form class="portal-form"><p>${clean(tr("Enter the existing code exactly as it is. It will not be changed."))}</p>${field("Current access code", "accessCode", "", true, "text", 'autocomplete="off" autocapitalize="characters"')}</form>`,
+        handler: async (data) => {
+          const result = await api("/api/portal/admin", { method: "POST", body: { operation: "save_current_code", targetAccountId: id, accessCode: data.get("accessCode") } });
+          revealCode(account.displayName, result.accessCode, true);
+        },
+      });
+    })
+    .catch((error) => toast(messageFor(error), "error"));
 }
 
 window.yabiRevealAccessCode = (code) => revealCode("Customer", code);
@@ -2341,53 +2385,85 @@ function createRental() {
 
 function updateRental(id) {
   const rental = state.data.rentals.find((item) => item.id === id);
+  if (!rental) return;
   modal({
-    title: `Update ${rental.reference}`,
-    submit: "Update status",
-    content: `<form class="portal-form">${select("Status", "status", ["draft", "scheduled", "active", "returned", "closed", "cancelled"].map((item) => [item, item]), true)}</form>`,
+    title: `Edit ${rental.reference}`,
+    submit: "Save rental",
+    content: `<form class="portal-form"><div class="form-grid">
+      ${select("Customer", "customerId", state.data.customers.map((customer) => [customer.id, customer.fullName]), true)}
+      ${select("Vehicle", "vehicleId", state.data.vehicles.map((vehicle) => [vehicle.id, `${vehicle.registrationPlate} · ${vehicle.make} ${vehicle.model}`, vehicleBrandMark(vehicle.make, "vehicle-brand-mark is-select")]), true)}
+      ${select("Status", "status", ["draft", "scheduled", "active", "returned", "closed", "cancelled"].map((item) => [item, item]), true)}
+      ${field("Start date", "startDate", rental.startDate, true, "date")}${field("Expected end date", "expectedEndDate", rental.expectedEndDate || "", false, "date")}
+      ${field("Actual end date", "actualEndDate", rental.actualEndDate || "", false, "date")}${field("Monthly price excl. VAT (€)", "monthlyPrice", String((rental.monthlyPriceCents || 0) / 100), true, "number", 'min="0" step="0.01"')}
+      ${field("Deposit (€)", "deposit", rental.depositCents == null ? "" : String(rental.depositCents / 100), false, "number", 'min="0" step="0.01"')}${field("Mileage allowance", "mileageAllowance", rental.mileageAllowance == null ? "" : String(rental.mileageAllowance), false, "number", 'min="0"')}
+      </div><div class="field"><label>Internal notes</label><textarea name="notes">${clean(rental.notes || "")}</textarea></div></form>`,
     handler: async (data) => {
-      await api("/api/portal/admin", { method: "POST", body: { operation: "update_rental_status", rentalId: id, status: data.get("status") } });
+      const values = Object.fromEntries(data);
+      values.monthlyPriceCents = Math.round(Number(values.monthlyPrice) * 100);
+      values.depositCents = values.deposit ? Math.round(Number(values.deposit) * 100) : undefined;
+      values.mileageAllowance = values.mileageAllowance ? Number(values.mileageAllowance) : undefined;
+      delete values.monthlyPrice;
+      delete values.deposit;
+      await api("/api/portal/admin", { method: "POST", body: { operation: "update_rental", rentalId: id, ...values } });
       closeModal();
-      toast("Rental status updated.");
+      toast("Rental updated.");
       await refresh();
     },
   });
+  setCustomValue(el.modalBody, "customerId", rental.customerId);
+  setCustomValue(el.modalBody, "vehicleId", rental.vehicleId);
   setCustomValue(el.modalBody, "status", rental.status);
 }
 
 function updateVehicle(id) {
   const vehicle = state.data.vehicles.find((item) => item.id === id);
+  if (!vehicle) return;
   modal({
-    title: `Update ${vehicle.registrationPlate}`,
-    submit: "Update status",
-    content: `<form class="portal-form">${select(
-      "Operational status",
-      "status",
-      [
-        ["available", "Available"],
-        ["reserved", "Reserved"],
-        ["rented", "Rented"],
-        ["maintenance", "Maintenance"],
-        ["cleaning", "Cleaning"],
-        ["inactive", "Inactive"],
-      ],
-      true,
-    )}</form>`,
+    title: `Edit ${vehicle.registrationPlate}`,
+    submit: "Save vehicle",
+    content: `<form class="portal-form"><div class="form-grid">
+      ${field("Licence plate", "registrationPlate", vehicle.registrationPlate, true)}${field("Make", "make", vehicle.make, true)}
+      ${field("Model", "model", vehicle.model, true)}${select("Format", "format", [["l1h1", "L1H1"], ["l2h2", "L2H2"], ["l3h2", "L3H2"]], true)}
+      ${field("Year", "year", String(vehicle.year), true, "number", 'min="1990" max="2100"')}${field("Colour", "color", vehicle.color, true)}
+      ${field("Current mileage", "currentMileage", String(vehicle.currentMileage), true, "number", 'min="0"')}${field("Fuel level (%)", "fuelPercent", vehicle.fuelPercent == null ? "" : String(vehicle.fuelPercent), false, "number", 'min="0" max="100"')}
+      ${field("VIN", "vin", vehicle.vin || "")}${select("Operational status", "status", [["available", "Available"], ["reserved", "Reserved"], ["rented", "Rented"], ["maintenance", "Maintenance"], ["cleaning", "Cleaning"], ["inactive", "Inactive"]], true)}
+      </div><div class="field"><label>Internal notes</label><textarea name="notes">${clean(vehicle.notes || "")}</textarea></div></form>`,
     handler: async (data) => {
+      const values = Object.fromEntries(data);
+      values.year = Number(values.year);
+      values.currentMileage = Number(values.currentMileage);
+      values.fuelPercent = values.fuelPercent ? Number(values.fuelPercent) : undefined;
       await api("/api/portal/admin", {
         method: "POST",
-        body: {
-          operation: "update_vehicle_status",
-          vehicleId: id,
-          status: data.get("status"),
-        },
+        body: { operation: "update_vehicle", vehicleId: id, ...values },
       });
       closeModal();
-      toast("Vehicle status updated.");
+      toast("Vehicle updated.");
       await refresh();
     },
   });
+  setCustomValue(el.modalBody, "format", vehicle.format);
   setCustomValue(el.modalBody, "status", vehicle.status);
+}
+
+async function removeVehicle(id) {
+  const vehicle = state.data.vehicles.find((item) => item.id === id);
+  if (!vehicle || !confirm(`Remove ${vehicle.registrationPlate}? This is only possible when it has no rental history.`)) return;
+  try {
+    await api("/api/portal/admin", { method: "POST", body: { operation: "remove_vehicle", vehicleId: id } });
+    toast("Vehicle removed.");
+    await refresh();
+  } catch (error) { toast(messageFor(error), "error"); }
+}
+
+async function removeRental(id) {
+  const rental = state.data.rentals.find((item) => item.id === id);
+  if (!rental || !confirm(`Remove ${rental.reference}? Active rentals must be closed or cancelled first.`)) return;
+  try {
+    await api("/api/portal/admin", { method: "POST", body: { operation: "remove_rental", rentalId: id } });
+    toast("Rental removed.");
+    await refresh();
+  } catch (error) { toast(messageFor(error), "error"); }
 }
 
 function uploadField(label, name, category, required = false, slot = name, multiple = false, accept = "image/jpeg,image/png,image/webp") {
@@ -3139,6 +3215,7 @@ el.view.addEventListener("click", async (event) => {
   const { action, id } = button.dataset;
   if (action === "create-account") createAccount();
   if (action === "edit-account") editAccount(id);
+  if (action === "reveal-account-code") manageAccountCode(id);
   if (action === "remove-account") removeAccount(id);
   if (action === "create-customer") createCustomer();
   if (action === "edit-customer") editCustomer(id);
@@ -3150,6 +3227,8 @@ el.view.addEventListener("click", async (event) => {
   if (action === "create-rental") createRental();
   if (action === "vehicle-status") updateVehicle(id);
   if (action === "rental-status") updateRental(id);
+  if (action === "remove-vehicle") removeVehicle(id);
+  if (action === "remove-rental") removeRental(id);
   if (action === "view-record") viewRecord(id);
   if (action === "resolve-report") resolveReport(id);
   if (action === "rotate-code" && confirm("Generate a new code? The current code and all active sessions will stop working.")) {

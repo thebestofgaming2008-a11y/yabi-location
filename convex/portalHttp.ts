@@ -176,6 +176,51 @@ function base64Url(input: Uint8Array | string): string {
     .replace(/=+$/g, "");
 }
 
+function base64UrlBytes(value: string): Uint8Array {
+  const padded = value.replace(/-/g, "+").replace(/_/g, "/");
+  const binary = atob(padded + "=".repeat((4 - (padded.length % 4)) % 4));
+  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+}
+
+async function accessCodeVaultKey(): Promise<CryptoKey> {
+  const pepper = process.env.PORTAL_ACCESS_PEPPER;
+  if (!pepper || pepper.length < 32) throw new Error("portal_not_configured");
+  const material = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(`portal-access-vault:${pepper}`),
+  );
+  return crypto.subtle.importKey("raw", material, { name: "AES-GCM" }, false, [
+    "encrypt",
+    "decrypt",
+  ]);
+}
+
+async function encryptAccessCode(code: string): Promise<{ ciphertext: string; iv: string }> {
+  const iv = randomBytes(12);
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: iv.buffer.slice(0) as ArrayBuffer },
+    await accessCodeVaultKey(),
+    new TextEncoder().encode(code),
+  );
+  return {
+    ciphertext: base64Url(new Uint8Array(ciphertext)),
+    iv: base64Url(iv),
+  };
+}
+
+async function decryptAccessCode(ciphertext: string, iv: string): Promise<string> {
+  const plaintext = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: base64UrlBytes(iv).buffer.slice(0) as ArrayBuffer },
+    await accessCodeVaultKey(),
+    base64UrlBytes(ciphertext).buffer.slice(0) as ArrayBuffer,
+  );
+  const value = new TextDecoder().decode(plaintext);
+  if (!/^YABI-(?:[A-Z0-9]{4}-){2}[A-Z0-9]{4}$/.test(value)) {
+    throw new Error("code_recovery_unavailable");
+  }
+  return value;
+}
+
 function generateAccessCode(): { formatted: string; normalized: string } {
   const bytes = randomBytes(12);
   let normalized = "";
@@ -289,9 +334,11 @@ function safeError(error: unknown): string {
     "vehicle_exists",
     "vehicle_unavailable",
     "vehicle_has_open_rental",
+    "vehicle_has_rental_history",
     "rental_not_found",
     "rental_mismatch",
     "rental_reference_exists",
+    "active_rental_cannot_be_removed",
     "record_not_found",
     "report_not_found",
     "invalid_file_size",
@@ -318,6 +365,7 @@ function safeError(error: unknown): string {
     "last_admin_required",
     "resolution_required",
     "code_collision",
+    "code_recovery_unavailable",
     "media_service_unavailable",
     "portal_not_configured",
   ]);
@@ -450,10 +498,13 @@ export const portalBootstrap = httpAction(async (ctx, request) => {
     }
     const body = await parseBody(request);
     const access = generateAccessCode();
+    const vault = await encryptAccessCode(access.formatted);
     const result = await ctx.runMutation(internal.portal.bootstrapAdmin, {
       displayName: clean(body.displayName, 100) || "YABI Administrator",
       codeHash: await codeHash(access.normalized),
       codeHint: access.normalized.slice(-4),
+      accessCodeCiphertext: vault.ciphertext,
+      accessCodeIv: vault.iv,
     });
     return json(
       {
@@ -484,6 +535,7 @@ export const portalAdmin = httpAction(async (ctx, request) => {
       const displayName = clean(body.displayName, 100);
       if (!displayName || !allowedRoles.has(role)) throw new Error("validation_failed");
       const access = generateAccessCode();
+      const vault = await encryptAccessCode(access.formatted);
       const workflowAccess = Array.isArray(body.allowedWorkflowTypes)
         ? [...new Set(body.allowedWorkflowTypes.map((item) => clean(item, 40)).filter((item) => allowedWorkflowTypes.has(item)))].slice(0, 12)
         : undefined;
@@ -493,6 +545,8 @@ export const portalAdmin = httpAction(async (ctx, request) => {
         role: role as "admin" | "employee" | "customer" | "driver" | "mechanic" | "contractor",
         codeHash: await codeHash(access.normalized),
         codeHint: access.normalized.slice(-4),
+        accessCodeCiphertext: vault.ciphertext,
+        accessCodeIv: vault.iv,
         linkedCustomerId: optionalString(body.linkedCustomerId, 80) as
           | Id<"customers">
           | undefined,
@@ -514,13 +568,55 @@ export const portalAdmin = httpAction(async (ctx, request) => {
       const targetAccountId = clean(body.targetAccountId, 80);
       if (!targetAccountId) throw new Error("validation_failed");
       const access = generateAccessCode();
+      const vault = await encryptAccessCode(access.formatted);
       await ctx.runMutation(internal.portal.rotateAccountCode, {
         actorAccountId: session.account.id,
         targetAccountId: targetAccountId as Id<"portalAccounts">,
         codeHash: await codeHash(access.normalized),
         codeHint: access.normalized.slice(-4),
+        accessCodeCiphertext: vault.ciphertext,
+        accessCodeIv: vault.iv,
       });
       return json({ ok: true, accessCode: access.formatted }, 200, origin);
+    }
+
+    if (operation === "save_current_code") {
+      const targetAccountId = clean(body.targetAccountId, 80);
+      const normalized = normalizeCode(body.accessCode);
+      if (!targetAccountId || normalized.length !== 12) {
+        throw new Error("validation_failed");
+      }
+      const target = await ctx.runQuery(internal.portal.getAccountCodeHashForAdmin, {
+        actorAccountId: session.account.id,
+        targetAccountId: targetAccountId as Id<"portalAccounts">,
+      });
+      if (!target || target.codeHash !== await codeHash(normalized)) {
+        throw new Error("invalid_credentials");
+      }
+      const formatted = `YABI-${normalized.slice(0, 4)}-${normalized.slice(4, 8)}-${normalized.slice(8)}`;
+      const encrypted = await encryptAccessCode(formatted);
+      await ctx.runMutation(internal.portal.saveAccountAccessCode, {
+        actorAccountId: session.account.id,
+        targetAccountId: targetAccountId as Id<"portalAccounts">,
+        accessCodeCiphertext: encrypted.ciphertext,
+        accessCodeIv: encrypted.iv,
+      });
+      return json({ ok: true, accessCode: formatted }, 200, origin);
+    }
+
+    if (operation === "reveal_code") {
+      const targetAccountId = clean(body.targetAccountId, 80);
+      if (!targetAccountId) throw new Error("validation_failed");
+      const vault = await ctx.runQuery(internal.portal.getAccountAccessCodeVault, {
+        actorAccountId: session.account.id,
+        targetAccountId: targetAccountId as Id<"portalAccounts">,
+      });
+      if (!vault) throw new Error("code_recovery_unavailable");
+      return json(
+        { ok: true, accessCode: await decryptAccessCode(vault.accessCodeCiphertext, vault.accessCodeIv) },
+        200,
+        origin,
+      );
     }
 
     if (operation === "update_account") {
@@ -718,6 +814,19 @@ export const portalAdmin = httpAction(async (ctx, request) => {
       return json({ ok: true }, 200, origin);
     }
 
+    if (operation === "update_vehicle" || operation === "remove_vehicle") {
+      const vehicleId = clean(body.vehicleId, 80);
+      if (!vehicleId) throw new Error("validation_failed");
+      if (operation === "remove_vehicle") {
+        await ctx.runMutation(internal.portal.removeVehicle, { actorAccountId: session.account.id, vehicleId: vehicleId as Id<"operationalVehicles"> });
+      } else {
+        const registrationPlate = normalizePlate(body.registrationPlate); const make = clean(body.make, 80); const model = clean(body.model, 80); const format = clean(body.format, 10); const color = clean(body.color, 50); const status = clean(body.status, 20); const year = boundedNumber(body.year, 1990, 2100); const currentMileage = boundedNumber(body.currentMileage, 0, 2_000_000);
+        if (!registrationPlate || !make || !model || !color || !allowedFormats.has(format) || !allowedVehicleStatuses.has(status) || year === undefined || currentMileage === undefined) throw new Error("validation_failed");
+        await ctx.runMutation(internal.portal.updateVehicle, { actorAccountId: session.account.id, vehicleId: vehicleId as Id<"operationalVehicles">, registrationPlate, make, model, year, format: format as "l1h1"|"l2h2"|"l3h2", color, vin: optionalString(body.vin, 40), status: status as "available"|"reserved"|"rented"|"maintenance"|"cleaning"|"inactive", currentMileage, fuelPercent: boundedNumber(body.fuelPercent, 0, 100), notes: optionalString(body.notes, 2000) });
+      }
+      return json({ ok: true }, 200, origin);
+    }
+
     if (operation === "update_rental_status") {
       const rentalId = clean(body.rentalId, 80);
       const status = clean(body.status, 20);
@@ -735,6 +844,18 @@ export const portalAdmin = httpAction(async (ctx, request) => {
           | "closed"
           | "cancelled",
       });
+      return json({ ok: true }, 200, origin);
+    }
+
+    if (operation === "update_rental" || operation === "remove_rental") {
+      const rentalId = clean(body.rentalId, 80); if (!rentalId) throw new Error("validation_failed");
+      if (operation === "remove_rental") {
+        await ctx.runMutation(internal.portal.removeRental, { actorAccountId: session.account.id, rentalId: rentalId as Id<"rentals"> });
+      } else {
+        const customerId = clean(body.customerId, 80); const vehicleId = clean(body.vehicleId, 80); const status = clean(body.status, 20); const startDate = clean(body.startDate, 10); const monthlyPriceCents = boundedNumber(body.monthlyPriceCents, 0, 100_000_000);
+        if (!customerId || !vehicleId || !startDate || !allowedRentalStatuses.has(status) || monthlyPriceCents === undefined) throw new Error("validation_failed");
+        await ctx.runMutation(internal.portal.updateRental, { actorAccountId: session.account.id, rentalId: rentalId as Id<"rentals">, customerId: customerId as Id<"customers">, vehicleId: vehicleId as Id<"operationalVehicles">, status: status as "draft"|"scheduled"|"active"|"returned"|"closed"|"cancelled", startDate, expectedEndDate: optionalString(body.expectedEndDate, 10), actualEndDate: optionalString(body.actualEndDate, 10), monthlyPriceCents, depositCents: boundedNumber(body.depositCents, 0, 100_000_000), mileageAllowance: boundedNumber(body.mileageAllowance, 0, 10_000_000), notes: optionalString(body.notes, 2000) });
+      }
       return json({ ok: true }, 200, origin);
     }
 
@@ -922,6 +1043,7 @@ export const portalDrivers = httpAction(async (ctx, request) => {
         throw new Error("validation_failed");
       }
       const access = generateAccessCode();
+      const vault = await encryptAccessCode(access.formatted);
       const result = await ctx.runMutation(internal.portal.createDriverWithAccount, {
         actorAccountId: session.account.id,
         customerId: optionalString(body.customerId, 80) as
@@ -940,6 +1062,8 @@ export const portalDrivers = httpAction(async (ctx, request) => {
         mediaIds: mediaIds as Id<"mediaAssets">[],
         codeHash: await codeHash(access.normalized),
         codeHint: access.normalized.slice(-4),
+        accessCodeCiphertext: vault.ciphertext,
+        accessCodeIv: vault.iv,
       });
       return json(
         { ok: true, ...result, accessCode: access.formatted },
@@ -952,11 +1076,14 @@ export const portalDrivers = httpAction(async (ctx, request) => {
       const driverId = clean(body.driverId, 80);
       if (!driverId) throw new Error("validation_failed");
       const access = generateAccessCode();
+      const vault = await encryptAccessCode(access.formatted);
       const accountId = await ctx.runMutation(internal.portal.createDriverAccess, {
         actorAccountId: session.account.id,
         driverId: driverId as Id<"customerDrivers">,
         codeHash: await codeHash(access.normalized),
         codeHint: access.normalized.slice(-4),
+        accessCodeCiphertext: vault.ciphertext,
+        accessCodeIv: vault.iv,
       });
       return json(
         { ok: true, accountId, accessCode: access.formatted },
