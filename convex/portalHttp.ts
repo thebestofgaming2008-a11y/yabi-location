@@ -82,6 +82,7 @@ const allowedReportCategories = new Set([
   "other",
 ]);
 const allowedPriorities = new Set(["low", "normal", "urgent"]);
+const allowedRecordStatuses = new Set(["submitted", "resolved"]);
 const allowedUploadTypes = new Set([
   "image/jpeg",
   "image/png",
@@ -281,6 +282,7 @@ function safeError(error: unknown): string {
     "driver_not_linked",
     "driver_link_required",
     "driver_already_linked",
+    "driver_customer_mismatch",
     "driver_documents_required",
     "driver_eligibility_failed",
     "vehicle_not_found",
@@ -312,6 +314,9 @@ function safeError(error: unknown): string {
     "required_evidence_missing",
     "cannot_deactivate_self",
     "cannot_change_self_role",
+    "cannot_remove_self",
+    "last_admin_required",
+    "resolution_required",
     "code_collision",
     "media_service_unavailable",
     "portal_not_configured",
@@ -522,7 +527,10 @@ export const portalAdmin = httpAction(async (ctx, request) => {
       const targetAccountId = clean(body.targetAccountId, 80);
       const displayName = clean(body.displayName, 100);
       const role = clean(body.role, 20);
-      if (!targetAccountId || !displayName || !allowedRoles.has(role)) {
+      if (
+        !targetAccountId || !displayName || !allowedRoles.has(role) ||
+        typeof body.active !== "boolean"
+      ) {
         throw new Error("validation_failed");
       }
       const workflowAccess = Array.isArray(body.allowedWorkflowTypes)
@@ -533,12 +541,23 @@ export const portalAdmin = httpAction(async (ctx, request) => {
         targetAccountId: targetAccountId as Id<"portalAccounts">,
         displayName,
         role: role as "admin" | "employee" | "customer" | "driver" | "mechanic" | "contractor",
+        active: body.active,
         linkedCustomerId: optionalString(body.linkedCustomerId, 80) as
           | Id<"customers">
           | undefined,
         allowedWorkflowTypes: workflowAccess as
           | Array<"customer_onboarding" | "check_in" | "check_out" | "wash" | "maintenance" | "handover_take" | "handover_return" | "breakdown_replacement" | "vehicle_transfer" | "report" | "problem_report" | "accident_report" | "payment_proof" | "monthly_inspection">
           | undefined,
+      });
+      return json({ ok: true }, 200, origin);
+    }
+
+    if (operation === "remove_account") {
+      const targetAccountId = clean(body.targetAccountId, 80);
+      if (!targetAccountId) throw new Error("validation_failed");
+      await ctx.runMutation(internal.portal.removeAccount, {
+        actorAccountId: session.account.id,
+        targetAccountId: targetAccountId as Id<"portalAccounts">,
       });
       return json({ ok: true }, 200, origin);
     }
@@ -727,6 +746,87 @@ export const portalAdmin = httpAction(async (ctx, request) => {
         actorAccountId: session.account.id,
         recordId: recordId as Id<"workflowRecords">,
         resolution,
+      });
+      return json({ ok: true }, 200, origin);
+    }
+
+    if (operation === "update_workflow_record") {
+      const recordId = clean(body.recordId, 80);
+      const status = clean(body.status, 20);
+      const maintenanceInterventionType = clean(body.maintenanceInterventionType, 40);
+      const disposition = clean(body.disposition, 20);
+      const accidentLiability = clean(body.accidentLiability, 20);
+      const reportCategory = clean(body.reportCategory, 30);
+      const reportPriority = clean(body.reportPriority, 20);
+      const maintenanceItems = Array.isArray(body.maintenanceItems)
+        ? [...new Set(body.maintenanceItems
+          .map((item) => clean(item, 80))
+          .filter((item) => allowedMaintenanceItemCodes.has(item)))]
+        : undefined;
+      const eventOccurredAt = body.eventOccurredAt
+        ? Date.parse(clean(body.eventOccurredAt, 40))
+        : undefined;
+      if (!recordId || !allowedRecordStatuses.has(status)) {
+        throw new Error("validation_failed");
+      }
+      await ctx.runMutation(internal.portal.updateWorkflowRecord, {
+        actorAccountId: session.account.id,
+        recordId: recordId as Id<"workflowRecords">,
+        vehicleId: optionalString(body.vehicleId, 80) as Id<"operationalVehicles"> | undefined,
+        customerId: optionalString(body.customerId, 80) as Id<"customers"> | undefined,
+        rentalId: optionalString(body.rentalId, 80) as Id<"rentals"> | undefined,
+        mileage: boundedNumber(body.mileage, 0, 2_000_000),
+        mileageAfter: boundedNumber(body.mileageAfter, 0, 2_000_000),
+        fuelPercent: boundedNumber(body.fuelPercent, 0, 100),
+        autonomyKm: boundedNumber(body.autonomyKm, 0, 5_000),
+        personName: optionalString(body.personName, 100),
+        customerName: optionalString(body.customerName, 100),
+        employeeName: optionalString(body.employeeName, 100),
+        secondaryLicensePlate: normalizePlate(body.secondaryLicensePlate) || undefined,
+        secondaryMileage: boundedNumber(body.secondaryMileage, 0, 2_000_000),
+        secondaryAutonomyKm: boundedNumber(body.secondaryAutonomyKm, 0, 5_000),
+        originAddress: optionalString(body.originAddress, 500),
+        destinationAddress: optionalString(body.destinationAddress, 500),
+        disposition: allowedDispositions.has(disposition)
+          ? disposition as "self" | "towing" | "mechanic" | "other"
+          : undefined,
+        mechanicName: optionalString(body.mechanicName, 100),
+        maintenanceInterventionType: allowedMaintenanceInterventionTypes.has(maintenanceInterventionType)
+          ? maintenanceInterventionType as "regular_service" | "breakdown_repair" | "technical_inspection"
+          : undefined,
+        maintenanceItems,
+        maintenanceOtherDetails: optionalString(body.maintenanceOtherDetails, 4000),
+        roadTestPerformed: typeof body.roadTestPerformed === "boolean" ? body.roadTestPerformed : undefined,
+        readyForService: typeof body.readyForService === "boolean" ? body.readyForService : undefined,
+        eventOccurredAt: eventOccurredAt !== undefined && Number.isFinite(eventOccurredAt) ? eventOccurredAt : undefined,
+        accidentLiability: allowedAccidentLiabilities.has(accidentLiability)
+          ? accidentLiability as "at_fault" | "not_at_fault"
+          : undefined,
+        amicableSettlement: typeof body.amicableSettlement === "boolean" ? body.amicableSettlement : undefined,
+        invoiceReference: optionalString(body.invoiceReference, 120),
+        inspectionMonth: optionalString(body.inspectionMonth, 7),
+        performedByName: optionalString(body.performedByName, 100),
+        maintenanceWork: optionalString(body.maintenanceWork, 4000),
+        changesMade: optionalString(body.changesMade, 4000),
+        reportCategory: allowedReportCategories.has(reportCategory)
+          ? reportCategory as "damage" | "mechanical" | "administrative" | "request" | "other"
+          : undefined,
+        reportPriority: allowedPriorities.has(reportPriority)
+          ? reportPriority as "low" | "normal" | "urgent"
+          : undefined,
+        description: optionalString(body.description, 4000),
+        status: status as "submitted" | "resolved",
+        resolution: optionalString(body.resolution, 4000),
+      });
+      return json({ ok: true }, 200, origin);
+    }
+
+    if (operation === "remove_workflow_record") {
+      const recordId = clean(body.recordId, 80);
+      if (!recordId) throw new Error("validation_failed");
+      await ctx.runMutation(internal.portal.removeWorkflowRecord, {
+        actorAccountId: session.account.id,
+        recordId: recordId as Id<"workflowRecords">,
       });
       return json({ ok: true }, 200, origin);
     }

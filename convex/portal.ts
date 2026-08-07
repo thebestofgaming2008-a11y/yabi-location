@@ -378,7 +378,9 @@ async function requireActor(
   accountId: Id<"portalAccounts">,
 ) {
   const actor = await ctx.db.get(accountId);
-  if (!actor || !actor.active) throw new Error("unauthorized");
+  if (!actor || !actor.active || actor.deletedAt !== undefined) {
+    throw new Error("unauthorized");
+  }
   return actor;
 }
 
@@ -645,7 +647,9 @@ export const getSessionContext = internalQuery({
       return null;
     }
     const account = await ctx.db.get(session.accountId);
-    if (!account || !account.active) return null;
+    if (!account || !account.active || account.deletedAt !== undefined) {
+      return null;
+    }
     return { sessionId: session._id, account: publicAccount(account) };
   },
 });
@@ -694,7 +698,11 @@ export const getPortalData = internalQuery({
 
     if (actor.role === "admin") {
       [accounts, customers, drivers, rentals, workflows, auditEvents] = await Promise.all([
-        ctx.db.query("portalAccounts").order("desc").take(100),
+        ctx.db
+          .query("portalAccounts")
+          .withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined))
+          .order("desc")
+          .take(100),
         ctx.db.query("customers").order("desc").take(100),
         ctx.db.query("customerDrivers").order("desc").take(100),
         ctx.db.query("rentals").order("desc").take(100),
@@ -910,6 +918,7 @@ export const updateAccount = internalMutation({
     targetAccountId: v.id("portalAccounts"),
     displayName: v.string(),
     role: portalRoleValidator,
+    active: v.boolean(),
     linkedCustomerId: v.optional(v.id("customers")),
     allowedWorkflowTypes: v.optional(v.array(workflowTypeValidator)),
   },
@@ -918,9 +927,14 @@ export const updateAccount = internalMutation({
     const actor = await requireActor(ctx, args.actorAccountId);
     requireRole(actor, ["admin"]);
     const target = await ctx.db.get(args.targetAccountId);
-    if (!target) throw new Error("account_not_found");
+    if (!target || target.deletedAt !== undefined) {
+      throw new Error("account_not_found");
+    }
     if (target._id === actor._id && args.role !== "admin") {
       throw new Error("cannot_change_self_role");
+    }
+    if (target._id === actor._id && !args.active) {
+      throw new Error("cannot_deactivate_self");
     }
     if (args.role === "customer" && !args.linkedCustomerId) {
       throw new Error("customer_link_required");
@@ -966,9 +980,19 @@ export const updateAccount = internalMutation({
         updatedAt: now,
       });
     }
+    if (target.role === "driver" && target.linkedDriverId && args.role !== "driver") {
+      const oldDriver = await ctx.db.get(target.linkedDriverId);
+      if (oldDriver?.portalAccountId === target._id) {
+        await ctx.db.patch(oldDriver._id, {
+          portalAccountId: undefined,
+          updatedAt: now,
+        });
+      }
+    }
     await ctx.db.patch(target._id, {
       displayName: args.displayName,
       role: args.role,
+      active: args.active,
       linkedCustomerId: args.linkedCustomerId,
       linkedDriverId: args.role === "driver" ? target.linkedDriverId : undefined,
       allowedWorkflowTypes: ["employee", "contractor"].includes(args.role)
@@ -976,6 +1000,19 @@ export const updateAccount = internalMutation({
         : undefined,
       updatedAt: now,
     });
+    if (!args.active && target.active) {
+      const sessions = await ctx.db
+        .query("portalSessions")
+        .withIndex("by_account_id_and_revoked_at", (q) =>
+          q.eq("accountId", target._id).eq("revokedAt", undefined),
+        )
+        .take(1000);
+      await Promise.all(
+        sessions
+          .filter((session) => session.revokedAt === undefined)
+          .map((session) => ctx.db.patch(session._id, { revokedAt: now })),
+      );
+    }
     await audit(
       ctx,
       actor._id,
@@ -983,6 +1020,93 @@ export const updateAccount = internalMutation({
       "portalAccount",
       String(target._id),
       `${args.displayName} account updated`,
+    );
+    return null;
+  },
+});
+
+export const removeAccount = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    targetAccountId: v.id("portalAccounts"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    if (actor._id === args.targetAccountId) {
+      throw new Error("cannot_remove_self");
+    }
+    const target = await ctx.db.get(args.targetAccountId);
+    if (!target || target.deletedAt !== undefined) {
+      throw new Error("account_not_found");
+    }
+    if (target.role === "admin" && target.active) {
+      const administrators = await ctx.db
+        .query("portalAccounts")
+        .withIndex("by_role", (q) => q.eq("role", "admin"))
+        .take(100);
+      if (
+        administrators.filter(
+          (account) => account.active && account.deletedAt === undefined,
+        ).length <= 1
+      ) {
+        throw new Error("last_admin_required");
+      }
+    }
+
+    const now = Date.now();
+    const [sessions, linkedCustomer, linkedDriver] = await Promise.all([
+      ctx.db
+        .query("portalSessions")
+        .withIndex("by_account_id_and_revoked_at", (q) =>
+          q.eq("accountId", target._id).eq("revokedAt", undefined),
+        )
+        .take(1000),
+      ctx.db
+        .query("customers")
+        .withIndex("by_portal_account_id", (q) =>
+          q.eq("portalAccountId", target._id),
+        )
+        .first(),
+      ctx.db
+        .query("customerDrivers")
+        .withIndex("by_portal_account_id", (q) =>
+          q.eq("portalAccountId", target._id),
+        )
+        .first(),
+    ]);
+    await Promise.all([
+      ...sessions
+        .filter((session) => session.revokedAt === undefined)
+        .map((session) => ctx.db.patch(session._id, { revokedAt: now })),
+      ...(linkedCustomer
+        ? [ctx.db.patch(linkedCustomer._id, { portalAccountId: undefined, updatedAt: now })]
+        : []),
+      ...(linkedDriver
+        ? [ctx.db.patch(linkedDriver._id, { portalAccountId: undefined, updatedAt: now })]
+        : []),
+    ]);
+    await ctx.db.patch(target._id, {
+      displayName: "Removed account",
+      codeHash: `removed:${String(target._id)}:${now}`,
+      codeHint: "----",
+      active: false,
+      linkedCustomerId: undefined,
+      linkedDriverId: undefined,
+      allowedWorkflowTypes: undefined,
+      lastLoginAt: undefined,
+      deletedAt: now,
+      deletedBy: actor._id,
+      updatedAt: now,
+    });
+    await audit(
+      ctx,
+      actor._id,
+      "portal.account_removed",
+      "portalAccount",
+      String(target._id),
+      "Portal account removed",
     );
     return null;
   },
@@ -1010,8 +1134,10 @@ export const rotateAccountCode = internalMutation({
     });
     const sessions = await ctx.db
       .query("portalSessions")
-      .withIndex("by_account_id", (q) => q.eq("accountId", target._id))
-      .take(100);
+      .withIndex("by_account_id_and_revoked_at", (q) =>
+        q.eq("accountId", target._id).eq("revokedAt", undefined),
+      )
+      .take(1000);
     await Promise.all(
       sessions
         .filter((session) => session.revokedAt === undefined)
@@ -1050,8 +1176,10 @@ export const setAccountActive = internalMutation({
     if (!args.active) {
       const sessions = await ctx.db
         .query("portalSessions")
-        .withIndex("by_account_id", (q) => q.eq("accountId", target._id))
-        .take(100);
+        .withIndex("by_account_id_and_revoked_at", (q) =>
+          q.eq("accountId", target._id).eq("revokedAt", undefined),
+        )
+        .take(1000);
       await Promise.all(
         sessions
           .filter((session) => session.revokedAt === undefined)
@@ -1432,10 +1560,10 @@ export const setDriverActive = internalMutation({
       if (!args.active) {
         const sessions = await ctx.db
           .query("portalSessions")
-          .withIndex("by_account_id", (q) =>
-            q.eq("accountId", driver.portalAccountId!),
+          .withIndex("by_account_id_and_revoked_at", (q) =>
+            q.eq("accountId", driver.portalAccountId!).eq("revokedAt", undefined),
           )
-          .take(100);
+          .take(1000);
         await Promise.all(
           sessions
             .filter((session) => session.revokedAt === undefined)
@@ -2135,6 +2263,275 @@ export const setWorkflowNotificationStatus = internalMutation({
       notificationEmailAttemptedAt: args.notificationEmailAttemptedAt,
       updatedAt: Date.now(),
     });
+    return null;
+  },
+});
+
+export const updateWorkflowRecord = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    recordId: v.id("workflowRecords"),
+    vehicleId: v.optional(v.id("operationalVehicles")),
+    customerId: v.optional(v.id("customers")),
+    rentalId: v.optional(v.id("rentals")),
+    mileage: v.optional(v.number()),
+    mileageAfter: v.optional(v.number()),
+    fuelPercent: v.optional(v.number()),
+    autonomyKm: v.optional(v.number()),
+    personName: v.optional(v.string()),
+    customerName: v.optional(v.string()),
+    employeeName: v.optional(v.string()),
+    secondaryLicensePlate: v.optional(v.string()),
+    secondaryMileage: v.optional(v.number()),
+    secondaryAutonomyKm: v.optional(v.number()),
+    originAddress: v.optional(v.string()),
+    destinationAddress: v.optional(v.string()),
+    disposition: v.optional(vehicleDispositionValidator),
+    mechanicName: v.optional(v.string()),
+    maintenanceInterventionType: v.optional(maintenanceInterventionTypeValidator),
+    maintenanceItems: v.optional(v.array(v.string())),
+    maintenanceOtherDetails: v.optional(v.string()),
+    roadTestPerformed: v.optional(v.boolean()),
+    readyForService: v.optional(v.boolean()),
+    eventOccurredAt: v.optional(v.number()),
+    accidentLiability: v.optional(accidentLiabilityValidator),
+    amicableSettlement: v.optional(v.boolean()),
+    invoiceReference: v.optional(v.string()),
+    inspectionMonth: v.optional(v.string()),
+    performedByName: v.optional(v.string()),
+    maintenanceWork: v.optional(v.string()),
+    changesMade: v.optional(v.string()),
+    reportCategory: v.optional(reportCategoryValidator),
+    reportPriority: v.optional(reportPriorityValidator),
+    description: v.optional(v.string()),
+    status: v.union(v.literal("submitted"), v.literal("resolved")),
+    resolution: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const record = await ctx.db.get(args.recordId);
+    if (!record) throw new Error("record_not_found");
+
+    const [vehicle, customer, rental, linkedDriver, media] = await Promise.all([
+      args.vehicleId ? ctx.db.get(args.vehicleId) : null,
+      args.customerId ? ctx.db.get(args.customerId) : null,
+      args.rentalId ? ctx.db.get(args.rentalId) : null,
+      record.driverId ? ctx.db.get(record.driverId) : null,
+      ctx.db
+        .query("mediaAssets")
+        .withIndex("by_record_id", (q) => q.eq("recordId", record._id))
+        .take(24),
+    ]);
+    if (args.vehicleId && !vehicle) throw new Error("vehicle_not_found");
+    if (args.customerId && !customer) throw new Error("customer_not_found");
+    if (args.rentalId && !rental) throw new Error("rental_not_found");
+    if (linkedDriver && linkedDriver.customerId !== args.customerId) {
+      throw new Error("driver_customer_mismatch");
+    }
+    if (
+      rental &&
+      (rental.vehicleId !== args.vehicleId || rental.customerId !== args.customerId)
+    ) {
+      throw new Error("rental_mismatch");
+    }
+
+    const vehicleRequired = [
+      "check_in", "check_out", "wash", "maintenance", "handover_take",
+      "handover_return", "breakdown_replacement", "vehicle_transfer",
+      "problem_report", "accident_report", "monthly_inspection",
+    ].includes(record.type);
+    const mileageRequired = [
+      "check_in", "check_out", "wash", "maintenance", "handover_take",
+      "handover_return", "breakdown_replacement", "vehicle_transfer",
+      "monthly_inspection",
+    ].includes(record.type);
+    if (vehicleRequired && !vehicle) throw new Error("vehicle_required");
+    if (mileageRequired && args.mileage === undefined) {
+      throw new Error("mileage_required");
+    }
+    if (record.type === "maintenance") {
+      const maintenanceItems = args.maintenanceItems ?? [];
+      if (
+        maintenanceItems.length > maintenanceItemCodes.length ||
+        new Set(maintenanceItems).size !== maintenanceItems.length ||
+        maintenanceItems.some((item) => !maintenanceItemCodeSet.has(item))
+      ) {
+        throw new Error("invalid_maintenance_items");
+      }
+      if (
+        !args.maintenanceInterventionType ||
+        (maintenanceItems.length === 0 && !args.maintenanceOtherDetails) ||
+        args.roadTestPerformed === undefined ||
+        args.readyForService === undefined
+      ) {
+        throw new Error("maintenance_details_required");
+      }
+    }
+    if (record.type === "problem_report" && !args.description) {
+      throw new Error("description_required");
+    }
+    if (record.type === "accident_report") {
+      if (
+        !args.description ||
+        args.eventOccurredAt === undefined ||
+        args.eventOccurredAt < 946684800000 ||
+        args.eventOccurredAt > Date.now() + 5 * 60 * 1000 ||
+        !args.accidentLiability ||
+        (args.accidentLiability === "at_fault" &&
+          args.amicableSettlement === undefined) ||
+        (args.accidentLiability === "not_at_fault" && args.amicableSettlement)
+      ) {
+        throw new Error("accident_details_required");
+      }
+    }
+    if (record.type === "payment_proof" && !args.invoiceReference) {
+      throw new Error("payment_details_required");
+    }
+    if (record.type === "monthly_inspection") {
+      if (!args.inspectionMonth || !/^\d{4}-\d{2}$/.test(args.inspectionMonth)) {
+        throw new Error("inspection_details_required");
+      }
+      const duplicate = await ctx.db
+        .query("workflowRecords")
+        .withIndex("by_vehicle_id_and_inspection_month", (q) =>
+          q.eq("vehicleId", args.vehicleId!).eq("inspectionMonth", args.inspectionMonth),
+        )
+        .first();
+      if (duplicate && duplicate._id !== record._id) {
+        throw new Error("inspection_already_submitted");
+      }
+    }
+    if (record.type === "report" && !args.description) {
+      throw new Error("description_required");
+    }
+    if (
+      ["check_in", "check_out"].includes(record.type) &&
+      (!args.personName || args.autonomyKm === undefined)
+    ) {
+      throw new Error("operation_details_required");
+    }
+    if (
+      record.type === "breakdown_replacement" &&
+      (!args.customerName || !args.secondaryLicensePlate ||
+        args.secondaryMileage === undefined ||
+        args.secondaryAutonomyKm === undefined || !args.disposition)
+    ) {
+      throw new Error("operation_details_required");
+    }
+    if (
+      record.type === "vehicle_transfer" &&
+      (!args.originAddress || !args.destinationAddress || !args.employeeName)
+    ) {
+      throw new Error("operation_details_required");
+    }
+    if (
+      record.type === "breakdown_replacement" && args.disposition === "self" &&
+      (!args.destinationAddress || !args.employeeName)
+    ) {
+      throw new Error("operation_details_required");
+    }
+    if (args.status === "resolved" && !args.resolution) {
+      throw new Error("resolution_required");
+    }
+
+    const slots = media
+      .filter((item) => item.status === "uploaded")
+      .map((item) => item.slot)
+      .filter((slot): slot is string => Boolean(slot));
+    const missingSlots = requiredMediaSlots(
+      record.type,
+      args.disposition,
+      args.amicableSettlement,
+    ).filter((slot) => !slots.includes(slot));
+    if (missingSlots.length) throw new Error("required_evidence_missing");
+
+    const now = Date.now();
+    const becameResolved = args.status === "resolved";
+    await ctx.db.patch(record._id, {
+      vehicleId: vehicle?._id,
+      customerId: customer?._id,
+      rentalId: rental?._id,
+      licensePlate: vehicle?.registrationPlate,
+      mileage: args.mileage,
+      mileageAfter: args.mileageAfter,
+      fuelPercent: args.fuelPercent,
+      autonomyKm: args.autonomyKm,
+      personName: args.personName,
+      customerName: args.customerName,
+      employeeName: args.employeeName,
+      secondaryLicensePlate: args.secondaryLicensePlate,
+      secondaryMileage: args.secondaryMileage,
+      secondaryAutonomyKm: args.secondaryAutonomyKm,
+      originAddress: args.originAddress,
+      destinationAddress: args.destinationAddress,
+      disposition: args.disposition,
+      mechanicName: args.mechanicName,
+      maintenanceInterventionType: args.maintenanceInterventionType,
+      maintenanceItems: args.maintenanceItems,
+      maintenanceOtherDetails: args.maintenanceOtherDetails,
+      roadTestPerformed: args.roadTestPerformed,
+      readyForService: args.readyForService,
+      eventOccurredAt: args.eventOccurredAt,
+      accidentLiability: args.accidentLiability,
+      amicableSettlement: args.amicableSettlement,
+      invoiceReference: args.invoiceReference,
+      inspectionMonth: args.inspectionMonth,
+      performedByName: args.performedByName,
+      maintenanceWork: args.maintenanceWork,
+      changesMade: args.changesMade,
+      reportCategory: args.reportCategory,
+      reportPriority: args.reportPriority,
+      description: args.description,
+      status: args.status,
+      resolution: becameResolved ? args.resolution : undefined,
+      resolvedAt: becameResolved ? (record.resolvedAt ?? now) : undefined,
+      resolvedBy: becameResolved ? actor._id : undefined,
+      updatedAt: now,
+    });
+    await audit(
+      ctx,
+      actor._id,
+      "workflow.record_updated",
+      "workflowRecord",
+      String(record._id),
+      `${record.reference} updated by administrator`,
+    );
+    return null;
+  },
+});
+
+export const removeWorkflowRecord = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    recordId: v.id("workflowRecords"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const record = await ctx.db.get(args.recordId);
+    if (!record) throw new Error("record_not_found");
+    const media = await ctx.db
+      .query("mediaAssets")
+      .withIndex("by_record_id", (q) => q.eq("recordId", record._id))
+      .take(24);
+    await Promise.all(
+      media.map((item) =>
+        ctx.db.patch(item._id, { status: "deleted", recordId: undefined }),
+      ),
+    );
+    await ctx.db.delete(record._id);
+    await audit(
+      ctx,
+      actor._id,
+      "workflow.record_removed",
+      "workflowRecord",
+      String(record._id),
+      `${record.reference} removed by administrator`,
+      JSON.stringify({ type: record.type, evidenceFilesRemoved: media.length }),
+    );
     return null;
   },
 });

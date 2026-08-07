@@ -265,6 +265,42 @@ const translations = {
     "items selected": "éléments sélectionnés",
     "Ready to upload": "Prêt à envoyer",
     Remove: "Supprimer",
+    "Administrator control": "Contrôle administrateur",
+    Account: "Compte",
+    People: "Personnes",
+    None: "Aucun",
+    "Account status": "Statut du compte",
+    Enabled: "Activé",
+    Disabled: "Désactivé",
+    "Remove account": "Supprimer le compte",
+    "Type the account name to confirm": "Saisissez le nom du compte pour confirmer",
+    "This immediately revokes access and removes the account from the portal. Existing audit history remains protected.": "Cette action révoque immédiatement l’accès et supprime le compte du portail. L’historique d’audit reste protégé.",
+    "Protected system information": "Informations système protégées",
+    "Action type": "Type d’action",
+    "Submitted by": "Envoyé par",
+    "Removed account": "Compte supprimé",
+    "This timestamp and the submitter cannot be changed.": "Cet horodatage et l’auteur de l’envoi ne peuvent pas être modifiés.",
+    "Linked records": "Éléments liés",
+    "Vehicle readings": "Relevés du véhicule",
+    "Replacement details": "Détails du remplacement",
+    "Transfer details": "Détails du transfert",
+    "Maintenance details": "Détails de l’entretien",
+    "Action status": "Statut de l’action",
+    Submitted: "Envoyée",
+    Resolved: "Résolue",
+    "Edit submitted action": "Modifier l’action envoyée",
+    "Remove submitted action": "Supprimer l’action envoyée",
+    "Remove action": "Supprimer l’action",
+    "Type the reference to confirm": "Saisissez la référence pour confirmer",
+    "This removes the action and makes its attached evidence inaccessible. The audit event remains protected.": "Cette action supprime l’enregistrement et rend les preuves jointes inaccessibles. L’événement d’audit reste protégé.",
+    "Submitted action updated.": "Action envoyée mise à jour.",
+    "Submitted action removed.": "Action envoyée supprimée.",
+    "Account removed.": "Compte supprimé.",
+    "The confirmation text does not match.": "Le texte de confirmation ne correspond pas.",
+    "You cannot remove your own administrator account.": "Vous ne pouvez pas supprimer votre propre compte administrateur.",
+    "At least one active administrator account must remain.": "Au moins un compte administrateur actif doit rester.",
+    "Add a resolution before marking this action resolved.": "Ajoutez une résolution avant de marquer cette action comme résolue.",
+    "The selected customer does not match the linked driver.": "Le client sélectionné ne correspond pas au chauffeur lié.",
     "Accepted evidence": "Preuves acceptées",
     "These files were securely accepted with this record.": "Ces fichiers ont été acceptés et sécurisés avec cet enregistrement.",
     "Complete operation": "Terminer l’opération",
@@ -723,6 +759,42 @@ const translations = {
     "items selected": "items geselecteerd",
     "Ready to upload": "Klaar om te uploaden",
     Remove: "Verwijderen",
+    "Administrator control": "Beheerderscontrole",
+    Account: "Account",
+    People: "Personen",
+    None: "Geen",
+    "Account status": "Accountstatus",
+    Enabled: "Ingeschakeld",
+    Disabled: "Uitgeschakeld",
+    "Remove account": "Account verwijderen",
+    "Type the account name to confirm": "Typ de accountnaam om te bevestigen",
+    "This immediately revokes access and removes the account from the portal. Existing audit history remains protected.": "Dit trekt de toegang onmiddellijk in en verwijdert het account uit het portaal. De bestaande auditgeschiedenis blijft beschermd.",
+    "Protected system information": "Beschermde systeeminformatie",
+    "Action type": "Actietype",
+    "Submitted by": "Ingediend door",
+    "Removed account": "Verwijderd account",
+    "This timestamp and the submitter cannot be changed.": "Deze tijdstempel en de indiener kunnen niet worden gewijzigd.",
+    "Linked records": "Gekoppelde gegevens",
+    "Vehicle readings": "Voertuigstanden",
+    "Replacement details": "Vervangingsgegevens",
+    "Transfer details": "Overdrachtsgegevens",
+    "Maintenance details": "Onderhoudsgegevens",
+    "Action status": "Actiestatus",
+    Submitted: "Ingediend",
+    Resolved: "Opgelost",
+    "Edit submitted action": "Ingediende actie bewerken",
+    "Remove submitted action": "Ingediende actie verwijderen",
+    "Remove action": "Actie verwijderen",
+    "Type the reference to confirm": "Typ de referentie om te bevestigen",
+    "This removes the action and makes its attached evidence inaccessible. The audit event remains protected.": "Dit verwijdert de actie en maakt het gekoppelde bewijs ontoegankelijk. De auditgebeurtenis blijft beschermd.",
+    "Submitted action updated.": "Ingediende actie bijgewerkt.",
+    "Submitted action removed.": "Ingediende actie verwijderd.",
+    "Account removed.": "Account verwijderd.",
+    "The confirmation text does not match.": "De bevestigingstekst komt niet overeen.",
+    "You cannot remove your own administrator account.": "U kunt uw eigen beheerdersaccount niet verwijderen.",
+    "At least one active administrator account must remain.": "Er moet minstens één actief beheerdersaccount blijven.",
+    "Add a resolution before marking this action resolved.": "Voeg een oplossing toe voordat u deze actie als opgelost markeert.",
+    "The selected customer does not match the linked driver.": "De geselecteerde klant komt niet overeen met de gekoppelde chauffeur.",
     "Accepted evidence": "Geaccepteerd bewijs",
     "These files were securely accepted with this record.": "Deze bestanden zijn veilig geaccepteerd bij deze registratie.",
     "Complete operation": "Werkzaamheid voltooien",
@@ -1344,6 +1416,7 @@ function messageFor(error) {
     driver_not_linked: "This driver account is not linked correctly.",
     driver_link_required: "Choose the linked customer for this driver.",
     driver_already_linked: "This driver already has an access account.",
+    driver_customer_mismatch: "The selected customer does not match the linked driver.",
     driver_documents_required: "All four identity and driving-licence photos are required.",
     driver_eligibility_failed: "The driver must be at least 23 and must have held a valid licence for at least five years.",
     accident_details_required: "Complete the accident details and liability choice.",
@@ -1353,6 +1426,10 @@ function messageFor(error) {
     inspection_media_required: "Add all six required monthly inspection photos.",
     invalid_media: "One or more uploaded files could not be verified. Please upload them again.",
     cannot_change_self_role: "You cannot change your own administrator role.",
+    cannot_remove_self: "You cannot remove your own administrator account.",
+    last_admin_required: "At least one active administrator account must remain.",
+    resolution_required: "Add a resolution before marking this action resolved.",
+    confirmation_mismatch: "The confirmation text does not match.",
     vehicle_unavailable: "That vehicle is not available for a new rental.",
     vehicle_has_open_rental: "This vehicle still has a scheduled or active rental.",
   };
@@ -1668,7 +1745,7 @@ function renderAccess() {
         <td>${clean(roles[account.role])}</td><td>${badge(account.active ? "active" : "inactive")}</td>
         <td>${date(account.lastLoginAt, true)}</td>
         <td><div class="table-actions"><button class="icon-button" data-action="edit-account" data-id="${account.id}">Edit</button><button class="icon-button" data-action="rotate-code" data-id="${account.id}">New code</button>
-        ${account.id !== state.data.account.id ? `<button class="icon-button" data-action="toggle-account" data-id="${account.id}" data-active="${account.active}">${account.active ? "Disable" : "Enable"}</button>` : ""}</div></td>
+        ${account.id !== state.data.account.id ? `<button class="icon-button" data-action="toggle-account" data-id="${account.id}" data-active="${account.active}">${account.active ? "Disable" : "Enable"}</button><button class="icon-button is-danger" data-action="remove-account" data-id="${account.id}">Remove</button>` : ""}</div></td>
       </tr>`,
     )
     .join("");
@@ -2033,10 +2110,11 @@ function editAccount(id) {
     submit: "Update account",
     content: `<form class="portal-form">${field("Display name", "displayName", account.displayName, true)}
       ${select("Role", "role", allowedRoles, true)}
+      ${select("Account status", "active", [["true", "Enabled"], ["false", "Disabled"]], true)}
       <fieldset id="workflow-access" class="permission-field" ${["employee", "contractor"].includes(account.role) ? "" : "hidden"}><legend>${clean(tr("Assigned operations"))}</legend><div class="permission-grid">${permissionOptions}</div></fieldset>
       <div id="customer-link" ${["customer", "driver"].includes(account.role) ? "" : "hidden"}>${select("Linked customer", "linkedCustomerId", state.data.customers.map((c) => [c.id, c.company || c.fullName]), ["customer", "driver"].includes(account.role))}</div></form>`,
     handler: async (data) => {
-      const body = { operation: "update_account", targetAccountId: id, displayName: data.get("displayName"), role: data.get("role") };
+      const body = { operation: "update_account", targetAccountId: id, displayName: data.get("displayName"), role: data.get("role"), active: data.get("active") === "true" };
       if (["customer", "driver"].includes(body.role)) body.linkedCustomerId = data.get("linkedCustomerId");
       if (["employee", "contractor"].includes(body.role)) body.allowedWorkflowTypes = data.getAll("workflowAccess");
       await api("/api/portal/admin", { method: "POST", body });
@@ -2046,6 +2124,7 @@ function editAccount(id) {
     },
   });
   setCustomValue(el.modalBody, "role", account.role);
+  setCustomValue(el.modalBody, "active", String(account.active));
   setCustomValue(el.modalBody, "linkedCustomerId", account.linkedCustomerId || "");
   const roleInput = el.modalBody.querySelector('[name="role"]');
   roleInput.addEventListener("change", () => {
@@ -2053,6 +2132,33 @@ function editAccount(id) {
     el.modalBody.querySelector("#customer-link").hidden = !linked;
     el.modalBody.querySelector("#customer-link [data-custom-select]").dataset.required = String(linked);
     el.modalBody.querySelector("#workflow-access").hidden = !["employee", "contractor"].includes(roleInput.value);
+  });
+}
+
+function removeAccount(id) {
+  const account = state.data.accounts.find((item) => item.id === id);
+  if (!account || account.id === state.data.account.id) return;
+  modal({
+    kicker: "Administrator control",
+    title: "Remove account",
+    submit: "Remove account",
+    content: `<form class="portal-form destructive-confirmation">
+      <p>${clean(tr("This immediately revokes access and removes the account from the portal. Existing audit history remains protected."))}</p>
+      ${readonlyField("Account", `${account.displayName} · ${roles[account.role]}`)}
+      ${field("Type the account name to confirm", "confirmation", "", true)}
+    </form>`,
+    handler: async (data) => {
+      if (String(data.get("confirmation") || "").trim() !== account.displayName) {
+        throw new Error("confirmation_mismatch");
+      }
+      await api("/api/portal/admin", {
+        method: "POST",
+        body: { operation: "remove_account", targetAccountId: id },
+      });
+      closeModal();
+      toast("Account removed.");
+      await refresh();
+    },
   });
 }
 
@@ -2747,6 +2853,138 @@ function recordDetailValue(value) {
   return `<div>${clean(value)}</div>`;
 }
 
+function textareaField(label, name, value = "", required = false) {
+  return `<div class="field"><label for="field-${clean(name)}">${clean(tr(label))}${required ? " *" : ""}</label><textarea id="field-${clean(name)}" name="${clean(name)}" ${required ? "required" : ""}>${clean(value || "")}</textarea></div>`;
+}
+
+function localDateTimeValue(timestamp) {
+  if (!timestamp) return "";
+  const value = new Date(timestamp - new Date(timestamp).getTimezoneOffset() * 60000);
+  return value.toISOString().slice(0, 16);
+}
+
+function recordEditForm(record) {
+  const dataMaps = maps();
+  const vehicleRequired = ["check_in", "check_out", "wash", "maintenance", "handover_take", "handover_return", "breakdown_replacement", "vehicle_transfer", "problem_report", "accident_report", "monthly_inspection"].includes(record.type);
+  const mileageRequired = ["check_in", "check_out", "wash", "maintenance", "handover_take", "handover_return", "breakdown_replacement", "vehicle_transfer", "monthly_inspection"].includes(record.type);
+  const vehicleOptions = [["", "None"], ...state.data.vehicles.map((vehicle) => [vehicle.id, `${vehicle.registrationPlate} · ${vehicle.make} ${vehicle.model}`, vehicleBrandMark(vehicle.make, "vehicle-brand-mark is-select")])];
+  const customerOptions = [["", "None"], ...state.data.customers.map((customer) => [customer.id, customer.company || customer.fullName])];
+  const rentalOptions = [["", "None"], ...state.data.rentals.map((rental) => {
+    const vehicle = dataMaps.vehicles.get(rental.vehicleId);
+    return [rental.id, `${rental.reference} · ${vehicle?.registrationPlate || tr("Vehicle")}`];
+  })];
+  const actor = dataMaps.accounts.get(record.actorAccountId);
+  const fields = [];
+
+  fields.push(`<section class="form-section"><h3>${clean(tr("Protected system information"))}</h3><div class="form-grid">${readonlyField("Reference", record.reference)}${readonlyField("Action type", workflows[record.type]?.[1] || record.type)}${readonlyField("Submitted by", actor?.displayName || tr("Removed account"))}${readonlyField("Server date and time", date(record.occurredAt, true), "This timestamp and the submitter cannot be changed.")}</div></section>`);
+  fields.push(`<section class="form-section"><h3>${clean(tr("Linked records"))}</h3><div class="form-grid">${select("Vehicle", "vehicleId", vehicleOptions, vehicleRequired)}${select("Customer", "customerId", customerOptions)}${select("Rental (optional)", "rentalId", rentalOptions)}</div></section>`);
+
+  const measurements = [];
+  if (mileageRequired || record.mileage != null) measurements.push(field("Mileage (km)", "mileage", record.mileage ?? "", mileageRequired, "number", 'min="0" max="2000000"'));
+  if (record.mileageAfter != null) measurements.push(field("Mileage after", "mileageAfter", record.mileageAfter, false, "number", 'min="0" max="2000000"'));
+  if (record.fuelPercent != null) measurements.push(field("Fuel level (%)", "fuelPercent", record.fuelPercent, false, "number", 'min="0" max="100"'));
+  if (["check_in", "check_out", "breakdown_replacement"].includes(record.type) || record.autonomyKm != null) measurements.push(field("Autonomy (km)", "autonomyKm", record.autonomyKm ?? "", ["check_in", "check_out", "breakdown_replacement"].includes(record.type), "number", 'min="0" max="5000"'));
+  if (measurements.length) fields.push(`<section class="form-section"><h3>${clean(tr("Vehicle readings"))}</h3><div class="form-grid">${measurements.join("")}</div></section>`);
+
+  if (["check_in", "check_out", "handover_take", "handover_return"].includes(record.type)) {
+    fields.push(`<section class="form-section"><h3>${clean(tr("People"))}</h3>${field("Driver / guest full name", "personName", record.personName || "", true)}</section>`);
+  }
+  if (record.type === "breakdown_replacement") {
+    fields.push(`<section class="form-section"><h3>${clean(tr("Replacement details"))}</h3><div class="form-grid">${field("Customer full name", "customerName", record.customerName || "", true)}${field("Licence plate", "secondaryLicensePlate", record.secondaryLicensePlate || "", true)}${field("Defective vehicle mileage", "secondaryMileage", record.secondaryMileage ?? "", true, "number", 'min="0" max="2000000"')}${field("Defective vehicle autonomy", "secondaryAutonomyKm", record.secondaryAutonomyKm ?? "", true, "number", 'min="0" max="5000"')}${select("Disposition", "disposition", [["self", "Moved by me"], ["towing", "Towing service"], ["mechanic", "Mechanic came"], ["other", "Other"]], true)}${field("Destination address (required when moved by me)", "destinationAddress", record.destinationAddress || "")}${field("Employee full name (required when moved by me)", "employeeName", record.employeeName || "")}</div></section>`);
+  }
+  if (record.type === "vehicle_transfer") {
+    fields.push(`<section class="form-section"><h3>${clean(tr("Transfer details"))}</h3><div class="form-grid">${field("Employee full name", "employeeName", record.employeeName || "", true)}${field("Point A — origin address", "originAddress", record.originAddress || "", true)}${field("Point B — destination address", "destinationAddress", record.destinationAddress || "", true)}</div></section>`);
+  }
+  if (record.type === "maintenance") {
+    fields.push(`<section class="form-section"><h3>${clean(tr("Maintenance details"))}</h3><div class="form-grid">${field("Mechanic name", "mechanicName", record.mechanicName || "", true)}${select("Intervention type", "maintenanceInterventionType", [["regular_service", "Regular maintenance"], ["breakdown_repair", "Breakdown / repair"], ["technical_inspection", "Technical inspection"]], true)}</div>${maintenanceChecklist()}${textareaField("Other maintenance details", "maintenanceOtherDetails", record.maintenanceOtherDetails || "")}${textareaField("Mechanic notes", "description", record.description || "")}</section><section class="form-section"><div class="form-grid">${select("Road test performed?", "roadTestPerformed", [["true", "Yes"], ["false", "No"]], true)}${select("Vehicle ready to return to service?", "readyForService", [["true", "Yes"], ["false", "No"]], true)}</div></section>`);
+  }
+  if (record.type === "accident_report") {
+    fields.push(`<section class="form-section"><h3>${clean(tr("Accident details"))}</h3><div class="form-grid">${field("Accident date and time", "eventOccurredAt", localDateTimeValue(record.eventOccurredAt), true, "datetime-local")}${select("Liability", "accidentLiability", [["at_fault", "At fault"], ["not_at_fault", "Not at fault"]], true)}${select("Amicable settlement", "amicableSettlement", [["true", "Yes"], ["false", "No"]], true)}${field("Performed by", "performedByName", record.performedByName || "")}</div>${textareaField("Accident description", "description", record.description || "", true)}</section>`);
+  } else if (record.type === "problem_report") {
+    fields.push(`<section class="form-section">${field("Performed by", "performedByName", record.performedByName || "")}${textareaField("Describe the problem or damage", "description", record.description || "", true)}</section>`);
+  } else if (record.type === "payment_proof") {
+    fields.push(`<section class="form-section"><div class="form-grid">${field("Invoice number or reference", "invoiceReference", record.invoiceReference || "", true)}${field("Performed by", "performedByName", record.performedByName || "")}</div>${textareaField("Description", "description", record.description || "")}</section>`);
+  } else if (record.type === "monthly_inspection") {
+    fields.push(`<section class="form-section"><div class="form-grid">${field("Inspection month", "inspectionMonth", record.inspectionMonth || "", true, "month")}${field("Performed by", "performedByName", record.performedByName || "")}</div>${textareaField("Description", "description", record.description || "")}</section>`);
+  } else if (record.type === "report") {
+    fields.push(`<section class="form-section"><div class="form-grid">${select("Category", "reportCategory", [["damage", "Damage"], ["mechanical", "Mechanical"], ["administrative", "Administrative"], ["request", "Request"], ["other", "Other"]], true)}${select("Priority", "reportPriority", [["low", "Low"], ["normal", "Normal"], ["urgent", "Urgent"]], true)}</div>${textareaField("Description", "description", record.description || "", true)}${textareaField("Maintenance", "maintenanceWork", record.maintenanceWork || "")}${textareaField("Changes", "changesMade", record.changesMade || "")}</section>`);
+  } else if (record.type !== "maintenance") {
+    fields.push(`<section class="form-section">${textareaField(record.type === "wash" ? "Notes" : "Description", "description", record.description || "")}</section>`);
+  }
+
+  fields.push(`<section class="form-section"><h3>${clean(tr("Action status"))}</h3><div class="form-grid">${select("Status", "status", [["submitted", "Submitted"], ["resolved", "Resolved"]], true)}</div>${textareaField("Resolution", "resolution", record.resolution || "")}</section>`);
+  return `<form class="portal-form admin-record-edit">${fields.join("")}</form>`;
+}
+
+function syncRecordEditValues(record) {
+  ["vehicleId", "customerId", "rentalId", "disposition", "maintenanceInterventionType", "accidentLiability", "reportCategory", "reportPriority", "status"].forEach((name) => {
+    setCustomValue(el.modalBody, name, record[name] || "");
+  });
+  if (record.roadTestPerformed != null) setCustomValue(el.modalBody, "roadTestPerformed", String(record.roadTestPerformed));
+  if (record.readyForService != null) setCustomValue(el.modalBody, "readyForService", String(record.readyForService));
+  if (record.amicableSettlement != null) setCustomValue(el.modalBody, "amicableSettlement", String(record.amicableSettlement));
+  (record.maintenanceItems || []).forEach((code) => {
+    const input = el.modalBody.querySelector(`input[name="maintenanceItems"][value="${CSS.escape(code)}"]`);
+    if (input) input.checked = true;
+  });
+  const updateCounts = () => el.modalBody.querySelectorAll(".maintenance-category").forEach((category) => {
+    const count = category.querySelectorAll('input[name="maintenanceItems"]:checked').length;
+    const counter = category.querySelector("[data-maintenance-count]");
+    if (counter) counter.textContent = maintenanceSelectionLabel(count);
+  });
+  updateCounts();
+  el.modalBody.querySelectorAll('input[name="maintenanceItems"]').forEach((input) => input.addEventListener("change", updateCounts));
+}
+
+function editRecord(id) {
+  const record = state.data.workflows.find((item) => item.id === id);
+  if (!record || state.data.account.role !== "admin") return;
+  closeModal();
+  modal({
+    kicker: record.reference,
+    title: "Edit submitted action",
+    submit: "Save changes",
+    content: recordEditForm(record),
+    handler: async (data) => {
+      const body = { operation: "update_workflow_record", recordId: id };
+      for (const [key, value] of data.entries()) {
+        if (key !== "maintenanceItems") body[key] = value;
+      }
+      body.maintenanceItems = data.getAll("maintenanceItems").map(String);
+      ["roadTestPerformed", "readyForService", "amicableSettlement"].forEach((key) => {
+        if (body[key] === "true" || body[key] === "false") body[key] = body[key] === "true";
+      });
+      await api("/api/portal/admin", { method: "POST", body });
+      closeModal();
+      toast("Submitted action updated.");
+      await refresh();
+      await viewRecord(id);
+    },
+  });
+  syncRecordEditValues(record);
+}
+
+function removeRecord(id) {
+  const record = state.data.workflows.find((item) => item.id === id);
+  if (!record || state.data.account.role !== "admin") return;
+  closeModal();
+  modal({
+    kicker: "Administrator control",
+    title: "Remove submitted action",
+    submit: "Remove action",
+    content: `<form class="portal-form destructive-confirmation"><p>${clean(tr("This removes the action and makes its attached evidence inaccessible. The audit event remains protected."))}</p>${readonlyField("Reference", record.reference)}${field("Type the reference to confirm", "confirmation", "", true)}</form>`,
+    handler: async (data) => {
+      if (String(data.get("confirmation") || "").trim().toUpperCase() !== record.reference.toUpperCase()) {
+        throw new Error("confirmation_mismatch");
+      }
+      await api("/api/portal/admin", { method: "POST", body: { operation: "remove_workflow_record", recordId: id } });
+      closeModal();
+      toast("Submitted action removed.");
+      await refresh();
+    },
+  });
+}
+
 async function viewRecord(id) {
   try {
     const result = await api("/api/portal/record-media", { method: "POST", body: { recordId: id } });
@@ -2799,8 +3037,10 @@ async function viewRecord(id) {
         ${result.items.length ? `<section class="accepted-evidence"><h3>${clean(tr("Accepted evidence"))}</h3><p>${clean(tr("These files were securely accepted with this record."))}</p><div class="media-gallery">${result.items.sort((a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99)).map((item) => {
           const caption = mediaSlotLabel(item.slot, item.category);
           return `<figure>${item.contentType === "application/pdf" ? `<a class="document-link" href="${clean(item.url)}" target="_blank" rel="noopener"><strong>PDF</strong><span>${clean(tr("Open document"))}</span></a>` : `<img src="${clean(item.url)}" alt="${clean(caption)}" loading="lazy">`}<figcaption>${clean(caption)}</figcaption></figure>`;
-        }).join("")}</div></section>` : `<p>${clean(tr("No media attached."))}</p>`}</div>`,
+        }).join("")}</div></section>` : `<p>${clean(tr("No media attached."))}</p>`}${state.data.account.role === "admin" ? `<div class="form-submit-row admin-record-actions"><button class="ghost-button" type="button" data-edit-record>${clean(tr("Edit submitted action"))}</button><button class="ghost-button danger-button" type="button" data-remove-record>${clean(tr("Remove submitted action"))}</button></div>` : ""}</div>`,
     });
+    el.modalBody.querySelector("[data-edit-record]")?.addEventListener("click", () => editRecord(id));
+    el.modalBody.querySelector("[data-remove-record]")?.addEventListener("click", () => removeRecord(id));
   } catch (error) {
     toast(messageFor(error), "error");
   }
@@ -2899,6 +3139,7 @@ el.view.addEventListener("click", async (event) => {
   const { action, id } = button.dataset;
   if (action === "create-account") createAccount();
   if (action === "edit-account") editAccount(id);
+  if (action === "remove-account") removeAccount(id);
   if (action === "create-customer") createCustomer();
   if (action === "edit-customer") editCustomer(id);
   if (action === "create-driver") createDriver();

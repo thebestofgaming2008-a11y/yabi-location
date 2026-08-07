@@ -1158,6 +1158,22 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.icon-button.is-danger {
+  border-color: #f0caca;
+  background: #fff7f7;
+  color: var(--danger);
+}
+.destructive-confirmation {
+  border-top: 4px solid var(--danger);
+}
+.destructive-confirmation > p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.admin-record-actions {
+  margin-top: 1rem;
+}
 
 /* Compact multi-select accordions for mechanic work */
 .maintenance-accordion { display: grid; gap: .55rem; }

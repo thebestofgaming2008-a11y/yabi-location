@@ -207,12 +207,15 @@ export default defineSchema({
     allowedWorkflowTypes: v.optional(v.array(workflowTypeValidator)),
     createdBy: v.optional(v.id("portalAccounts")),
     lastLoginAt: v.optional(v.number()),
+    deletedAt: v.optional(v.number()),
+    deletedBy: v.optional(v.id("portalAccounts")),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_code_hash", ["codeHash"])
     .index("by_role", ["role"])
-    .index("by_active", ["active"]),
+    .index("by_active", ["active"])
+    .index("by_deleted_at", ["deletedAt"]),
 
   portalSessions: defineTable({
     accountId: v.id("portalAccounts"),
@@ -225,6 +228,7 @@ export default defineSchema({
   })
     .index("by_token_hash", ["tokenHash"])
     .index("by_account_id", ["accountId"])
+    .index("by_account_id_and_revoked_at", ["accountId", "revokedAt"])
     .index("by_expires_at", ["expiresAt"]),
 
   customers: defineTable({
