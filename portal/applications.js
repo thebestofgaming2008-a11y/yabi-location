@@ -120,6 +120,11 @@
       "Mark agreed": "Marquer accepté",
       "Create client access": "Créer l’accès client",
       Reject: "Refuser",
+      Edit: "Modifier",
+      Cancel: "Annuler",
+      Save: "Enregistrer",
+      "Remove this application?": "Supprimer cette demande ?",
+      "The action could not be completed.": "L’action n’a pas pu être effectuée.",
       "Could not load applications": "Impossible de charger les demandes",
     },
     nl: {
@@ -239,6 +244,11 @@
       "Mark agreed": "Markeer akkoord",
       "Create client access": "Klanttoegang aanmaken",
       Reject: "Weigeren",
+      Edit: "Wijzigen",
+      Cancel: "Annuleren",
+      Save: "Opslaan",
+      "Remove this application?": "Deze aanvraag verwijderen?",
+      "The action could not be completed.": "De actie kon niet worden voltooid.",
       "Could not load applications": "Aanvragen konden niet worden geladen",
     },
   };
@@ -1180,6 +1190,12 @@
     return result;
   }
 
+  const adminApplicationCache = new Map();
+
+  function adminField(label, name, value = "", type = "text", required = false) {
+    return `<label class="app-field"><span>${escape(t(label))}</span><input name="${escape(name)}" type="${escape(type)}" value="${escape(value || "")}" ${required ? "required" : ""}></label>`;
+  }
+
   async function renderApplicationsAdmin(root) {
     root.innerHTML = '<div class="loading-state"><span></span><p>Loading…</p></div>';
     try {
@@ -1212,6 +1228,7 @@
       const result = await adminApi(
         `/api/portal/applications/admin?id=${encodeURIComponent(id)}`,
       );
+      adminApplicationCache.set(id, result);
       const app = result.application;
       modalTitle.textContent = app.reference;
       const documentsByDriver = new Map();
@@ -1242,10 +1259,12 @@
         </section>`).join("")}
         <label class="app-field"><span>${escape(t("Internal notes"))}</span><textarea id="application-admin-notes">${escape(app.adminNotes || "")}</textarea></label>
         <div class="application-admin-actions">
+          <button class="ghost-button" data-application-action="edit">${escape(t("Edit"))}</button>
           ${app.status !== "activated" ? `<button class="ghost-button" data-application-action="status" data-status="contacted">${escape(t("Mark contacted"))}</button>` : ""}
           ${!["agreed", "activated"].includes(app.status) ? `<button class="secondary-button" data-application-action="status" data-status="agreed">${escape(t("Mark agreed"))}</button>` : ""}
           ${app.status === "agreed" ? `<button class="primary-button" data-application-action="activate">${escape(t("Create client access"))}</button>` : ""}
           ${app.status !== "activated" ? `<button class="danger-button" data-application-action="status" data-status="rejected">${escape(t("Reject"))}</button>` : ""}
+          <button class="danger-button" data-application-action="remove">${escape(t("Remove"))}</button>
         </div>
       </div>`;
       modalBody.dataset.applicationId = id;
@@ -1253,6 +1272,53 @@
       modalBody.innerHTML = "<p>Could not load this application.</p>";
     }
   }
+
+  async function openAdminApplicationEditor(id) {
+    const result = adminApplicationCache.get(id) || await adminApi(`/api/portal/applications/admin?id=${encodeURIComponent(id)}`);
+    adminApplicationCache.set(id, result);
+    const app = result.application;
+    const modalBody = document.querySelector("#modal-body");
+    const modalTitle = document.querySelector("#modal-title");
+    modalTitle.textContent = `${t("Edit")} ${app.reference}`;
+    modalBody.innerHTML = `<form id="application-admin-edit" class="application-admin-detail">
+      <section class="detail-block"><h3>${escape(t("Contract holder"))}</h3><div class="application-grid">
+        <label class="app-field"><span>${escape(t("Applicant type"))}</span><span><label><input type="radio" name="applicantType" value="individual" ${app.applicantType !== "company" ? "checked" : ""}> ${escape(t("Individual"))}</label> <label><input type="radio" name="applicantType" value="company" ${app.applicantType === "company" ? "checked" : ""}> ${escape(t("Company"))}</label></span></label>
+        ${adminField("Full name", "holderFullName", app.holderFullName || app.holderNameOrCompany, "text", true)}${adminField("Company name", "companyName", app.companyName)}${adminField("Belgian VAT number", "companyVatNumber", app.companyVatNumber)}
+        ${adminField("Street", "holderStreet", app.holderStreet)}${adminField("House number", "holderHouseNumber", app.holderHouseNumber)}${adminField("Box / unit (optional)", "holderAddressBox", app.holderAddressBox)}${adminField("Postal code", "holderPostalCode", app.holderPostalCode)}${adminField("City", "holderCity", app.holderCity)}${provinceSelect("holderProvince", app.holderProvince || "", false)}
+        ${adminField("Phone", "holderPhone", app.holderPhone, "tel", true)}${adminField("Email", "holderEmail", app.holderEmail, "email", true)}${adminField("Identity card number", "holderIdentityCardNumber", app.holderIdentityCardNumber)}${adminField("National register number", "holderNationalRegisterNumber", app.holderNationalRegisterNumber)}
+      </div></section>
+      ${result.drivers.map((driver, index) => `<section class="detail-block" data-admin-driver="${escape(driver.id)}" data-kind="${escape(driver.kind)}"><h3>${escape(t(driver.kind === "main" ? "Main driver" : "Additional driver"))} ${index + 1}</h3><div class="application-grid">
+        ${adminField("Full name", "fullName", driver.fullName, "text", true)}${adminField("Street", "street", driver.street)}${adminField("House number", "houseNumber", driver.houseNumber)}${adminField("Box / unit (optional)", "addressBox", driver.addressBox)}${adminField("Postal code", "postalCode", driver.postalCode)}${adminField("City", "city", driver.city)}${provinceSelect("province", driver.province || "", false)}
+        ${adminField("Email", "email", driver.email, "email")}${adminField("Phone", "phone", driver.phone, "tel", true)}${adminField("Date of birth", "dateOfBirth", driver.dateOfBirth, "date")}${adminField("Identity card number", "identityCardNumber", driver.identityCardNumber, "text", true)}${adminField("National register number", "nationalRegisterNumber", driver.nationalRegisterNumber)}${adminField("Position in company", "companyPosition", driver.companyPosition)}
+        ${adminField("Driving licence number", "drivingLicenceNumber", driver.drivingLicenceNumber, "text", true)}${adminField("Licence issue date", "licenceIssueDate", driver.licenceIssueDate, "date", true)}${adminField("Licence valid since", "licenceValidSince", driver.licenceValidSince, "date", true)}
+      </div></section>`).join("")}
+      <label class="app-field"><span>${escape(t("Internal notes"))}</span><textarea name="adminNotes">${escape(app.adminNotes || "")}</textarea></label>
+      <div class="application-admin-actions"><button type="button" class="ghost-button" data-application-action="view" data-id="${escape(id)}">${escape(t("Cancel"))}</button><button type="submit" class="primary-button">${escape(t("Save"))}</button></div>
+    </form>`;
+    modalBody.dataset.applicationId = id;
+    modalBody.querySelectorAll("[data-application-select]").forEach(updateApplicationSelect);
+  }
+
+  document.addEventListener("submit", async (event) => {
+    if (event.target.id !== "application-admin-edit") return;
+    event.preventDefault();
+    const form = event.target;
+    const applicationId = document.querySelector("#modal-body")?.dataset.applicationId;
+    const values = Object.fromEntries(new FormData(form));
+    const drivers = [...form.querySelectorAll("[data-admin-driver]")].map((section) => ({
+      id: section.dataset.adminDriver,
+      kind: section.dataset.kind,
+      ...Object.fromEntries([...section.querySelectorAll("[name]")].map((input) => [input.name, input.value])),
+    }));
+    const submit = form.querySelector('[type="submit"]');
+    submit.disabled = true;
+    try {
+      await adminApi("/api/portal/applications/admin", { method: "POST", body: { operation: "update_details", applicationId, ...values, drivers } });
+      adminApplicationCache.delete(applicationId);
+      await openAdminApplication(applicationId);
+    } catch { alert(t("The action could not be completed.")); }
+    finally { submit.disabled = false; }
+  });
 
   document.addEventListener("click", async (event) => {
     const action = event.target.closest("[data-application-action]");
@@ -1262,6 +1328,20 @@
       document.querySelector("#modal-body")?.dataset.applicationId;
     if (action.dataset.applicationAction === "view") {
       await openAdminApplication(id);
+      return;
+    }
+    if (action.dataset.applicationAction === "edit") {
+      await openAdminApplicationEditor(id);
+      return;
+    }
+    if (action.dataset.applicationAction === "remove") {
+      if (!confirm(t("Remove this application?"))) return;
+      try {
+        await adminApi("/api/portal/applications/admin", { method: "POST", body: { operation: "remove", applicationId: id } });
+        adminApplicationCache.delete(id);
+        document.querySelector("#portal-modal").close();
+        await renderApplicationsAdmin(document.querySelector("#view-root"));
+      } catch { alert(t("The action could not be completed.")); }
       return;
     }
     action.disabled = true;

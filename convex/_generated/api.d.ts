@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as accessCodeVault from "../accessCodeVault.js";
 import type * as applicationEmails from "../applicationEmails.js";
 import type * as applicationHttp from "../applicationHttp.js";
 import type * as applications from "../applications.js";
@@ -27,6 +28,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  accessCodeVault: typeof accessCodeVault;
   applicationEmails: typeof applicationEmails;
   applicationHttp: typeof applicationHttp;
   applications: typeof applications;

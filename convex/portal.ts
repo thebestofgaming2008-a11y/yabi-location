@@ -71,10 +71,19 @@ const driverPublicValidator = v.object({
   firstName: v.optional(v.string()),
   lastName: v.optional(v.string()),
   fullName: v.string(),
+  address: v.optional(v.string()),
+  street: v.optional(v.string()),
+  houseNumber: v.optional(v.string()),
+  addressBox: v.optional(v.string()),
+  postalCode: v.optional(v.string()),
+  city: v.optional(v.string()),
+  province: v.optional(v.string()),
   email: v.optional(v.string()),
   phone: v.string(),
   identityCardNumber: v.string(),
+  nationalRegisterNumber: v.optional(v.string()),
   dateOfBirth: v.optional(v.string()),
+  companyPosition: v.optional(v.string()),
   drivingLicenceNumber: v.string(),
   licenceIssueDate: v.string(),
   licenceValidSince: v.string(),
@@ -266,10 +275,19 @@ function publicDriver(
     firstName: driver.firstName,
     lastName: driver.lastName,
     fullName: driver.fullName,
+    address: driver.address,
+    street: driver.street,
+    houseNumber: driver.houseNumber,
+    addressBox: driver.addressBox,
+    postalCode: driver.postalCode,
+    city: driver.city,
+    province: driver.province,
     email: driver.email,
     phone: driver.phone,
     identityCardNumber: driver.identityCardNumber,
+    nationalRegisterNumber: driver.nationalRegisterNumber,
     dateOfBirth: driver.dateOfBirth,
+    companyPosition: driver.companyPosition,
     drivingLicenceNumber: driver.drivingLicenceNumber,
     licenceIssueDate: driver.licenceIssueDate,
     licenceValidSince: driver.licenceValidSince,
@@ -509,6 +527,8 @@ export const bootstrapAdmin = internalMutation({
     displayName: v.string(),
     codeHash: v.string(),
     codeHint: v.string(),
+    accessCodeCiphertext: v.string(),
+    accessCodeIv: v.string(),
   },
   returns: v.object({
     created: v.boolean(),
@@ -527,6 +547,8 @@ export const bootstrapAdmin = internalMutation({
       role: "admin",
       codeHash: args.codeHash,
       codeHint: args.codeHint,
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
       active: true,
       createdAt: now,
       updatedAt: now,
@@ -549,6 +571,8 @@ export const loginWithCode = internalMutation({
     tokenHash: v.string(),
     fingerprint: v.string(),
     userAgentHash: v.optional(v.string()),
+    accessCodeCiphertext: v.string(),
+    accessCodeIv: v.string(),
   },
   returns: v.object({
     ok: v.boolean(),
@@ -612,7 +636,12 @@ export const loginWithCode = internalMutation({
       createdAt: now,
       lastSeenAt: now,
     });
-    await ctx.db.patch(account._id, { lastLoginAt: now, updatedAt: now });
+    await ctx.db.patch(account._id, {
+      lastLoginAt: now,
+      updatedAt: now,
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
+    });
     await audit(
       ctx,
       account._id,
@@ -687,7 +716,11 @@ export const getPortalData = internalQuery({
     let vehicles =
       actor.role === "customer" || actor.role === "driver"
         ? []
-        : await ctx.db.query("operationalVehicles").order("desc").take(100);
+        : await ctx.db
+            .query("operationalVehicles")
+            .withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined))
+            .order("desc")
+            .take(100);
 
     let accounts: Doc<"portalAccounts">[] = [];
     let customers: Doc<"customers">[] = [];
@@ -703,9 +736,9 @@ export const getPortalData = internalQuery({
           .withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined))
           .order("desc")
           .take(100),
-        ctx.db.query("customers").order("desc").take(100),
-        ctx.db.query("customerDrivers").order("desc").take(100),
-        ctx.db.query("rentals").order("desc").take(100),
+        ctx.db.query("customers").withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined)).order("desc").take(100),
+        ctx.db.query("customerDrivers").withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined)).order("desc").take(100),
+        ctx.db.query("rentals").withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined)).order("desc").take(100),
         ctx.db.query("workflowRecords").order("desc").take(100),
         ctx.db.query("auditEvents").order("desc").take(100),
       ]);
@@ -838,6 +871,8 @@ export const createAccount = internalMutation({
     role: portalRoleValidator,
     codeHash: v.string(),
     codeHint: v.string(),
+    accessCodeCiphertext: v.string(),
+    accessCodeIv: v.string(),
     linkedCustomerId: v.optional(v.id("customers")),
     linkedDriverId: v.optional(v.id("customerDrivers")),
     allowedWorkflowTypes: v.optional(v.array(workflowTypeValidator)),
@@ -880,6 +915,8 @@ export const createAccount = internalMutation({
       role: args.role,
       codeHash: args.codeHash,
       codeHint: args.codeHint,
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
       active: true,
       linkedCustomerId: args.linkedCustomerId,
       linkedDriverId: args.linkedDriverId,
@@ -1091,6 +1128,8 @@ export const removeAccount = internalMutation({
       displayName: "Removed account",
       codeHash: `removed:${String(target._id)}:${now}`,
       codeHint: "----",
+      accessCodeCiphertext: undefined,
+      accessCodeIv: undefined,
       active: false,
       linkedCustomerId: undefined,
       linkedDriverId: undefined,
@@ -1118,6 +1157,8 @@ export const rotateAccountCode = internalMutation({
     targetAccountId: v.id("portalAccounts"),
     codeHash: v.string(),
     codeHint: v.string(),
+    accessCodeCiphertext: v.string(),
+    accessCodeIv: v.string(),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -1130,6 +1171,8 @@ export const rotateAccountCode = internalMutation({
     await ctx.db.patch(target._id, {
       codeHash: args.codeHash,
       codeHint: args.codeHint,
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
       updatedAt: now,
     });
     const sessions = await ctx.db
@@ -1152,6 +1195,25 @@ export const rotateAccountCode = internalMutation({
       `Access code rotated for ${target.displayName}`,
     );
     return null;
+  },
+});
+
+export const getAccountAccessCodeForAdmin = internalQuery({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    targetAccountId: v.id("portalAccounts"),
+  },
+  returns: v.union(
+    v.null(),
+    v.object({ ciphertext: v.string(), iv: v.string() }),
+  ),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const target = await ctx.db.get(args.targetAccountId);
+    if (!target || target.deletedAt !== undefined) throw new Error("account_not_found");
+    if (!target.accessCodeCiphertext || !target.accessCodeIv) return null;
+    return { ciphertext: target.accessCodeCiphertext, iv: target.accessCodeIv };
   },
 });
 
@@ -1296,6 +1358,67 @@ export const updateCustomer = internalMutation({
   },
 });
 
+export const removeCustomer = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    customerId: v.id("customers"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const customer = await ctx.db.get(args.customerId);
+    if (!customer || customer.deletedAt !== undefined) throw new Error("customer_not_found");
+    const rentals = await ctx.db.query("rentals").withIndex("by_customer_id", (q) => q.eq("customerId", customer._id)).take(100);
+    if (rentals.some((rental) => rental.deletedAt === undefined)) throw new Error("customer_has_rental_history");
+    const drivers = await ctx.db
+      .query("customerDrivers")
+      .withIndex("by_customer_id", (q) => q.eq("customerId", customer._id))
+      .take(100);
+    const accountIds = [customer.portalAccountId, ...drivers.map((driver) => driver.portalAccountId)]
+      .filter((id): id is Id<"portalAccounts"> => id !== undefined);
+    const now = Date.now();
+    for (const accountId of accountIds) {
+      const account = await ctx.db.get(accountId);
+      if (!account || account.deletedAt !== undefined) continue;
+      const sessions = await ctx.db
+        .query("portalSessions")
+        .withIndex("by_account_id_and_revoked_at", (q) => q.eq("accountId", accountId).eq("revokedAt", undefined))
+        .take(1000);
+      await Promise.all(sessions.map((session) => ctx.db.patch(session._id, { revokedAt: now })));
+      await ctx.db.patch(accountId, {
+        displayName: "Removed account",
+        codeHash: `removed:${String(accountId)}:${now}`,
+        codeHint: "----",
+        accessCodeCiphertext: undefined,
+        accessCodeIv: undefined,
+        active: false,
+        linkedCustomerId: undefined,
+        linkedDriverId: undefined,
+        deletedAt: now,
+        deletedBy: actor._id,
+        updatedAt: now,
+      });
+    }
+    await Promise.all(drivers.map((driver) => ctx.db.patch(driver._id, {
+      active: false,
+      portalAccountId: undefined,
+      deletedAt: now,
+      deletedBy: actor._id,
+      updatedAt: now,
+    })));
+    await ctx.db.patch(customer._id, {
+      status: "inactive",
+      portalAccountId: undefined,
+      deletedAt: now,
+      deletedBy: actor._id,
+      updatedAt: now,
+    });
+    await audit(ctx, actor._id, "customer.removed", "customer", String(customer._id), `Customer ${customer.fullName} removed`);
+    return null;
+  },
+});
+
 export const updateOwnCustomerProfile = internalMutation({
   args: {
     actorAccountId: v.id("portalAccounts"),
@@ -1359,6 +1482,8 @@ export const createDriverWithAccount = internalMutation({
     mediaIds: v.array(v.id("mediaAssets")),
     codeHash: v.string(),
     codeHint: v.string(),
+    accessCodeCiphertext: v.string(),
+    accessCodeIv: v.string(),
   },
   returns: v.object({
     driverId: v.id("customerDrivers"),
@@ -1454,6 +1579,8 @@ export const createDriverWithAccount = internalMutation({
       role: "driver",
       codeHash: args.codeHash,
       codeHint: args.codeHint,
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
       active: true,
       linkedCustomerId: customerId,
       linkedDriverId: driverId,
@@ -1488,6 +1615,8 @@ export const createDriverAccess = internalMutation({
     driverId: v.id("customerDrivers"),
     codeHash: v.string(),
     codeHint: v.string(),
+    accessCodeCiphertext: v.string(),
+    accessCodeIv: v.string(),
   },
   returns: v.id("portalAccounts"),
   handler: async (ctx, args) => {
@@ -1510,6 +1639,8 @@ export const createDriverAccess = internalMutation({
       role: "driver",
       codeHash: args.codeHash,
       codeHint: args.codeHint,
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
       active: driver.active,
       linkedCustomerId: driver.customerId,
       linkedDriverId: driver._id,
@@ -1583,6 +1714,120 @@ export const setDriverActive = internalMutation({
   },
 });
 
+export const updateDriver = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    driverId: v.id("customerDrivers"),
+    customerId: v.id("customers"),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    fullName: v.string(),
+    street: v.optional(v.string()),
+    houseNumber: v.optional(v.string()),
+    addressBox: v.optional(v.string()),
+    postalCode: v.optional(v.string()),
+    city: v.optional(v.string()),
+    province: v.optional(belgianProvinceValidator),
+    email: v.optional(v.string()),
+    phone: v.string(),
+    identityCardNumber: v.string(),
+    nationalRegisterNumber: v.optional(v.string()),
+    dateOfBirth: v.optional(v.string()),
+    companyPosition: v.optional(v.string()),
+    drivingLicenceNumber: v.string(),
+    licenceIssueDate: v.string(),
+    licenceValidSince: v.string(),
+    active: v.boolean(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const [driver, customer] = await Promise.all([ctx.db.get(args.driverId), ctx.db.get(args.customerId)]);
+    if (!driver || driver.deletedAt !== undefined) throw new Error("driver_not_found");
+    if (!customer || customer.deletedAt !== undefined) throw new Error("customer_not_found");
+    const address = [
+      [args.street, args.houseNumber, args.addressBox ? `box ${args.addressBox}` : undefined].filter(Boolean).join(" "),
+      [args.postalCode, args.city].filter(Boolean).join(" "),
+    ].filter(Boolean).join(", ");
+    const now = Date.now();
+    await ctx.db.patch(driver._id, {
+      customerId: customer._id,
+      firstName: args.firstName,
+      lastName: args.lastName,
+      fullName: args.fullName,
+      address: address || undefined,
+      street: args.street,
+      houseNumber: args.houseNumber,
+      addressBox: args.addressBox,
+      postalCode: args.postalCode,
+      city: args.city,
+      province: args.province,
+      email: args.email,
+      phone: args.phone,
+      identityCardNumber: args.identityCardNumber,
+      nationalRegisterNumber: args.nationalRegisterNumber,
+      dateOfBirth: args.dateOfBirth,
+      companyPosition: args.companyPosition,
+      drivingLicenceNumber: args.drivingLicenceNumber,
+      licenceIssueDate: args.licenceIssueDate,
+      licenceValidSince: args.licenceValidSince,
+      active: args.active,
+      updatedAt: now,
+    });
+    if (driver.portalAccountId) {
+      await ctx.db.patch(driver.portalAccountId, {
+        displayName: args.fullName,
+        linkedCustomerId: customer._id,
+        active: args.active,
+        updatedAt: now,
+      });
+    }
+    await audit(ctx, actor._id, "driver.updated", "customerDriver", String(driver._id), `${args.fullName} updated`);
+    return null;
+  },
+});
+
+export const removeDriver = internalMutation({
+  args: { actorAccountId: v.id("portalAccounts"), driverId: v.id("customerDrivers") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const driver = await ctx.db.get(args.driverId);
+    if (!driver || driver.deletedAt !== undefined) throw new Error("driver_not_found");
+    const now = Date.now();
+    if (driver.portalAccountId) {
+      const sessions = await ctx.db.query("portalSessions")
+        .withIndex("by_account_id_and_revoked_at", (q) => q.eq("accountId", driver.portalAccountId!).eq("revokedAt", undefined))
+        .take(1000);
+      await Promise.all(sessions.map((session) => ctx.db.patch(session._id, { revokedAt: now })));
+      await ctx.db.patch(driver.portalAccountId, {
+        displayName: "Removed account",
+        codeHash: `removed:${String(driver.portalAccountId)}:${now}`,
+        codeHint: "----",
+        accessCodeCiphertext: undefined,
+        accessCodeIv: undefined,
+        active: false,
+        linkedCustomerId: undefined,
+        linkedDriverId: undefined,
+        deletedAt: now,
+        deletedBy: actor._id,
+        updatedAt: now,
+      });
+    }
+    await ctx.db.patch(driver._id, {
+      active: false,
+      portalAccountId: undefined,
+      deletedAt: now,
+      deletedBy: actor._id,
+      updatedAt: now,
+    });
+    await audit(ctx, actor._id, "driver.removed", "customerDriver", String(driver._id), `${driver.fullName} removed`);
+    return null;
+  },
+});
+
 export const createVehicle = internalMutation({
   args: {
     actorAccountId: v.id("portalAccounts"),
@@ -1607,8 +1852,27 @@ export const createVehicle = internalMutation({
         q.eq("registrationPlate", args.registrationPlate),
       )
       .unique();
-    if (existing) throw new Error("vehicle_exists");
     const now = Date.now();
+    if (existing?.deletedAt !== undefined) {
+      await ctx.db.patch(existing._id, {
+        make: args.make,
+        model: args.model,
+        year: args.year,
+        format: args.format,
+        color: args.color,
+        vin: args.vin,
+        status: "available",
+        currentMileage: args.currentMileage,
+        fuelPercent: args.fuelPercent,
+        notes: args.notes,
+        deletedAt: undefined,
+        deletedBy: undefined,
+        updatedAt: now,
+      });
+      await audit(ctx, actor._id, "vehicle.restored", "vehicle", String(existing._id), `${args.registrationPlate} restored to fleet`);
+      return existing._id;
+    }
+    if (existing) throw new Error("vehicle_exists");
     const vehicleId = await ctx.db.insert("operationalVehicles", {
       registrationPlate: args.registrationPlate,
       make: args.make,
@@ -1743,6 +2007,75 @@ export const updateVehicleStatus = internalMutation({
   },
 });
 
+export const updateVehicle = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    vehicleId: v.id("operationalVehicles"),
+    registrationPlate: v.string(),
+    make: v.string(),
+    model: v.string(),
+    year: v.number(),
+    format: vehicleFormatValidator,
+    color: v.string(),
+    vin: v.optional(v.string()),
+    status: operationalVehicleStatusValidator,
+    currentMileage: v.number(),
+    fuelPercent: v.optional(v.number()),
+    notes: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const vehicle = await ctx.db.get(args.vehicleId);
+    if (!vehicle || vehicle.deletedAt !== undefined) throw new Error("vehicle_not_found");
+    if (args.status === "available") {
+      const [scheduled, active] = await Promise.all([
+        ctx.db.query("rentals").withIndex("by_vehicle_id_and_status", (q) => q.eq("vehicleId", vehicle._id).eq("status", "scheduled")).first(),
+        ctx.db.query("rentals").withIndex("by_vehicle_id_and_status", (q) => q.eq("vehicleId", vehicle._id).eq("status", "active")).first(),
+      ]);
+      if ((scheduled && scheduled.deletedAt === undefined) || (active && active.deletedAt === undefined)) throw new Error("vehicle_has_open_rental");
+    }
+    const duplicate = await ctx.db.query("operationalVehicles")
+      .withIndex("by_registration_plate", (q) => q.eq("registrationPlate", args.registrationPlate))
+      .unique();
+    if (duplicate && duplicate._id !== vehicle._id && duplicate.deletedAt === undefined) throw new Error("vehicle_exists");
+    await ctx.db.patch(vehicle._id, {
+      registrationPlate: args.registrationPlate,
+      make: args.make,
+      model: args.model,
+      year: args.year,
+      format: args.format,
+      color: args.color,
+      vin: args.vin,
+      status: args.status,
+      currentMileage: args.currentMileage,
+      fuelPercent: args.fuelPercent,
+      notes: args.notes,
+      updatedAt: Date.now(),
+    });
+    await audit(ctx, actor._id, "vehicle.updated", "vehicle", String(vehicle._id), `${args.registrationPlate} updated`);
+    return null;
+  },
+});
+
+export const removeVehicle = internalMutation({
+  args: { actorAccountId: v.id("portalAccounts"), vehicleId: v.id("operationalVehicles") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const vehicle = await ctx.db.get(args.vehicleId);
+    if (!vehicle || vehicle.deletedAt !== undefined) throw new Error("vehicle_not_found");
+    const rentals = await ctx.db.query("rentals").withIndex("by_vehicle_id", (q) => q.eq("vehicleId", vehicle._id)).take(100);
+    if (rentals.some((rental) => rental.deletedAt === undefined)) throw new Error("vehicle_has_rental_history");
+    const now = Date.now();
+    await ctx.db.patch(vehicle._id, { status: "inactive", deletedAt: now, deletedBy: actor._id, updatedAt: now });
+    await audit(ctx, actor._id, "vehicle.removed", "vehicle", String(vehicle._id), `${vehicle.registrationPlate} removed from fleet`);
+    return null;
+  },
+});
+
 export const updateRentalStatus = internalMutation({
   args: {
     actorAccountId: v.id("portalAccounts"),
@@ -1782,6 +2115,86 @@ export const updateRentalStatus = internalMutation({
       String(rental._id),
       `${rental.reference} changed to ${args.status}`,
     );
+    return null;
+  },
+});
+
+export const updateRental = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    rentalId: v.id("rentals"),
+    customerId: v.id("customers"),
+    vehicleId: v.id("operationalVehicles"),
+    status: rentalStatusValidator,
+    startDate: v.string(),
+    expectedEndDate: v.optional(v.string()),
+    actualEndDate: v.optional(v.string()),
+    monthlyPriceCents: v.number(),
+    depositCents: v.optional(v.number()),
+    mileageAllowance: v.optional(v.number()),
+    notes: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const [rental, customer, vehicle] = await Promise.all([
+      ctx.db.get(args.rentalId), ctx.db.get(args.customerId), ctx.db.get(args.vehicleId),
+    ]);
+    if (!rental || rental.deletedAt !== undefined) throw new Error("rental_not_found");
+    if (!customer || customer.deletedAt !== undefined) throw new Error("customer_not_found");
+    if (!vehicle || vehicle.deletedAt !== undefined) throw new Error("vehicle_not_found");
+    const openStatus = ["draft", "scheduled", "active"].includes(args.status);
+    if (openStatus && vehicle._id !== rental.vehicleId) {
+      const vehicleRentals = await ctx.db.query("rentals").withIndex("by_vehicle_id", (q) => q.eq("vehicleId", vehicle._id)).take(100);
+      if (vehicleRentals.some((item) => item._id !== rental._id && item.deletedAt === undefined && ["draft", "scheduled", "active"].includes(item.status))) {
+        throw new Error("vehicle_unavailable");
+      }
+    }
+    const now = Date.now();
+    await ctx.db.patch(rental._id, {
+      customerId: customer._id,
+      vehicleId: vehicle._id,
+      status: args.status,
+      startDate: args.startDate,
+      expectedEndDate: args.expectedEndDate,
+      actualEndDate: args.actualEndDate,
+      monthlyPriceCents: args.monthlyPriceCents,
+      depositCents: args.depositCents,
+      mileageAllowance: args.mileageAllowance,
+      notes: args.notes,
+      updatedAt: now,
+    });
+    if (rental.vehicleId !== vehicle._id) {
+      const oldVehicleRentals = await ctx.db.query("rentals").withIndex("by_vehicle_id", (q) => q.eq("vehicleId", rental.vehicleId)).take(100);
+      if (!oldVehicleRentals.some((item) => item._id !== rental._id && item.deletedAt === undefined && ["draft", "scheduled", "active"].includes(item.status))) {
+        await ctx.db.patch(rental.vehicleId, { status: "available", updatedAt: now });
+      }
+    }
+    await ctx.db.patch(vehicle._id, {
+      status: args.status === "active" ? "rented" : openStatus ? "reserved" : "available",
+      updatedAt: now,
+    });
+    await audit(ctx, actor._id, "rental.updated", "rental", String(rental._id), `${rental.reference} updated`);
+    return null;
+  },
+});
+
+export const removeRental = internalMutation({
+  args: { actorAccountId: v.id("portalAccounts"), rentalId: v.id("rentals") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const rental = await ctx.db.get(args.rentalId);
+    if (!rental || rental.deletedAt !== undefined) throw new Error("rental_not_found");
+    const now = Date.now();
+    await ctx.db.patch(rental._id, { status: "cancelled", deletedAt: now, deletedBy: actor._id, updatedAt: now });
+    const otherRentals = await ctx.db.query("rentals").withIndex("by_vehicle_id", (q) => q.eq("vehicleId", rental.vehicleId)).take(100);
+    if (!otherRentals.some((item) => item._id !== rental._id && item.deletedAt === undefined && ["draft", "scheduled", "active"].includes(item.status))) {
+      await ctx.db.patch(rental.vehicleId, { status: "available", updatedAt: now });
+    }
+    await audit(ctx, actor._id, "rental.removed", "rental", String(rental._id), `${rental.reference} removed`);
     return null;
   },
 });

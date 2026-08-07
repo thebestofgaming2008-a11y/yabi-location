@@ -52,6 +52,27 @@ const driverInputValidator = v.object({
   ageConfirmed: v.boolean(),
 });
 
+const adminDriverUpdateValidator = v.object({
+  id: v.id("applicationDrivers"),
+  kind: applicationDriverKindValidator,
+  fullName: v.string(),
+  street: v.optional(v.string()),
+  houseNumber: v.optional(v.string()),
+  addressBox: v.optional(v.string()),
+  postalCode: v.optional(v.string()),
+  city: v.optional(v.string()),
+  province: v.optional(belgianProvinceValidator),
+  email: v.optional(v.string()),
+  phone: v.string(),
+  identityCardNumber: v.string(),
+  nationalRegisterNumber: v.optional(v.string()),
+  dateOfBirth: v.optional(v.string()),
+  companyPosition: v.optional(v.string()),
+  drivingLicenceNumber: v.string(),
+  licenceIssueDate: v.string(),
+  licenceValidSince: v.string(),
+});
+
 const applicationSummaryValidator = v.object({
   id: v.id("rentalApplications"),
   reference: v.string(),
@@ -603,7 +624,7 @@ export const listApplicationsForAdmin = internalQuery({
       .order("desc")
       .take(100);
     return applications
-      .filter((application) => application.status !== "draft")
+      .filter((application) => application.status !== "draft" && application.deletedAt === undefined)
       .map((application) => ({
         id: application._id,
         reference: application.reference,
@@ -657,7 +678,7 @@ export const getApplicationForAdmin = internalQuery({
   handler: async (ctx, args) => {
     await requireAdmin(ctx, args.actorAccountId);
     const application = await ctx.db.get(args.applicationId);
-    if (!application) throw new Error("application_not_found");
+    if (!application || application.deletedAt !== undefined) throw new Error("application_not_found");
     const [drivers, documents] = await Promise.all([
       ctx.db
         .query("applicationDrivers")
@@ -702,6 +723,7 @@ export const getApplicationForAdmin = internalQuery({
         portalAccountId: application.portalAccountId,
       },
       drivers: drivers
+        .filter((driver) => driver.deletedAt === undefined)
         .sort((left, right) => left.sortOrder - right.sortOrder)
         .map((driver) => ({
           id: driver._id,
@@ -744,6 +766,117 @@ export const getApplicationForAdmin = internalQuery({
   },
 });
 
+export const updateApplicationForAdmin = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    applicationId: v.id("rentalApplications"),
+    applicantType: applicantTypeValidator,
+    holderFullName: v.string(),
+    companyName: v.optional(v.string()),
+    companyVatNumber: v.optional(v.string()),
+    holderStreet: v.optional(v.string()),
+    holderHouseNumber: v.optional(v.string()),
+    holderAddressBox: v.optional(v.string()),
+    holderPostalCode: v.optional(v.string()),
+    holderCity: v.optional(v.string()),
+    holderProvince: v.optional(belgianProvinceValidator),
+    holderPhone: v.string(),
+    holderIdentityCardNumber: v.optional(v.string()),
+    holderNationalRegisterNumber: v.optional(v.string()),
+    holderEmail: v.string(),
+    adminNotes: v.optional(v.string()),
+    drivers: v.array(adminDriverUpdateValidator),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireAdmin(ctx, args.actorAccountId);
+    const application = await ctx.db.get(args.applicationId);
+    if (!application || application.deletedAt !== undefined) throw new Error("application_not_found");
+    if (args.drivers.length < 1 || args.drivers.length > 6) throw new Error("application_validation_failed");
+    const holderAddress = [
+      [args.holderStreet, args.holderHouseNumber, args.holderAddressBox ? `box ${args.holderAddressBox}` : undefined].filter(Boolean).join(" "),
+      [args.holderPostalCode, args.holderCity].filter(Boolean).join(" "),
+    ].filter(Boolean).join(", ");
+    const now = Date.now();
+    for (const input of args.drivers) {
+      const driver = await ctx.db.get(input.id);
+      if (!driver || driver.applicationId !== application._id || driver.deletedAt !== undefined) throw new Error("application_driver_not_found");
+      const address = [
+        [input.street, input.houseNumber, input.addressBox ? `box ${input.addressBox}` : undefined].filter(Boolean).join(" "),
+        [input.postalCode, input.city].filter(Boolean).join(" "),
+      ].filter(Boolean).join(", ");
+      await ctx.db.patch(driver._id, {
+        kind: input.kind,
+        fullName: input.fullName,
+        address: address || undefined,
+        street: input.street,
+        houseNumber: input.houseNumber,
+        addressBox: input.addressBox,
+        postalCode: input.postalCode,
+        city: input.city,
+        province: input.province,
+        email: input.email,
+        phone: input.phone,
+        identityCardNumber: input.identityCardNumber,
+        nationalRegisterNumber: input.nationalRegisterNumber,
+        dateOfBirth: input.dateOfBirth,
+        companyPosition: input.companyPosition,
+        drivingLicenceNumber: input.drivingLicenceNumber,
+        licenceIssueDate: input.licenceIssueDate,
+        licenceValidSince: input.licenceValidSince,
+        updatedAt: now,
+      });
+    }
+    const holderNameOrCompany = args.applicantType === "company" ? args.companyName || args.holderFullName : args.holderFullName;
+    await ctx.db.patch(application._id, {
+      applicantType: args.applicantType,
+      holderFullName: args.holderFullName,
+      companyName: args.applicantType === "company" ? args.companyName : undefined,
+      companyVatNumber: args.applicantType === "company" ? args.companyVatNumber : undefined,
+      holderNameOrCompany,
+      holderAddress: holderAddress || undefined,
+      holderStreet: args.holderStreet,
+      holderHouseNumber: args.holderHouseNumber,
+      holderAddressBox: args.holderAddressBox,
+      holderPostalCode: args.holderPostalCode,
+      holderCity: args.holderCity,
+      holderProvince: args.holderProvince,
+      holderPhone: args.holderPhone,
+      holderIdentityCardNumber: args.holderIdentityCardNumber,
+      holderNationalRegisterNumber: args.holderNationalRegisterNumber,
+      holderEmail: args.holderEmail,
+      adminNotes: args.adminNotes,
+      reviewedBy: actor._id,
+      reviewedAt: now,
+      updatedAt: now,
+    });
+    await audit(ctx, actor._id, "application.updated", String(application._id), `${application.reference} details updated`);
+    return null;
+  },
+});
+
+export const removeApplicationForAdmin = internalMutation({
+  args: { actorAccountId: v.id("portalAccounts"), applicationId: v.id("rentalApplications") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireAdmin(ctx, args.actorAccountId);
+    const application = await ctx.db.get(args.applicationId);
+    if (!application || application.deletedAt !== undefined) throw new Error("application_not_found");
+    const [drivers, documents] = await Promise.all([
+      ctx.db.query("applicationDrivers").withIndex("by_application_id", (q) => q.eq("applicationId", application._id)).take(6),
+      ctx.db.query("applicationMedia").withIndex("by_application_id", (q) => q.eq("applicationId", application._id)).take(48),
+    ]);
+    const now = Date.now();
+    await Promise.all([
+      ...drivers.map((driver) => ctx.db.patch(driver._id, { deletedAt: now, deletedBy: actor._id, updatedAt: now })),
+      ...documents.map((document) => ctx.db.patch(document._id, { status: "deleted" as const })),
+    ]);
+    await ctx.db.patch(application._id, { deletedAt: now, deletedBy: actor._id, updatedAt: now });
+    await audit(ctx, actor._id, "application.removed", String(application._id), `${application.reference} removed`);
+    return null;
+  },
+});
+
 export const updateApplicationStatus = internalMutation({
   args: {
     actorAccountId: v.id("portalAccounts"),
@@ -759,7 +892,7 @@ export const updateApplicationStatus = internalMutation({
   handler: async (ctx, args) => {
     const actor = await requireAdmin(ctx, args.actorAccountId);
     const application = await ctx.db.get(args.applicationId);
-    if (!application) throw new Error("application_not_found");
+    if (!application || application.deletedAt !== undefined) throw new Error("application_not_found");
     if (application.status === "activated" || application.status === "draft") {
       throw new Error("application_status_locked");
     }
@@ -788,6 +921,8 @@ export const activateApplication = internalMutation({
     applicationId: v.id("rentalApplications"),
     codeHash: v.string(),
     codeHint: v.string(),
+    accessCodeCiphertext: v.string(),
+    accessCodeIv: v.string(),
   },
   returns: v.object({
     customerId: v.id("customers"),
@@ -796,7 +931,7 @@ export const activateApplication = internalMutation({
   handler: async (ctx, args) => {
     const actor = await requireAdmin(ctx, args.actorAccountId);
     const application = await ctx.db.get(args.applicationId);
-    if (!application) throw new Error("application_not_found");
+    if (!application || application.deletedAt !== undefined) throw new Error("application_not_found");
     if (application.status !== "agreed") {
       throw new Error("application_must_be_agreed");
     }
@@ -861,6 +996,8 @@ export const activateApplication = internalMutation({
       role: "customer",
       codeHash: args.codeHash,
       codeHint: args.codeHint,
+      accessCodeCiphertext: args.accessCodeCiphertext,
+      accessCodeIv: args.accessCodeIv,
       active: true,
       linkedCustomerId: customerId,
       createdBy: actor._id,

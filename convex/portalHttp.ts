@@ -5,6 +5,7 @@ import {
   maintenanceInterventionTypes,
   maintenanceItemCodes,
 } from "./maintenanceCatalog";
+import { decryptAccessCode, encryptAccessCode } from "./accessCodeVault";
 
 const allowedRoles = new Set([
   "admin",
@@ -275,6 +276,7 @@ function safeError(error: unknown): string {
     "invalid_json",
     "account_not_found",
     "customer_not_found",
+    "customer_has_rental_history",
     "customer_already_linked",
     "customer_link_required",
     "customer_not_linked",
@@ -289,6 +291,7 @@ function safeError(error: unknown): string {
     "vehicle_exists",
     "vehicle_unavailable",
     "vehicle_has_open_rental",
+    "vehicle_has_rental_history",
     "rental_not_found",
     "rental_mismatch",
     "rental_reference_exists",
@@ -318,6 +321,8 @@ function safeError(error: unknown): string {
     "last_admin_required",
     "resolution_required",
     "code_collision",
+    "code_not_captured_yet",
+    "code_vault_invalid",
     "media_service_unavailable",
     "portal_not_configured",
   ]);
@@ -367,6 +372,8 @@ export const portalLogin = httpAction(async (ctx, request) => {
     }
 
     const rawToken = base64Url(randomBytes(32));
+    const formattedCode = `YABI-${normalized.slice(0, 4)}-${normalized.slice(4, 8)}-${normalized.slice(8)}`;
+    const vault = await encryptAccessCode(formattedCode);
     const userAgent = request.headers.get("user-agent") ?? "";
     const userAgentHash = userAgent
       ? await hmac(userAgent.slice(0, 500), "PORTAL_ACCESS_PEPPER")
@@ -376,6 +383,8 @@ export const portalLogin = httpAction(async (ctx, request) => {
       tokenHash: await tokenHash(rawToken),
       fingerprint: await fingerprint(request),
       userAgentHash,
+      accessCodeCiphertext: vault.ciphertext,
+      accessCodeIv: vault.iv,
     });
     if (!result.ok) {
       const status = result.reason === "rate_limited" ? 429 : 401;
@@ -450,10 +459,13 @@ export const portalBootstrap = httpAction(async (ctx, request) => {
     }
     const body = await parseBody(request);
     const access = generateAccessCode();
+    const vault = await encryptAccessCode(access.formatted);
     const result = await ctx.runMutation(internal.portal.bootstrapAdmin, {
       displayName: clean(body.displayName, 100) || "YABI Administrator",
       codeHash: await codeHash(access.normalized),
       codeHint: access.normalized.slice(-4),
+      accessCodeCiphertext: vault.ciphertext,
+      accessCodeIv: vault.iv,
     });
     return json(
       {
@@ -484,6 +496,7 @@ export const portalAdmin = httpAction(async (ctx, request) => {
       const displayName = clean(body.displayName, 100);
       if (!displayName || !allowedRoles.has(role)) throw new Error("validation_failed");
       const access = generateAccessCode();
+      const vault = await encryptAccessCode(access.formatted);
       const workflowAccess = Array.isArray(body.allowedWorkflowTypes)
         ? [...new Set(body.allowedWorkflowTypes.map((item) => clean(item, 40)).filter((item) => allowedWorkflowTypes.has(item)))].slice(0, 12)
         : undefined;
@@ -493,6 +506,8 @@ export const portalAdmin = httpAction(async (ctx, request) => {
         role: role as "admin" | "employee" | "customer" | "driver" | "mechanic" | "contractor",
         codeHash: await codeHash(access.normalized),
         codeHint: access.normalized.slice(-4),
+        accessCodeCiphertext: vault.ciphertext,
+        accessCodeIv: vault.iv,
         linkedCustomerId: optionalString(body.linkedCustomerId, 80) as
           | Id<"customers">
           | undefined,
@@ -514,13 +529,27 @@ export const portalAdmin = httpAction(async (ctx, request) => {
       const targetAccountId = clean(body.targetAccountId, 80);
       if (!targetAccountId) throw new Error("validation_failed");
       const access = generateAccessCode();
+      const vault = await encryptAccessCode(access.formatted);
       await ctx.runMutation(internal.portal.rotateAccountCode, {
         actorAccountId: session.account.id,
         targetAccountId: targetAccountId as Id<"portalAccounts">,
         codeHash: await codeHash(access.normalized),
         codeHint: access.normalized.slice(-4),
+        accessCodeCiphertext: vault.ciphertext,
+        accessCodeIv: vault.iv,
       });
       return json({ ok: true, accessCode: access.formatted }, 200, origin);
+    }
+
+    if (operation === "reveal_code") {
+      const targetAccountId = clean(body.targetAccountId, 80);
+      if (!targetAccountId) throw new Error("validation_failed");
+      const vault = await ctx.runQuery(internal.portal.getAccountAccessCodeForAdmin, {
+        actorAccountId: session.account.id,
+        targetAccountId: targetAccountId as Id<"portalAccounts">,
+      });
+      if (!vault) throw new Error("code_not_captured_yet");
+      return json({ ok: true, accessCode: await decryptAccessCode(vault.ciphertext, vault.iv) }, 200, origin);
     }
 
     if (operation === "update_account") {
@@ -634,6 +663,16 @@ export const portalAdmin = httpAction(async (ctx, request) => {
       return json({ ok: true }, 200, origin);
     }
 
+    if (operation === "remove_customer") {
+      const customerId = clean(body.customerId, 80);
+      if (!customerId) throw new Error("validation_failed");
+      await ctx.runMutation(internal.portal.removeCustomer, {
+        actorAccountId: session.account.id,
+        customerId: customerId as Id<"customers">,
+      });
+      return json({ ok: true }, 200, origin);
+    }
+
     if (operation === "create_vehicle") {
       const registrationPlate = normalizePlate(body.registrationPlate);
       const make = clean(body.make, 80);
@@ -718,6 +757,39 @@ export const portalAdmin = httpAction(async (ctx, request) => {
       return json({ ok: true }, 200, origin);
     }
 
+    if (operation === "update_vehicle" || operation === "remove_vehicle") {
+      const vehicleId = clean(body.vehicleId, 80);
+      if (!vehicleId) throw new Error("validation_failed");
+      if (operation === "remove_vehicle") {
+        await ctx.runMutation(internal.portal.removeVehicle, {
+          actorAccountId: session.account.id,
+          vehicleId: vehicleId as Id<"operationalVehicles">,
+        });
+      } else {
+        const registrationPlate = normalizePlate(body.registrationPlate);
+        const make = clean(body.make, 80);
+        const model = clean(body.model, 80);
+        const format = clean(body.format, 10);
+        const color = clean(body.color, 50);
+        const status = clean(body.status, 20);
+        const year = boundedNumber(body.year, 1990, 2100);
+        const currentMileage = boundedNumber(body.currentMileage, 0, 2_000_000);
+        if (!registrationPlate || !make || !model || !color || !allowedFormats.has(format) || !allowedVehicleStatuses.has(status) || year === undefined || currentMileage === undefined) throw new Error("validation_failed");
+        await ctx.runMutation(internal.portal.updateVehicle, {
+          actorAccountId: session.account.id,
+          vehicleId: vehicleId as Id<"operationalVehicles">,
+          registrationPlate, make, model, color, year,
+          format: format as "l1h1" | "l2h2" | "l3h2",
+          status: status as "available" | "reserved" | "rented" | "maintenance" | "cleaning" | "inactive",
+          vin: optionalString(body.vin, 40),
+          currentMileage,
+          fuelPercent: boundedNumber(body.fuelPercent, 0, 100),
+          notes: optionalString(body.notes, 2000),
+        });
+      }
+      return json({ ok: true }, 200, origin);
+    }
+
     if (operation === "update_rental_status") {
       const rentalId = clean(body.rentalId, 80);
       const status = clean(body.status, 20);
@@ -735,6 +807,39 @@ export const portalAdmin = httpAction(async (ctx, request) => {
           | "closed"
           | "cancelled",
       });
+      return json({ ok: true }, 200, origin);
+    }
+
+    if (operation === "update_rental" || operation === "remove_rental") {
+      const rentalId = clean(body.rentalId, 80);
+      if (!rentalId) throw new Error("validation_failed");
+      if (operation === "remove_rental") {
+        await ctx.runMutation(internal.portal.removeRental, {
+          actorAccountId: session.account.id,
+          rentalId: rentalId as Id<"rentals">,
+        });
+      } else {
+        const customerId = clean(body.customerId, 80);
+        const vehicleId = clean(body.vehicleId, 80);
+        const status = clean(body.status, 20);
+        const startDate = clean(body.startDate, 10);
+        const monthlyPriceCents = boundedNumber(body.monthlyPriceCents, 0, 100_000_000);
+        if (!customerId || !vehicleId || !startDate || !allowedRentalStatuses.has(status) || monthlyPriceCents === undefined) throw new Error("validation_failed");
+        await ctx.runMutation(internal.portal.updateRental, {
+          actorAccountId: session.account.id,
+          rentalId: rentalId as Id<"rentals">,
+          customerId: customerId as Id<"customers">,
+          vehicleId: vehicleId as Id<"operationalVehicles">,
+          status: status as "draft" | "scheduled" | "active" | "returned" | "closed" | "cancelled",
+          startDate,
+          expectedEndDate: optionalString(body.expectedEndDate, 10),
+          actualEndDate: optionalString(body.actualEndDate, 10),
+          monthlyPriceCents,
+          depositCents: boundedNumber(body.depositCents, 0, 100_000_000),
+          mileageAllowance: boundedNumber(body.mileageAllowance, 0, 10_000_000),
+          notes: optionalString(body.notes, 2000),
+        });
+      }
       return json({ ok: true }, 200, origin);
     }
 
@@ -922,6 +1027,7 @@ export const portalDrivers = httpAction(async (ctx, request) => {
         throw new Error("validation_failed");
       }
       const access = generateAccessCode();
+      const vault = await encryptAccessCode(access.formatted);
       const result = await ctx.runMutation(internal.portal.createDriverWithAccount, {
         actorAccountId: session.account.id,
         customerId: optionalString(body.customerId, 80) as
@@ -940,6 +1046,8 @@ export const portalDrivers = httpAction(async (ctx, request) => {
         mediaIds: mediaIds as Id<"mediaAssets">[],
         codeHash: await codeHash(access.normalized),
         codeHint: access.normalized.slice(-4),
+        accessCodeCiphertext: vault.ciphertext,
+        accessCodeIv: vault.iv,
       });
       return json(
         { ok: true, ...result, accessCode: access.formatted },
@@ -952,11 +1060,14 @@ export const portalDrivers = httpAction(async (ctx, request) => {
       const driverId = clean(body.driverId, 80);
       if (!driverId) throw new Error("validation_failed");
       const access = generateAccessCode();
+      const vault = await encryptAccessCode(access.formatted);
       const accountId = await ctx.runMutation(internal.portal.createDriverAccess, {
         actorAccountId: session.account.id,
         driverId: driverId as Id<"customerDrivers">,
         codeHash: await codeHash(access.normalized),
         codeHint: access.normalized.slice(-4),
+        accessCodeCiphertext: vault.ciphertext,
+        accessCodeIv: vault.iv,
       });
       return json(
         { ok: true, accountId, accessCode: access.formatted },
@@ -975,6 +1086,52 @@ export const portalDrivers = httpAction(async (ctx, request) => {
         driverId: driverId as Id<"customerDrivers">,
         active: body.active,
       });
+      return json({ ok: true }, 200, origin);
+    }
+
+    if (operation === "update" || operation === "remove") {
+      const driverId = clean(body.driverId, 80);
+      if (!driverId) throw new Error("validation_failed");
+      if (operation === "remove") {
+        await ctx.runMutation(internal.portal.removeDriver, {
+          actorAccountId: session.account.id,
+          driverId: driverId as Id<"customerDrivers">,
+        });
+      } else {
+        const customerId = clean(body.customerId, 80);
+        const fullName = clean(body.fullName, 160);
+        const phone = clean(body.phone, 40);
+        const identityCardNumber = clean(body.identityCardNumber, 80);
+        const drivingLicenceNumber = clean(body.drivingLicenceNumber, 80);
+        const licenceIssueDate = clean(body.licenceIssueDate, 10);
+        const licenceValidSince = clean(body.licenceValidSince, 10);
+        const province = clean(body.province, 30);
+        if (!customerId || !fullName || !phone || !identityCardNumber || !drivingLicenceNumber || !licenceIssueDate || !licenceValidSince || typeof body.active !== "boolean") throw new Error("validation_failed");
+        await ctx.runMutation(internal.portal.updateDriver, {
+          actorAccountId: session.account.id,
+          driverId: driverId as Id<"customerDrivers">,
+          customerId: customerId as Id<"customers">,
+          firstName: optionalString(body.firstName, 80),
+          lastName: optionalString(body.lastName, 80),
+          fullName,
+          street: optionalString(body.street, 160),
+          houseNumber: optionalString(body.houseNumber, 20),
+          addressBox: optionalString(body.addressBox, 20),
+          postalCode: optionalString(body.postalCode, 20),
+          city: optionalString(body.city, 80),
+          province: allowedBelgianProvinces.has(province) ? province as "antwerp" | "east_flanders" | "flemish_brabant" | "hainaut" | "liege" | "limburg" | "luxembourg" | "namur" | "walloon_brabant" | "west_flanders" | "brussels_capital" : undefined,
+          email: optionalString(body.email, 254)?.toLowerCase(),
+          phone,
+          identityCardNumber,
+          nationalRegisterNumber: optionalString(body.nationalRegisterNumber, 40),
+          dateOfBirth: optionalString(body.dateOfBirth, 10),
+          companyPosition: optionalString(body.companyPosition, 120),
+          drivingLicenceNumber,
+          licenceIssueDate,
+          licenceValidSince,
+          active: body.active,
+        });
+      }
       return json({ ok: true }, 200, origin);
     }
 

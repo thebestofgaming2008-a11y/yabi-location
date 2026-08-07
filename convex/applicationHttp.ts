@@ -1,6 +1,7 @@
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { httpAction, type ActionCtx } from "./_generated/server";
+import { encryptAccessCode } from "./accessCodeVault";
 
 const allowedLocales = new Set(["en", "fr", "nl"]);
 const allowedDocumentCategories = new Set([
@@ -258,6 +259,7 @@ function safeError(error: unknown): string {
     "application_not_found",
     "application_status_locked",
     "application_must_be_agreed",
+    "application_driver_not_found",
     "invalid_capture",
     "invalid_file_type",
     "code_collision",
@@ -673,8 +675,79 @@ export const portalApplicationAdmin = httpAction(async (ctx, request) => {
       );
       return json({ ok: true }, 200, origin);
     }
+    if (operation === "update_details") {
+      const applicantType = clean(body.applicantType, 20);
+      const holderFullName = clean(body.holderFullName, 160);
+      const holderPhone = clean(body.holderPhone, 40);
+      const holderEmail = clean(body.holderEmail, 254).toLowerCase();
+      const holderProvince = clean(body.holderProvince, 30);
+      const rawDrivers = Array.isArray(body.drivers) ? body.drivers.slice(0, 6) : [];
+      if (!['individual', 'company'].includes(applicantType) || !holderFullName || !holderPhone || !emailAddressValid(holderEmail) || rawDrivers.length < 1) throw new Error("validation_failed");
+      const drivers = rawDrivers.map((value) => {
+        const driver = value && typeof value === "object" && !Array.isArray(value) ? value as JsonBody : {};
+        const province = clean(driver.province, 30);
+        const kind = clean(driver.kind, 20);
+        const id = clean(driver.id, 80);
+        const fullName = clean(driver.fullName, 160);
+        const phone = clean(driver.phone, 40);
+        const identityCardNumber = clean(driver.identityCardNumber, 80);
+        const drivingLicenceNumber = clean(driver.drivingLicenceNumber, 80);
+        const licenceIssueDate = clean(driver.licenceIssueDate, 10);
+        const licenceValidSince = clean(driver.licenceValidSince, 10);
+        if (!id || !['main', 'additional'].includes(kind) || !fullName || !phone || !identityCardNumber || !drivingLicenceNumber || !licenceIssueDate || !licenceValidSince) throw new Error("validation_failed");
+        return {
+          id: id as Id<"applicationDrivers">,
+          kind: kind as "main" | "additional",
+          fullName,
+          street: optionalString(driver.street, 160),
+          houseNumber: optionalString(driver.houseNumber, 20),
+          addressBox: optionalString(driver.addressBox, 20),
+          postalCode: optionalString(driver.postalCode, 20),
+          city: optionalString(driver.city, 80),
+          province: allowedBelgianProvinces.has(province) ? province as "antwerp" | "brussels_capital" | "east_flanders" | "flemish_brabant" | "hainaut" | "liege" | "limburg" | "luxembourg" | "namur" | "walloon_brabant" | "west_flanders" : undefined,
+          email: optionalString(driver.email, 254)?.toLowerCase(),
+          phone,
+          identityCardNumber,
+          nationalRegisterNumber: optionalString(driver.nationalRegisterNumber, 40),
+          dateOfBirth: optionalString(driver.dateOfBirth, 10),
+          companyPosition: optionalString(driver.companyPosition, 120),
+          drivingLicenceNumber,
+          licenceIssueDate,
+          licenceValidSince,
+        };
+      });
+      await ctx.runMutation(internal.applications.updateApplicationForAdmin, {
+        actorAccountId: session.account.id,
+        applicationId: applicationId as Id<"rentalApplications">,
+        applicantType: applicantType as "individual" | "company",
+        holderFullName,
+        companyName: optionalString(body.companyName, 160),
+        companyVatNumber: optionalString(body.companyVatNumber, 40),
+        holderStreet: optionalString(body.holderStreet, 160),
+        holderHouseNumber: optionalString(body.holderHouseNumber, 20),
+        holderAddressBox: optionalString(body.holderAddressBox, 20),
+        holderPostalCode: optionalString(body.holderPostalCode, 20),
+        holderCity: optionalString(body.holderCity, 80),
+        holderProvince: allowedBelgianProvinces.has(holderProvince) ? holderProvince as "antwerp" | "brussels_capital" | "east_flanders" | "flemish_brabant" | "hainaut" | "liege" | "limburg" | "luxembourg" | "namur" | "walloon_brabant" | "west_flanders" : undefined,
+        holderPhone,
+        holderIdentityCardNumber: optionalString(body.holderIdentityCardNumber, 80),
+        holderNationalRegisterNumber: optionalString(body.holderNationalRegisterNumber, 40),
+        holderEmail,
+        adminNotes: optionalString(body.adminNotes, 4000),
+        drivers,
+      });
+      return json({ ok: true }, 200, origin);
+    }
+    if (operation === "remove") {
+      await ctx.runMutation(internal.applications.removeApplicationForAdmin, {
+        actorAccountId: session.account.id,
+        applicationId: applicationId as Id<"rentalApplications">,
+      });
+      return json({ ok: true }, 200, origin);
+    }
     if (operation === "activate") {
       const access = generateAccessCode();
+      const vault = await encryptAccessCode(access.formatted);
       const activated = await ctx.runMutation(
         internal.applications.activateApplication,
         {
@@ -682,6 +755,8 @@ export const portalApplicationAdmin = httpAction(async (ctx, request) => {
           applicationId: applicationId as Id<"rentalApplications">,
           codeHash: await codeHash(access.normalized),
           codeHint: access.normalized.slice(-4),
+          accessCodeCiphertext: vault.ciphertext,
+          accessCodeIv: vault.iv,
         },
       );
       return json(

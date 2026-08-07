@@ -350,6 +350,11 @@ const translations = {
     "This code is shown only once.": "Ce code n’est affiché qu’une fois.",
     "Share it privately. Anyone with this code can sign in.": "Partagez-le de façon privée.",
     "Copy code": "Copier le code",
+    "Reveal / copy": "Afficher / copier",
+    "Current access code": "Code d’accès actuel",
+    "This unchanged legacy code will become revealable after its next successful sign-in.": "Ce code existant inchangé pourra être affiché après la prochaine connexion réussie.",
+    "Linked access will stop immediately.": "L’accès lié sera immédiatement interrompu.",
+    "Access stops immediately.": "L’accès est immédiatement interrompu.",
     "Create personal access": "Créer un accès personnel",
     "Add a customer": "Ajouter un client",
     "Add a vehicle": "Ajouter un véhicule",
@@ -498,6 +503,9 @@ const translations = {
     "Driver reactivated.": "Chauffeur réactivé.",
     "Add a customer before adding a driver.": "Ajoutez un client avant d’ajouter un chauffeur.",
     "Something went wrong. Please try again.": "Une erreur s’est produite. Réessayez.",
+    "This vehicle still has a scheduled or active rental.": "Ce véhicule a encore une location planifiée ou active.",
+    "Remove this vehicle’s rental records first.": "Supprimez d’abord les locations liées à ce véhicule.",
+    "Remove this customer’s rental records first.": "Supprimez d’abord les locations liées à ce client.",
   },
   nl: {
     "Skip to content": "Ga naar inhoud",
@@ -844,6 +852,11 @@ const translations = {
     "This code is shown only once.": "Deze code wordt maar één keer getoond.",
     "Share it privately. Anyone with this code can sign in.": "Deel de code uitsluitend privé.",
     "Copy code": "Code kopiëren",
+    "Reveal / copy": "Tonen / kopiëren",
+    "Current access code": "Huidige toegangscode",
+    "This unchanged legacy code will become revealable after its next successful sign-in.": "Deze bestaande ongewijzigde code kan na de volgende geslaagde aanmelding worden getoond.",
+    "Linked access will stop immediately.": "De gekoppelde toegang stopt onmiddellijk.",
+    "Access stops immediately.": "De toegang stopt onmiddellijk.",
     "Create personal access": "Persoonlijke toegang aanmaken",
     "Add a customer": "Klant toevoegen",
     "Add a vehicle": "Voertuig toevoegen",
@@ -992,6 +1005,9 @@ const translations = {
     "Driver reactivated.": "Chauffeur geheractiveerd.",
     "Add a customer before adding a driver.": "Voeg eerst een klant toe voordat u een chauffeur toevoegt.",
     "Something went wrong. Please try again.": "Er is iets misgegaan. Probeer opnieuw.",
+    "This vehicle still has a scheduled or active rental.": "Dit voertuig heeft nog een geplande of actieve verhuur.",
+    "Remove this vehicle’s rental records first.": "Verwijder eerst de verhuurrecords van dit voertuig.",
+    "Remove this customer’s rental records first.": "Verwijder eerst de verhuurrecords van deze klant.",
   },
 };
 
@@ -1432,6 +1448,9 @@ function messageFor(error) {
     confirmation_mismatch: "The confirmation text does not match.",
     vehicle_unavailable: "That vehicle is not available for a new rental.",
     vehicle_has_open_rental: "This vehicle still has a scheduled or active rental.",
+    vehicle_has_rental_history: "Remove this vehicle’s rental records first.",
+    customer_has_rental_history: "Remove this customer’s rental records first.",
+    code_not_captured_yet: "This unchanged legacy code will become revealable after its next successful sign-in.",
   };
   return tr(messages[error?.message] || "Something went wrong. Please try again.");
 }
@@ -1741,10 +1760,10 @@ function renderAccess() {
   const rows = accounts
     .map(
       (account) => `<tr>
-        <td><strong>${clean(account.displayName)}</strong><small>•••• ${clean(account.codeHint)}</small></td>
+        <td><strong>${clean(account.displayName)}</strong><small>YABI-••••-••••-${clean(account.codeHint)}</small></td>
         <td>${clean(roles[account.role])}</td><td>${badge(account.active ? "active" : "inactive")}</td>
         <td>${date(account.lastLoginAt, true)}</td>
-        <td><div class="table-actions"><button class="icon-button" data-action="edit-account" data-id="${account.id}">Edit</button><button class="icon-button" data-action="rotate-code" data-id="${account.id}">New code</button>
+        <td><div class="table-actions"><button class="icon-button" data-action="reveal-account-code" data-id="${account.id}">Reveal / copy</button><button class="icon-button" data-action="edit-account" data-id="${account.id}">Edit</button><button class="icon-button" data-action="rotate-code" data-id="${account.id}">New code</button>
         ${account.id !== state.data.account.id ? `<button class="icon-button" data-action="toggle-account" data-id="${account.id}" data-active="${account.active}">${account.active ? "Disable" : "Enable"}</button><button class="icon-button is-danger" data-action="remove-account" data-id="${account.id}">Remove</button>` : ""}</div></td>
       </tr>`,
     )
@@ -1760,7 +1779,7 @@ function renderCustomers() {
     .map(
       (customer) => `<tr><td><strong>${clean(customer.fullName)}</strong><small>${clean(customer.company || "")}</small></td>
       <td>${clean(customer.email)}</td><td>${clean(customer.phone)}</td><td>${clean([customer.address, customer.postalCode, customer.city].filter(Boolean).join(", ") || "Not completed")}</td><td>${badge(customer.status)}</td>
-      <td><button class="icon-button" data-action="edit-customer" data-id="${customer.id}">${state.data.account.role === "admin" ? "View / edit" : "View"}</button></td></tr>`,
+      <td><div class="table-actions"><button class="icon-button" data-action="edit-customer" data-id="${customer.id}">${state.data.account.role === "admin" ? "View / edit" : "View"}</button>${state.data.account.role === "admin" ? `<button class="icon-button is-danger" data-action="remove-customer" data-id="${customer.id}">Remove</button>` : ""}</div></td></tr>`,
     )
     .join("");
   el.view.innerHTML = `${header(canCreate ? '<button class="primary-button" data-action="create-customer">Add customer</button>' : "")}
@@ -1777,7 +1796,7 @@ function renderDrivers() {
       ${state.data.account.role === "admin" ? `<td>${clean(customer?.company || customer?.fullName || "—")}</td>` : ""}
       <td>${clean(driver.phone)}</td><td>${badge(driver.active && driver.accountActive !== false ? "active" : "inactive")}</td>
       <td>${driver.codeHint ? `•••• ${clean(driver.codeHint)}` : clean(tr("No access code"))}</td>
-      <td><div class="table-actions"><button class="icon-button" data-action="view-driver" data-id="${driver.id}">View</button>
+      <td><div class="table-actions"><button class="icon-button" data-action="view-driver" data-id="${driver.id}">View</button>${state.data.account.role === "admin" ? `<button class="icon-button" data-action="edit-driver" data-id="${driver.id}">Edit</button><button class="icon-button is-danger" data-action="remove-driver" data-id="${driver.id}">Remove</button>` : ""}
       ${canManage && !driver.portalAccountId ? `<button class="icon-button" data-action="driver-access" data-id="${driver.id}">Create code</button>` : ""}
       ${canManage ? `<button class="icon-button" data-action="toggle-driver" data-id="${driver.id}" data-active="${driver.active && driver.accountActive !== false}">${driver.active && driver.accountActive !== false ? "Deactivate" : "Reactivate"}</button>` : ""}</div></td></tr>`;
   }).join("");
@@ -1793,7 +1812,7 @@ function renderFleet() {
       (vehicle) => `<tr><td><span class="vehicle-table-identity">${vehicleBrandMark(vehicle.make)}<span><strong>${clean(vehicle.registrationPlate)}</strong><small>${clean(vehicle.make)} ${clean(vehicle.model)}</small></span></span></td>
       <td>${clean(vehicle.format.toUpperCase())}</td><td>${clean(vehicle.year)}</td><td>${clean(vehicle.color)}</td>
       <td>${vehicle.currentMileage.toLocaleString(languageLocales[state.language])} km</td><td>${badge(vehicle.status)}</td>
-      ${canUpdate ? `<td><button class="icon-button" data-action="vehicle-status" data-id="${vehicle.id}">Update</button></td>` : ""}</tr>`,
+      ${canUpdate ? `<td><div class="table-actions"><button class="icon-button" data-action="vehicle-status" data-id="${vehicle.id}">${state.data.account.role === "admin" ? "Edit" : "Update"}</button>${state.data.account.role === "admin" ? `<button class="icon-button is-danger" data-action="remove-vehicle" data-id="${vehicle.id}">Remove</button>` : ""}</div></td>` : ""}</tr>`,
     )
     .join("");
   el.view.innerHTML = `${header(state.data.account.role === "admin" ? '<button class="primary-button" data-action="create-vehicle">Add vehicle</button>' : "")}
@@ -1812,7 +1831,7 @@ function renderRentals() {
         <td>${vehicle ? `<span class="vehicle-table-identity">${vehicleBrandMark(vehicle.make)}<span>${clean(`${vehicle.registrationPlate} · ${vehicle.make} ${vehicle.model}`)}</span></span>` : "—"}</td>
         <td>${date(rental.startDate)} → ${date(rental.expectedEndDate)}</td>
         <td>${money(rental.monthlyPriceCents)}<small>excl. VAT / month</small></td><td>${badge(rental.status)}</td>
-        ${admin ? `<td><button class="icon-button" data-action="rental-status" data-id="${rental.id}">Update</button></td>` : ""}</tr>`;
+        ${admin ? `<td><div class="table-actions"><button class="icon-button" data-action="rental-status" data-id="${rental.id}">Edit</button><button class="icon-button is-danger" data-action="remove-rental" data-id="${rental.id}">Remove</button></div></td>` : ""}</tr>`;
     })
     .join("");
   el.view.innerHTML = `${header(admin ? '<button class="primary-button" data-action="create-rental">Create rental</button>' : "")}
@@ -2052,10 +2071,10 @@ function closeModal() {
   el.modalBody.innerHTML = "";
 }
 
-function revealCode(person, code) {
+function revealCode(person, code, persistent = false) {
   modal({
     title: `${tr("Access for")} ${person}`,
-    content: `<div class="code-reveal"><p>This code is shown only once.</p><strong>${clean(code)}</strong><small>Share it privately. Anyone with this code can sign in.</small></div>
+    content: `<div class="code-reveal"><p>${clean(tr(persistent ? "Current access code" : "This code is shown only once."))}</p><strong>${clean(code)}</strong><small>${clean(tr("Share it privately. Anyone with this code can sign in."))}</small></div>
       <div class="form-submit-row"><button class="ghost-button" id="copy-code">Copy code</button><button class="primary-button" data-close>Done</button></div>`,
   });
   el.modalBody.querySelector("#copy-code").addEventListener("click", async () => {
@@ -2063,6 +2082,21 @@ function revealCode(person, code) {
     toast("Access code copied.");
   });
   el.modalBody.querySelector("[data-close]").addEventListener("click", closeModal);
+}
+
+async function revealAccountCode(id) {
+  const account = state.data.accounts.find((item) => item.id === id);
+  if (!account) return;
+  try {
+    const result = await api("/api/portal/admin", { method: "POST", body: { operation: "reveal_code", targetAccountId: id } });
+    revealCode(account.displayName, result.accessCode, true);
+  } catch (error) {
+    if (error?.message === "code_not_captured_yet") {
+      toast(tr("This unchanged legacy code will become revealable after its next successful sign-in."), "error");
+      return;
+    }
+    toast(messageFor(error), "error");
+  }
 }
 
 window.yabiRevealAccessCode = (code) => revealCode("Customer", code);
@@ -2216,6 +2250,16 @@ function editCustomer(id) {
   setCustomValue(el.modalBody, "status", customer.status);
 }
 
+async function removeCustomer(id) {
+  const customer = state.data.customers.find((item) => item.id === id);
+  if (!customer || !confirm(`${tr("Remove")} ${customer.fullName}? ${tr("Linked access will stop immediately.")}`)) return;
+  try {
+    await api("/api/portal/admin", { method: "POST", body: { operation: "remove_customer", customerId: id } });
+    toast("Customer removed.");
+    await refresh();
+  } catch (error) { toast(messageFor(error), "error"); }
+}
+
 function createDriver() {
   if (state.data.account.role === "admin" && !state.data.customers.length) {
     toast("Add a customer before adding a driver.", "error");
@@ -2285,6 +2329,43 @@ async function viewDriver(id) {
   } catch (error) { toast(messageFor(error), "error"); }
 }
 
+function editDriver(id) {
+  const driver = state.data.drivers.find((item) => item.id === id);
+  if (!driver) return;
+  modal({
+    title: "Edit driver",
+    submit: "Save changes",
+    content: `<form class="portal-form">${select("Customer / company", "customerId", state.data.customers.map((customer) => [customer.id, customer.company || customer.fullName]), true)}<div class="form-grid">
+      ${field("First name", "firstName", driver.firstName || "")}${field("Last name", "lastName", driver.lastName || "")}${field("Full name", "fullName", driver.fullName, true)}
+      ${field("Email", "email", driver.email || "", false, "email")}${field("Phone", "phone", driver.phone, true, "tel")}${field("Date of birth", "dateOfBirth", driver.dateOfBirth || "", false, "date")}
+      ${field("Street", "street", driver.street || "")}${field("House number", "houseNumber", driver.houseNumber || "")}${field("Box", "addressBox", driver.addressBox || "")}${field("Postal code", "postalCode", driver.postalCode || "")}${field("City", "city", driver.city || "")}${select("Province", "province", provinceOptions)}
+      ${field("Identity-card number", "identityCardNumber", driver.identityCardNumber, true)}${field("National-register number", "nationalRegisterNumber", driver.nationalRegisterNumber || "")}${field("Position in company", "companyPosition", driver.companyPosition || "")}
+      ${field("Driving-licence number", "drivingLicenceNumber", driver.drivingLicenceNumber, true)}${field("Licence issue date", "licenceIssueDate", driver.licenceIssueDate, true, "date")}${field("Licence valid since", "licenceValidSince", driver.licenceValidSince, true, "date")}
+      ${select("Account status", "active", [["true", "Enabled"], ["false", "Disabled"]], true)}</div></form>`,
+    handler: async (data) => {
+      const values = Object.fromEntries(data);
+      values.active = values.active === "true";
+      await api("/api/portal/drivers", { method: "POST", body: { operation: "update", driverId: id, ...values } });
+      closeModal();
+      toast("Driver updated.");
+      await refresh();
+    },
+  });
+  setCustomValue(el.modalBody, "customerId", driver.customerId);
+  setCustomValue(el.modalBody, "province", driver.province || "");
+  setCustomValue(el.modalBody, "active", String(driver.active && driver.accountActive !== false));
+}
+
+async function removeDriver(id) {
+  const driver = state.data.drivers.find((item) => item.id === id);
+  if (!driver || !confirm(`${tr("Remove")} ${driver.fullName}? ${tr("Access stops immediately.")}`)) return;
+  try {
+    await api("/api/portal/drivers", { method: "POST", body: { operation: "remove", driverId: id } });
+    toast("Driver removed.");
+    await refresh();
+  } catch (error) { toast(messageFor(error), "error"); }
+}
+
 function createVehicle() {
   modal({
     title: "Add a vehicle",
@@ -2341,53 +2422,86 @@ function createRental() {
 
 function updateRental(id) {
   const rental = state.data.rentals.find((item) => item.id === id);
+  if (!rental) return;
   modal({
-    title: `Update ${rental.reference}`,
-    submit: "Update status",
-    content: `<form class="portal-form">${select("Status", "status", ["draft", "scheduled", "active", "returned", "closed", "cancelled"].map((item) => [item, item]), true)}</form>`,
+    title: `${tr("Edit")} ${rental.reference}`,
+    submit: "Save changes",
+    content: `<form class="portal-form"><div class="form-grid">
+      ${select("Customer", "customerId", state.data.customers.map((customer) => [customer.id, customer.fullName]), true)}
+      ${select("Vehicle", "vehicleId", state.data.vehicles.map((vehicle) => [vehicle.id, `${vehicle.registrationPlate} · ${vehicle.make} ${vehicle.model}`, vehicleBrandMark(vehicle.make, "vehicle-brand-mark is-select")]), true)}
+      ${select("Status", "status", ["draft", "scheduled", "active", "returned", "closed", "cancelled"].map((item) => [item, item]), true)}
+      ${field("Start date", "startDate", rental.startDate, true, "date")}${field("Expected end date", "expectedEndDate", rental.expectedEndDate || "", false, "date")}${field("Actual end date", "actualEndDate", rental.actualEndDate || "", false, "date")}
+      ${field("Monthly price excl. VAT (€)", "monthlyPrice", String(rental.monthlyPriceCents / 100), true, "number", 'min="0" step="0.01"')}${field("Deposit (€)", "deposit", rental.depositCents == null ? "" : String(rental.depositCents / 100), false, "number", 'min="0" step="0.01"')}${field("Mileage allowance", "mileageAllowance", rental.mileageAllowance == null ? "" : String(rental.mileageAllowance), false, "number", 'min="0"')}</div>
+      <div class="field"><label>${clean(tr("Internal notes"))}</label><textarea name="notes">${clean(rental.notes || "")}</textarea></div></form>`,
     handler: async (data) => {
-      await api("/api/portal/admin", { method: "POST", body: { operation: "update_rental_status", rentalId: id, status: data.get("status") } });
+      const values = Object.fromEntries(data);
+      values.monthlyPriceCents = Math.round(Number(values.monthlyPrice) * 100);
+      values.depositCents = values.deposit ? Math.round(Number(values.deposit) * 100) : undefined;
+      values.mileageAllowance = values.mileageAllowance ? Number(values.mileageAllowance) : undefined;
+      delete values.monthlyPrice;
+      delete values.deposit;
+      await api("/api/portal/admin", { method: "POST", body: { operation: "update_rental", rentalId: id, ...values } });
       closeModal();
-      toast("Rental status updated.");
+      toast("Rental updated.");
       await refresh();
     },
   });
+  setCustomValue(el.modalBody, "customerId", rental.customerId);
+  setCustomValue(el.modalBody, "vehicleId", rental.vehicleId);
   setCustomValue(el.modalBody, "status", rental.status);
 }
 
 function updateVehicle(id) {
   const vehicle = state.data.vehicles.find((item) => item.id === id);
+  if (!vehicle) return;
+  if (state.data.account.role !== "admin") {
+    modal({
+      title: `Update ${vehicle.registrationPlate}`,
+      submit: "Update status",
+      content: `<form class="portal-form">${select("Operational status", "status", [["available", "Available"], ["reserved", "Reserved"], ["rented", "Rented"], ["maintenance", "Maintenance"], ["cleaning", "Cleaning"], ["inactive", "Inactive"]], true)}</form>`,
+      handler: async (data) => {
+        await api("/api/portal/admin", { method: "POST", body: { operation: "update_vehicle_status", vehicleId: id, status: data.get("status") } });
+        closeModal(); await refresh();
+      },
+    });
+    setCustomValue(el.modalBody, "status", vehicle.status);
+    return;
+  }
   modal({
-    title: `Update ${vehicle.registrationPlate}`,
-    submit: "Update status",
-    content: `<form class="portal-form">${select(
-      "Operational status",
-      "status",
-      [
-        ["available", "Available"],
-        ["reserved", "Reserved"],
-        ["rented", "Rented"],
-        ["maintenance", "Maintenance"],
-        ["cleaning", "Cleaning"],
-        ["inactive", "Inactive"],
-      ],
-      true,
-    )}</form>`,
+    title: `${tr("Edit")} ${vehicle.registrationPlate}`,
+    submit: "Save changes",
+    content: `<form class="portal-form"><div class="form-grid">
+      ${field("Licence plate", "registrationPlate", vehicle.registrationPlate, true)}${field("Make", "make", vehicle.make, true)}${field("Model", "model", vehicle.model, true)}${select("Format", "format", [["l1h1", "L1H1"], ["l2h2", "L2H2"], ["l3h2", "L3H2"]], true)}
+      ${field("Year", "year", String(vehicle.year), true, "number", 'min="1990" max="2100"')}${field("Colour", "color", vehicle.color, true)}${field("Current mileage", "currentMileage", String(vehicle.currentMileage), true, "number", 'min="0"')}${field("Fuel level (%)", "fuelPercent", vehicle.fuelPercent == null ? "" : String(vehicle.fuelPercent), false, "number", 'min="0" max="100"')}
+      ${field("VIN", "vin", vehicle.vin || "")}${select("Operational status", "status", [["available", "Available"], ["reserved", "Reserved"], ["rented", "Rented"], ["maintenance", "Maintenance"], ["cleaning", "Cleaning"], ["inactive", "Inactive"]], true)}</div>
+      <div class="field"><label>${clean(tr("Internal notes"))}</label><textarea name="notes">${clean(vehicle.notes || "")}</textarea></div></form>`,
     handler: async (data) => {
-      await api("/api/portal/admin", {
-        method: "POST",
-        body: {
-          operation: "update_vehicle_status",
-          vehicleId: id,
-          status: data.get("status"),
-        },
-      });
+      const values = Object.fromEntries(data);
+      values.year = Number(values.year);
+      values.currentMileage = Number(values.currentMileage);
+      values.fuelPercent = values.fuelPercent ? Number(values.fuelPercent) : undefined;
+      await api("/api/portal/admin", { method: "POST", body: { operation: "update_vehicle", vehicleId: id, ...values } });
       closeModal();
-      toast("Vehicle status updated.");
+      toast("Vehicle updated.");
       await refresh();
     },
   });
+  setCustomValue(el.modalBody, "format", vehicle.format);
   setCustomValue(el.modalBody, "status", vehicle.status);
+}
+
+async function removeVehicle(id) {
+  const vehicle = state.data.vehicles.find((item) => item.id === id);
+  if (!vehicle || !confirm(`${tr("Remove")} ${vehicle.registrationPlate}?`)) return;
+  try { await api("/api/portal/admin", { method: "POST", body: { operation: "remove_vehicle", vehicleId: id } }); toast("Vehicle removed."); await refresh(); }
+  catch (error) { toast(messageFor(error), "error"); }
+}
+
+async function removeRental(id) {
+  const rental = state.data.rentals.find((item) => item.id === id);
+  if (!rental || !confirm(`${tr("Remove")} ${rental.reference}?`)) return;
+  try { await api("/api/portal/admin", { method: "POST", body: { operation: "remove_rental", rentalId: id } }); toast("Rental removed."); await refresh(); }
+  catch (error) { toast(messageFor(error), "error"); }
 }
 
 function uploadField(label, name, category, required = false, slot = name, multiple = false, accept = "image/jpeg,image/png,image/webp") {
@@ -3138,18 +3252,24 @@ el.view.addEventListener("click", async (event) => {
   if (!button) return;
   const { action, id } = button.dataset;
   if (action === "create-account") createAccount();
+  if (action === "reveal-account-code") revealAccountCode(id);
   if (action === "edit-account") editAccount(id);
   if (action === "remove-account") removeAccount(id);
   if (action === "create-customer") createCustomer();
   if (action === "edit-customer") editCustomer(id);
+  if (action === "remove-customer") removeCustomer(id);
   if (action === "create-driver") createDriver();
   if (action === "view-driver") viewDriver(id);
+  if (action === "edit-driver") editDriver(id);
+  if (action === "remove-driver") removeDriver(id);
   if (action === "driver-access") createDriverAccess(id);
   if (action === "toggle-driver") toggleDriver(id, button.dataset.active === "true");
   if (action === "create-vehicle") createVehicle();
   if (action === "create-rental") createRental();
   if (action === "vehicle-status") updateVehicle(id);
   if (action === "rental-status") updateRental(id);
+  if (action === "remove-vehicle") removeVehicle(id);
+  if (action === "remove-rental") removeRental(id);
   if (action === "view-record") viewRecord(id);
   if (action === "resolve-report") resolveReport(id);
   if (action === "rotate-code" && confirm("Generate a new code? The current code and all active sessions will stop working.")) {

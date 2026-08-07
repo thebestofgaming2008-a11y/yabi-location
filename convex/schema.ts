@@ -201,6 +201,8 @@ export default defineSchema({
     role: portalRoleValidator,
     codeHash: v.string(),
     codeHint: v.string(),
+    accessCodeCiphertext: v.optional(v.string()),
+    accessCodeIv: v.optional(v.string()),
     active: v.boolean(),
     linkedCustomerId: v.optional(v.id("customers")),
     linkedDriverId: v.optional(v.id("customerDrivers")),
@@ -257,10 +259,13 @@ export default defineSchema({
     portalAccountId: v.optional(v.id("portalAccounts")),
     createdAt: v.number(),
     updatedAt: v.number(),
+    deletedAt: v.optional(v.number()),
+    deletedBy: v.optional(v.id("portalAccounts")),
   })
     .index("by_email", ["email"])
     .index("by_status", ["status"])
-    .index("by_portal_account_id", ["portalAccountId"]),
+    .index("by_portal_account_id", ["portalAccountId"])
+    .index("by_deleted_at", ["deletedAt"]),
 
   customerDrivers: defineTable({
     customerId: v.id("customers"),
@@ -290,10 +295,13 @@ export default defineSchema({
     active: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),
+    deletedAt: v.optional(v.number()),
+    deletedBy: v.optional(v.id("portalAccounts")),
   })
     .index("by_customer_id", ["customerId"])
     .index("by_portal_account_id", ["portalAccountId"])
-    .index("by_source_application_driver_id", ["sourceApplicationDriverId"]),
+    .index("by_source_application_driver_id", ["sourceApplicationDriverId"])
+    .index("by_deleted_at", ["deletedAt"]),
 
   rentalApplications: defineTable({
     reference: v.string(),
@@ -338,11 +346,14 @@ export default defineSchema({
     expiresAt: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),
+    deletedAt: v.optional(v.number()),
+    deletedBy: v.optional(v.id("portalAccounts")),
   })
     .index("by_reference", ["reference"])
     .index("by_token_hash", ["tokenHash"])
     .index("by_status", ["status"])
-    .index("by_created_at", ["createdAt"]),
+    .index("by_created_at", ["createdAt"])
+    .index("by_deleted_at", ["deletedAt"]),
 
   applicationDrivers: defineTable({
     applicationId: v.id("rentalApplications"),
@@ -369,6 +380,8 @@ export default defineSchema({
     ageConfirmed: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),
+    deletedAt: v.optional(v.number()),
+    deletedBy: v.optional(v.id("portalAccounts")),
   })
     .index("by_application_id", ["applicationId"])
     .index("by_application_id_and_client_key", ["applicationId", "clientKey"]),
@@ -414,9 +427,12 @@ export default defineSchema({
     notes: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
+    deletedAt: v.optional(v.number()),
+    deletedBy: v.optional(v.id("portalAccounts")),
   })
     .index("by_registration_plate", ["registrationPlate"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_deleted_at", ["deletedAt"]),
 
   rentals: defineTable({
     reference: v.string(),
@@ -434,12 +450,15 @@ export default defineSchema({
     createdBy: v.id("portalAccounts"),
     createdAt: v.number(),
     updatedAt: v.number(),
+    deletedAt: v.optional(v.number()),
+    deletedBy: v.optional(v.id("portalAccounts")),
   })
     .index("by_reference", ["reference"])
     .index("by_customer_id", ["customerId"])
     .index("by_vehicle_id", ["vehicleId"])
     .index("by_vehicle_id_and_status", ["vehicleId", "status"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_deleted_at", ["deletedAt"]),
 
   workflowRecords: defineTable({
     reference: v.string(),
