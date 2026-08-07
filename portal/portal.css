@@ -150,6 +150,10 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .data-table strong { color: var(--navy); }
 .data-table small { display: block; color: var(--muted); }
 .table-actions { display: flex; gap: .35rem; justify-content: flex-end; }
+.account-code-row { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; margin-top: .28rem; }
+.account-code-row code { color: var(--muted); font: inherit; font-size: .68rem; letter-spacing: .04em; }
+.inline-code-button { min-height: 26px; padding: .2rem .48rem; border: 1px solid var(--line); background: #fff; color: var(--blue); font: inherit; font-size: .62rem; font-weight: 800; cursor: pointer; }
+.inline-code-button:hover, .inline-code-button:focus-visible { border-color: var(--blue); background: #eef5ff; }
 .icon-button { min-width: 34px; min-height: 32px; padding: .35rem .55rem; border: 1px solid var(--line); background: white; color: var(--blue); font-size: .57rem; font-weight: 800; cursor: pointer; }
 .status-badge { display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .5rem; background: #eff4f9; color: #52677e; font-size: .56rem; font-weight: 800; text-transform: capitalize; white-space: nowrap; }
 .status-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #7c8c9c; }

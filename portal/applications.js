@@ -1205,7 +1205,7 @@
           (item) => `<tr><td><strong>${escape(item.reference)}</strong><small>${item.submittedAt ? new Date(item.submittedAt).toLocaleString() : ""}</small></td>
           <td>${escape(item.holderNameOrCompany || "")}</td><td>${escape(item.holderEmail || "")}</td>
           <td><span class="status-badge status-${escape(item.status)}">${escape(item.status)}</span></td>
-          <td><button class="icon-button" data-application-action="view" data-id="${escape(item.id)}">${escape(t("View"))}</button></td></tr>`,
+          <td><div class="table-actions"><button class="icon-button" data-application-action="view" data-id="${escape(item.id)}">${escape(t("View"))}</button><button class="icon-button is-danger" data-application-action="remove" data-id="${escape(item.id)}">${escape(t("Remove"))}</button></div></td></tr>`,
         )
         .join("");
       root.innerHTML = `<header class="view-header"><div><h1>${escape(t("Applications"))}</h1></div></header>

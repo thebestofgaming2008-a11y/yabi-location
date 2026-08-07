@@ -1370,7 +1370,6 @@ export const removeCustomer = internalMutation({
     const customer = await ctx.db.get(args.customerId);
     if (!customer || customer.deletedAt !== undefined) throw new Error("customer_not_found");
     const rentals = await ctx.db.query("rentals").withIndex("by_customer_id", (q) => q.eq("customerId", customer._id)).take(100);
-    if (rentals.some((rental) => rental.deletedAt === undefined)) throw new Error("customer_has_rental_history");
     const drivers = await ctx.db
       .query("customerDrivers")
       .withIndex("by_customer_id", (q) => q.eq("customerId", customer._id))
@@ -1378,6 +1377,21 @@ export const removeCustomer = internalMutation({
     const accountIds = [customer.portalAccountId, ...drivers.map((driver) => driver.portalAccountId)]
       .filter((id): id is Id<"portalAccounts"> => id !== undefined);
     const now = Date.now();
+    const activeRentals = rentals.filter((rental) => rental.deletedAt === undefined);
+    await Promise.all(activeRentals.map((rental) => ctx.db.patch(rental._id, {
+      status: "cancelled",
+      deletedAt: now,
+      deletedBy: actor._id,
+      updatedAt: now,
+    })));
+    const affectedVehicleIds = [...new Set(activeRentals.map((rental) => rental.vehicleId))];
+    for (const vehicleId of affectedVehicleIds) {
+      const otherRentals = await ctx.db.query("rentals").withIndex("by_vehicle_id", (q) => q.eq("vehicleId", vehicleId)).take(100);
+      if (!otherRentals.some((rental) => rental.customerId !== customer._id && rental.deletedAt === undefined && ["draft", "scheduled", "active"].includes(rental.status))) {
+        const vehicle = await ctx.db.get(vehicleId);
+        if (vehicle && vehicle.deletedAt === undefined) await ctx.db.patch(vehicleId, { status: "available", updatedAt: now });
+      }
+    }
     for (const accountId of accountIds) {
       const account = await ctx.db.get(accountId);
       if (!account || account.deletedAt !== undefined) continue;
@@ -1414,7 +1428,7 @@ export const removeCustomer = internalMutation({
       deletedBy: actor._id,
       updatedAt: now,
     });
-    await audit(ctx, actor._id, "customer.removed", "customer", String(customer._id), `Customer ${customer.fullName} removed`);
+    await audit(ctx, actor._id, "customer.removed", "customer", String(customer._id), `Customer ${customer.fullName} removed`, JSON.stringify({ removedRentals: activeRentals.length, removedDrivers: drivers.length }));
     return null;
   },
 });
@@ -1975,24 +1989,6 @@ export const updateVehicleStatus = internalMutation({
     const vehicle = await ctx.db.get(args.vehicleId);
     if (!vehicle) throw new Error("vehicle_not_found");
 
-    if (args.status === "available") {
-      const [scheduled, active] = await Promise.all([
-        ctx.db
-          .query("rentals")
-          .withIndex("by_vehicle_id_and_status", (q) =>
-            q.eq("vehicleId", vehicle._id).eq("status", "scheduled"),
-          )
-          .first(),
-        ctx.db
-          .query("rentals")
-          .withIndex("by_vehicle_id_and_status", (q) =>
-            q.eq("vehicleId", vehicle._id).eq("status", "active"),
-          )
-          .first(),
-      ]);
-      if (scheduled || active) throw new Error("vehicle_has_open_rental");
-    }
-
     const now = Date.now();
     await ctx.db.patch(vehicle._id, { status: args.status, updatedAt: now });
     await audit(
@@ -2029,13 +2025,6 @@ export const updateVehicle = internalMutation({
     requireRole(actor, ["admin"]);
     const vehicle = await ctx.db.get(args.vehicleId);
     if (!vehicle || vehicle.deletedAt !== undefined) throw new Error("vehicle_not_found");
-    if (args.status === "available") {
-      const [scheduled, active] = await Promise.all([
-        ctx.db.query("rentals").withIndex("by_vehicle_id_and_status", (q) => q.eq("vehicleId", vehicle._id).eq("status", "scheduled")).first(),
-        ctx.db.query("rentals").withIndex("by_vehicle_id_and_status", (q) => q.eq("vehicleId", vehicle._id).eq("status", "active")).first(),
-      ]);
-      if ((scheduled && scheduled.deletedAt === undefined) || (active && active.deletedAt === undefined)) throw new Error("vehicle_has_open_rental");
-    }
     const duplicate = await ctx.db.query("operationalVehicles")
       .withIndex("by_registration_plate", (q) => q.eq("registrationPlate", args.registrationPlate))
       .unique();
@@ -2068,10 +2057,15 @@ export const removeVehicle = internalMutation({
     const vehicle = await ctx.db.get(args.vehicleId);
     if (!vehicle || vehicle.deletedAt !== undefined) throw new Error("vehicle_not_found");
     const rentals = await ctx.db.query("rentals").withIndex("by_vehicle_id", (q) => q.eq("vehicleId", vehicle._id)).take(100);
-    if (rentals.some((rental) => rental.deletedAt === undefined)) throw new Error("vehicle_has_rental_history");
     const now = Date.now();
+    await Promise.all(rentals.filter((rental) => rental.deletedAt === undefined).map((rental) => ctx.db.patch(rental._id, {
+      status: "cancelled",
+      deletedAt: now,
+      deletedBy: actor._id,
+      updatedAt: now,
+    })));
     await ctx.db.patch(vehicle._id, { status: "inactive", deletedAt: now, deletedBy: actor._id, updatedAt: now });
-    await audit(ctx, actor._id, "vehicle.removed", "vehicle", String(vehicle._id), `${vehicle.registrationPlate} removed from fleet`);
+    await audit(ctx, actor._id, "vehicle.removed", "vehicle", String(vehicle._id), `${vehicle.registrationPlate} removed from fleet`, JSON.stringify({ removedRentals: rentals.filter((rental) => rental.deletedAt === undefined).length }));
     return null;
   },
 });

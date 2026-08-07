@@ -351,6 +351,9 @@ const translations = {
     "Share it privately. Anyone with this code can sign in.": "Partagez-le de façon privée.",
     "Copy code": "Copier le code",
     "Reveal / copy": "Afficher / copier",
+    Reveal: "Afficher",
+    Hide: "Masquer",
+    Copy: "Copier",
     "Current access code": "Code d’accès actuel",
     "This unchanged legacy code will become revealable after its next successful sign-in.": "Ce code existant inchangé pourra être affiché après la prochaine connexion réussie.",
     "Linked access will stop immediately.": "L’accès lié sera immédiatement interrompu.",
@@ -504,8 +507,6 @@ const translations = {
     "Add a customer before adding a driver.": "Ajoutez un client avant d’ajouter un chauffeur.",
     "Something went wrong. Please try again.": "Une erreur s’est produite. Réessayez.",
     "This vehicle still has a scheduled or active rental.": "Ce véhicule a encore une location planifiée ou active.",
-    "Remove this vehicle’s rental records first.": "Supprimez d’abord les locations liées à ce véhicule.",
-    "Remove this customer’s rental records first.": "Supprimez d’abord les locations liées à ce client.",
   },
   nl: {
     "Skip to content": "Ga naar inhoud",
@@ -853,6 +854,9 @@ const translations = {
     "Share it privately. Anyone with this code can sign in.": "Deel de code uitsluitend privé.",
     "Copy code": "Code kopiëren",
     "Reveal / copy": "Tonen / kopiëren",
+    Reveal: "Tonen",
+    Hide: "Verbergen",
+    Copy: "Kopiëren",
     "Current access code": "Huidige toegangscode",
     "This unchanged legacy code will become revealable after its next successful sign-in.": "Deze bestaande ongewijzigde code kan na de volgende geslaagde aanmelding worden getoond.",
     "Linked access will stop immediately.": "De gekoppelde toegang stopt onmiddellijk.",
@@ -1006,8 +1010,6 @@ const translations = {
     "Add a customer before adding a driver.": "Voeg eerst een klant toe voordat u een chauffeur toevoegt.",
     "Something went wrong. Please try again.": "Er is iets misgegaan. Probeer opnieuw.",
     "This vehicle still has a scheduled or active rental.": "Dit voertuig heeft nog een geplande of actieve verhuur.",
-    "Remove this vehicle’s rental records first.": "Verwijder eerst de verhuurrecords van dit voertuig.",
-    "Remove this customer’s rental records first.": "Verwijder eerst de verhuurrecords van deze klant.",
   },
 };
 
@@ -1447,9 +1449,6 @@ function messageFor(error) {
     resolution_required: "Add a resolution before marking this action resolved.",
     confirmation_mismatch: "The confirmation text does not match.",
     vehicle_unavailable: "That vehicle is not available for a new rental.",
-    vehicle_has_open_rental: "This vehicle still has a scheduled or active rental.",
-    vehicle_has_rental_history: "Remove this vehicle’s rental records first.",
-    customer_has_rental_history: "Remove this customer’s rental records first.",
     code_not_captured_yet: "This unchanged legacy code will become revealable after its next successful sign-in.",
   };
   return tr(messages[error?.message] || "Something went wrong. Please try again.");
@@ -1760,10 +1759,10 @@ function renderAccess() {
   const rows = accounts
     .map(
       (account) => `<tr>
-        <td><strong>${clean(account.displayName)}</strong><small>YABI-••••-••••-${clean(account.codeHint)}</small></td>
+        <td><strong>${clean(account.displayName)}</strong><span class="account-code-row"><code data-account-code>YABI-••••-••••-${clean(account.codeHint)}</code><button class="inline-code-button" data-action="reveal-account-code" data-id="${account.id}">Reveal</button><button class="inline-code-button" data-action="copy-account-code" data-id="${account.id}" hidden>Copy</button></span></td>
         <td>${clean(roles[account.role])}</td><td>${badge(account.active ? "active" : "inactive")}</td>
         <td>${date(account.lastLoginAt, true)}</td>
-        <td><div class="table-actions"><button class="icon-button" data-action="reveal-account-code" data-id="${account.id}">Reveal / copy</button><button class="icon-button" data-action="edit-account" data-id="${account.id}">Edit</button><button class="icon-button" data-action="rotate-code" data-id="${account.id}">New code</button>
+        <td><div class="table-actions"><button class="icon-button" data-action="edit-account" data-id="${account.id}">Edit</button><button class="icon-button" data-action="rotate-code" data-id="${account.id}">New code</button>
         ${account.id !== state.data.account.id ? `<button class="icon-button" data-action="toggle-account" data-id="${account.id}" data-active="${account.active}">${account.active ? "Disable" : "Enable"}</button><button class="icon-button is-danger" data-action="remove-account" data-id="${account.id}">Remove</button>` : ""}</div></td>
       </tr>`,
     )
@@ -1874,7 +1873,7 @@ function recordTable(records, compact = false) {
       return `<tr><td><span class="record-operation-identity">${actionPictogram(record.type)}<span><strong>${clean(workflows[record.type]?.[1] || record.type)}</strong><small>${clean(record.reference)}</small></span></span></td>
         <td><span class="record-vehicle-identity">${vehicleBrandMark(vehicle?.make, "vehicle-brand-mark is-compact")}<span>${clean(vehicle ? vehicle.registrationPlate : record.licensePlate || "—")}</span></span></td>
         ${compact ? "" : `<td>${clean(record.performedByName || account?.displayName || "Portal user")}</td>`}<td>${date(record.occurredAt, true)}</td>
-        <td>${badge(record.status)}</td><td><div class="table-actions"><button class="icon-button" data-action="view-record" data-id="${record.id}">View</button>
+        <td>${badge(record.status)}</td><td><div class="table-actions"><button class="icon-button" data-action="view-record" data-id="${record.id}">View</button>${state.data.account.role === "admin" ? `<button class="icon-button is-danger" data-action="remove-record" data-id="${record.id}">Remove</button>` : ""}
         ${["report", "problem_report", "accident_report", "payment_proof"].includes(record.type) && record.status !== "resolved" && ["admin", "employee"].includes(state.data.account.role) ? `<button class="icon-button" data-action="resolve-report" data-id="${record.id}">Resolve</button>` : ""}</div></td></tr>`;
     })
     .join("");
@@ -2084,12 +2083,27 @@ function revealCode(person, code, persistent = false) {
   el.modalBody.querySelector("[data-close]").addEventListener("click", closeModal);
 }
 
-async function revealAccountCode(id) {
+async function revealAccountCode(id, button) {
   const account = state.data.accounts.find((item) => item.id === id);
   if (!account) return;
+  const row = button?.closest(".account-code-row");
+  const codeNode = row?.querySelector("[data-account-code]");
+  const copyButton = row?.querySelector('[data-action="copy-account-code"]');
+  if (button?.dataset.revealed === "true") {
+    codeNode.textContent = `YABI-••••-••••-${account.codeHint}`;
+    delete codeNode.dataset.fullCode;
+    button.dataset.revealed = "false";
+    button.textContent = tr("Reveal");
+    copyButton.hidden = true;
+    return;
+  }
   try {
     const result = await api("/api/portal/admin", { method: "POST", body: { operation: "reveal_code", targetAccountId: id } });
-    revealCode(account.displayName, result.accessCode, true);
+    codeNode.textContent = result.accessCode;
+    codeNode.dataset.fullCode = result.accessCode;
+    button.dataset.revealed = "true";
+    button.textContent = tr("Hide");
+    copyButton.hidden = false;
   } catch (error) {
     if (error?.message === "code_not_captured_yet") {
       toast(tr("This unchanged legacy code will become revealable after its next successful sign-in."), "error");
@@ -2097,6 +2111,13 @@ async function revealAccountCode(id) {
     }
     toast(messageFor(error), "error");
   }
+}
+
+async function copyAccountCode(id, button) {
+  const code = button?.closest(".account-code-row")?.querySelector("[data-account-code]")?.dataset.fullCode;
+  if (!code) return;
+  await navigator.clipboard.writeText(code);
+  toast("Access code copied.");
 }
 
 window.yabiRevealAccessCode = (code) => revealCode("Customer", code);
@@ -3252,7 +3273,8 @@ el.view.addEventListener("click", async (event) => {
   if (!button) return;
   const { action, id } = button.dataset;
   if (action === "create-account") createAccount();
-  if (action === "reveal-account-code") revealAccountCode(id);
+  if (action === "reveal-account-code") revealAccountCode(id, button);
+  if (action === "copy-account-code") copyAccountCode(id, button);
   if (action === "edit-account") editAccount(id);
   if (action === "remove-account") removeAccount(id);
   if (action === "create-customer") createCustomer();
@@ -3271,6 +3293,7 @@ el.view.addEventListener("click", async (event) => {
   if (action === "remove-vehicle") removeVehicle(id);
   if (action === "remove-rental") removeRental(id);
   if (action === "view-record") viewRecord(id);
+  if (action === "remove-record") removeRecord(id);
   if (action === "resolve-report") resolveReport(id);
   if (action === "rotate-code" && confirm("Generate a new code? The current code and all active sessions will stop working.")) {
     try {
