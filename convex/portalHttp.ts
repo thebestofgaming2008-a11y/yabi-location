@@ -1144,15 +1144,23 @@ export const portalUpload = httpAction(async (ctx, request) => {
   if (origin === "") return json({ ok: false, error: "origin_not_allowed" }, 403, null);
   try {
     const session = await requireSession(ctx, request);
+    const body = await parseBody(request);
+    const uploadGroupId = clean(body.uploadGroupId, 80);
+    if (body.operation === "discard") {
+      if (!uploadGroupId) throw new Error("validation_failed");
+      const discarded = await ctx.runMutation(internal.portal.discardMediaUploadGroup, {
+        actorAccountId: session.account.id,
+        uploadGroupId,
+      });
+      return json({ ok: true, discarded }, 200, origin);
+    }
     const workerUrl = process.env.MEDIA_WORKER_URL?.replace(/\/+$/, "");
     if (!workerUrl) throw new Error("media_service_unavailable");
-    const body = await parseBody(request);
     const fileName = clean(body.fileName, 180);
     const contentType = clean(body.contentType, 80).toLowerCase();
     const category = clean(body.category, 40);
     const slot = clean(body.slot, 80).toLowerCase();
     const captureSource = clean(body.captureSource, 20).toLowerCase();
-    const uploadGroupId = clean(body.uploadGroupId, 80);
     const size = boundedNumber(body.size, 1, 8_000_000);
     const sortOrder = boundedNumber(body.sortOrder, 0, 100);
     if (

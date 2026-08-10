@@ -1837,7 +1837,12 @@ export const removeDriver = internalMutation({
       deletedBy: actor._id,
       updatedAt: now,
     });
-    await audit(ctx, actor._id, "driver.removed", "customerDriver", String(driver._id), `${driver.fullName} removed`);
+    const media = await ctx.db
+      .query("mediaAssets")
+      .withIndex("by_driver_id", (q) => q.eq("driverId", driver._id))
+      .take(24);
+    await Promise.all(media.filter((item) => item.status !== "deleted").map((item) => ctx.db.patch(item._id, { status: "deleted" })));
+    await audit(ctx, actor._id, "driver.removed", "customerDriver", String(driver._id), `${driver.fullName} removed`, JSON.stringify({ removedMedia: media.length }));
     return null;
   },
 });
@@ -2260,6 +2265,30 @@ export const markMediaUploaded = internalMutation({
       uploadedAt: Date.now(),
     });
     return true;
+  },
+});
+
+export const discardMediaUploadGroup = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    uploadGroupId: v.string(),
+  },
+  returns: v.number(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    const media = await ctx.db
+      .query("mediaAssets")
+      .withIndex("by_upload_group_id", (q) => q.eq("uploadGroupId", args.uploadGroupId))
+      .take(24);
+    const removable = media.filter(
+      (item) =>
+        item.createdBy === actor._id &&
+        item.recordId === undefined &&
+        item.driverId === undefined &&
+        item.status !== "deleted",
+    );
+    await Promise.all(removable.map((item) => ctx.db.patch(item._id, { status: "deleted" })));
+    return removable.length;
   },
 });
 

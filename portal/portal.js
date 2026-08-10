@@ -368,6 +368,7 @@ const translations = {
     "Signing in…": "Connexion…",
     "Preparing evidence…": "Préparation des preuves…",
     "Saving record…": "Enregistrement…",
+    "Saving driver…": "Enregistrement du chauffeur…",
     "Uploading evidence": "Téléchargement de la preuve",
     of: "sur",
     "The latest records visible to your role.": "Derniers enregistrements accessibles.",
@@ -871,6 +872,7 @@ const translations = {
     "Signing in…": "Aanmelden…",
     "Preparing evidence…": "Bewijs voorbereiden…",
     "Saving record…": "Registratie opslaan…",
+    "Saving driver…": "Chauffeur opslaan…",
     "Uploading evidence": "Bewijs uploaden",
     of: "van",
     "The latest records visible to your role.": "Laatste registraties voor uw rol.",
@@ -2038,6 +2040,7 @@ function modal({ kicker = "YABI", title, content, submit = "Save", handler }) {
     form.insertAdjacentHTML("beforeend", `<div class="form-submit-row"><button class="ghost-button" type="button" data-close>${clean(tr("Cancel"))}</button><button class="primary-button" type="submit">${clean(tr(submit))}</button></div>`);
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (form.dataset.submitting === "true") return;
       const missing = [...form.querySelectorAll('[data-custom-select][data-required="true"]')].find(
         (customSelect) => !customSelect.querySelector('input[type="hidden"]').value,
       );
@@ -2048,12 +2051,16 @@ function modal({ kicker = "YABI", title, content, submit = "Save", handler }) {
         return;
       }
       const button = form.querySelector('[type="submit"]');
+      form.dataset.submitting = "true";
+      form.setAttribute("aria-busy", "true");
       busy(button, true);
       try {
         await handler(new FormData(form), form);
       } catch (error) {
-        toast(messageFor(error), "error");
+        if (!error?.inlineHandled) toast(messageFor(error), "error");
       } finally {
+        delete form.dataset.submitting;
+        form.removeAttribute("aria-busy");
         busy(button, false);
       }
     });
@@ -2281,6 +2288,55 @@ async function removeCustomer(id) {
   } catch (error) { toast(messageFor(error), "error"); }
 }
 
+function driverDateIsEligible(dateOfBirth, licenceIssueDate, licenceValidSince) {
+  const yearsBefore = (years) => {
+    const threshold = new Date();
+    threshold.setUTCFullYear(threshold.getUTCFullYear() - years);
+    return threshold.toISOString().slice(0, 10);
+  };
+  const validDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const today = new Date().toISOString().slice(0, 10);
+  return (
+    validDate(dateOfBirth) &&
+    validDate(licenceIssueDate) &&
+    validDate(licenceValidSince) &&
+    dateOfBirth <= yearsBefore(23) &&
+    licenceValidSince <= yearsBefore(5) &&
+    licenceIssueDate <= today
+  );
+}
+
+function driverUploadProgress(form) {
+  let progress = form.querySelector("[data-driver-upload-progress]");
+  if (!progress) {
+    progress = document.createElement("div");
+    progress.className = "upload-progress visible";
+    progress.dataset.driverUploadProgress = "true";
+    progress.innerHTML = `<div class="progress-track"><i></i></div><span></span>`;
+    form.querySelector(".form-submit-row").before(progress);
+  }
+  progress.classList.remove("is-error");
+  return progress;
+}
+
+function showDriverUploadError(progress, error) {
+  progress.classList.add("is-error");
+  progress.querySelector("i").style.width = "100%";
+  progress.querySelector("span").textContent = messageFor(error);
+  progress.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  error.inlineHandled = true;
+}
+
+async function discardUploadGroup(uploadGroupId) {
+  if (!uploadGroupId) return;
+  try {
+    await api("/api/portal/uploads", {
+      method: "POST",
+      body: { operation: "discard", uploadGroupId },
+    });
+  } catch {}
+}
+
 function createDriver() {
   if (state.data.account.role === "admin" && !state.data.customers.length) {
     toast("Add a customer before adding a driver.", "error");
@@ -2300,22 +2356,40 @@ function createDriver() {
       <section class="form-section"><h3>${clean(tr("Identity and driving-licence photographs"))}</h3><p>${clean(tr("Clear photographs are required. Only authorised administrators and the linked customer can view them."))}</p>
       <div class="evidence-grid">${uploadField("ID card — front", "driver_identity_front", "driver_document", true, "driver_identity_front")}${uploadField("ID card — back", "driver_identity_back", "driver_document", true, "driver_identity_back")}${uploadField("Driving licence — front", "driver_licence_front", "driver_document", true, "driver_licence_front")}${uploadField("Driving licence — back", "driver_licence_back", "driver_document", true, "driver_licence_back")}</div></section></form>`,
     handler: async (data, form) => {
+      const values = {};
+      for (const [key, value] of data.entries()) {
+        if (!(value instanceof File)) values[key] = value;
+      }
+      const progress = driverUploadProgress(form);
+      if (!driverDateIsEligible(values.dateOfBirth, values.licenceIssueDate, values.licenceValidSince)) {
+        const error = new Error("driver_eligibility_failed");
+        showDriverUploadError(progress, error);
+        throw error;
+      }
       const files = [...form.querySelectorAll('input[type="file"]')].map((input, sortOrder) => ({ file: input.files[0], category: "driver_document", slot: input.dataset.slot, captureSource: "gallery", sortOrder }));
-      if (files.some((item) => !item.file)) throw new Error("driver_documents_required");
-      const progress = document.createElement("div");
-      progress.className = "upload-progress visible";
-      progress.innerHTML = `<div class="progress-track"><i></i></div><span>${clean(tr("Preparing evidence…"))}</span>`;
-      form.querySelector(".form-submit-row").before(progress);
+      if (files.some((item) => !item.file)) {
+        const error = new Error("driver_documents_required");
+        showDriverUploadError(progress, error);
+        throw error;
+      }
+      progress.querySelector("i").style.width = "0%";
+      progress.querySelector("span").textContent = tr("Preparing evidence…");
       const uploadGroupId = crypto.randomUUID();
-      const mediaIds = await upload(files, uploadGroupId, (done, total) => {
-        progress.querySelector("i").style.width = `${Math.round((done / Math.max(1, total)) * 100)}%`;
-        progress.querySelector("span").textContent = `${tr("Uploading evidence")} ${Math.ceil(done)} ${tr("of")} ${total}`;
-      });
-      const values = Object.fromEntries(data);
-      const result = await api("/api/portal/drivers", { method: "POST", body: { operation: "create", uploadGroupId, mediaIds, ...values } });
-      closeModal();
-      await refresh();
-      revealCode(`${values.firstName} ${values.lastName}`, result.accessCode);
+      try {
+        const mediaIds = await upload(files, uploadGroupId, (done, total) => {
+          progress.querySelector("i").style.width = `${Math.round((done / Math.max(1, total)) * 100)}%`;
+          progress.querySelector("span").textContent = `${tr("Uploading evidence")} ${Math.ceil(done)} ${tr("of")} ${total}`;
+        });
+        progress.querySelector("span").textContent = tr("Saving driver…");
+        const result = await api("/api/portal/drivers", { method: "POST", body: { operation: "create", uploadGroupId, mediaIds, ...values } });
+        closeModal();
+        await refresh();
+        revealCode(`${values.firstName} ${values.lastName}`, result.accessCode);
+      } catch (error) {
+        await discardUploadGroup(uploadGroupId);
+        showDriverUploadError(progress, error);
+        throw error;
+      }
     },
   });
   bindUploads();

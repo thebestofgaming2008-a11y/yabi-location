@@ -221,6 +221,9 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .form-submit-row { padding-top: .9rem; display: flex; justify-content: flex-end; gap: .65rem; border-top: 1px solid var(--line); }
 .upload-progress { display: none; gap: .5rem; align-items: center; color: var(--muted); font-size: .65rem; }
 .upload-progress.visible { display: flex; }
+.upload-progress.is-error { padding: .65rem; border: 1px solid #e3a9ad; background: #fff5f5; color: var(--danger); font-weight: 700; }
+.upload-progress.is-error .progress-track { background: #f2d5d7; }
+.upload-progress.is-error .progress-track i { background: var(--danger); }
 .progress-track { flex: 1; height: 5px; background: var(--line-soft); }
 .progress-track i { width: 0; height: 100%; display: block; background: var(--blue); transition: width .2s; }
 .code-reveal { padding: 1.2rem; border: 1px solid #b9d2ee; background: var(--blue-light); text-align: center; }
