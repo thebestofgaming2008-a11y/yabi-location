@@ -1073,6 +1073,21 @@ export const portalDrivers = httpAction(async (ctx, request) => {
       );
     }
 
+    if (operation === "reveal_code") {
+      const driverId = clean(body.driverId, 80);
+      if (!driverId) throw new Error("validation_failed");
+      const vault = await ctx.runQuery(internal.portal.getDriverAccessCodeForManager, {
+        actorAccountId: session.account.id,
+        driverId: driverId as Id<"customerDrivers">,
+      });
+      if (!vault) throw new Error("code_not_captured_yet");
+      return json(
+        { ok: true, accessCode: await decryptAccessCode(vault.ciphertext, vault.iv) },
+        200,
+        origin,
+      );
+    }
+
     if (operation === "set_active") {
       const driverId = clean(body.driverId, 80);
       if (!driverId || typeof body.active !== "boolean") {

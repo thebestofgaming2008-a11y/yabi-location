@@ -1796,7 +1796,7 @@ function renderDrivers() {
     return `<tr><td><strong>${clean(driver.fullName)}</strong><small>${clean(driver.email)}</small></td>
       ${state.data.account.role === "admin" ? `<td>${clean(customer?.company || customer?.fullName || "—")}</td>` : ""}
       <td>${clean(driver.phone)}</td><td>${badge(driver.active && driver.accountActive !== false ? "active" : "inactive")}</td>
-      <td>${driver.codeHint ? `•••• ${clean(driver.codeHint)}` : clean(tr("No access code"))}</td>
+      <td>${driver.codeHint ? `<span class="account-code-row"><code data-driver-code>YABI-••••-••••-${clean(driver.codeHint)}</code>${canManage ? `<button class="inline-code-button" data-action="reveal-driver-code" data-id="${driver.id}">${clean(tr("Reveal"))}</button><button class="inline-code-button" data-action="copy-driver-code" data-id="${driver.id}" hidden>${clean(tr("Copy"))}</button>` : ""}</span>` : clean(tr("No access code"))}</td>
       <td><div class="table-actions"><button class="icon-button" data-action="view-driver" data-id="${driver.id}">View</button>${state.data.account.role === "admin" ? `<button class="icon-button" data-action="edit-driver" data-id="${driver.id}">Edit</button><button class="icon-button is-danger" data-action="remove-driver" data-id="${driver.id}">Remove</button>` : ""}
       ${canManage && !driver.portalAccountId ? `<button class="icon-button" data-action="driver-access" data-id="${driver.id}">Create code</button>` : ""}
       ${canManage ? `<button class="icon-button" data-action="toggle-driver" data-id="${driver.id}" data-active="${driver.active && driver.accountActive !== false}">${driver.active && driver.accountActive !== false ? "Deactivate" : "Reactivate"}</button>` : ""}</div></td></tr>`;
@@ -2122,6 +2122,42 @@ async function revealAccountCode(id, button) {
 
 async function copyAccountCode(id, button) {
   const code = button?.closest(".account-code-row")?.querySelector("[data-account-code]")?.dataset.fullCode;
+  if (!code) return;
+  await navigator.clipboard.writeText(code);
+  toast("Access code copied.");
+}
+
+async function revealDriverCode(id, button) {
+  const driver = state.data.drivers.find((item) => item.id === id);
+  if (!driver?.codeHint) return;
+  const row = button?.closest(".account-code-row");
+  const codeNode = row?.querySelector("[data-driver-code]");
+  const copyButton = row?.querySelector('[data-action="copy-driver-code"]');
+  if (button?.dataset.revealed === "true") {
+    codeNode.textContent = `YABI-••••-••••-${driver.codeHint}`;
+    delete codeNode.dataset.fullCode;
+    button.dataset.revealed = "false";
+    button.textContent = tr("Reveal");
+    copyButton.hidden = true;
+    return;
+  }
+  try {
+    const result = await api("/api/portal/drivers", {
+      method: "POST",
+      body: { operation: "reveal_code", driverId: id },
+    });
+    codeNode.textContent = result.accessCode;
+    codeNode.dataset.fullCode = result.accessCode;
+    button.dataset.revealed = "true";
+    button.textContent = tr("Hide");
+    copyButton.hidden = false;
+  } catch (error) {
+    toast(messageFor(error), "error");
+  }
+}
+
+async function copyDriverCode(id, button) {
+  const code = button?.closest(".account-code-row")?.querySelector("[data-driver-code]")?.dataset.fullCode;
   if (!code) return;
   await navigator.clipboard.writeText(code);
   toast("Access code copied.");
@@ -3359,6 +3395,8 @@ el.view.addEventListener("click", async (event) => {
   if (action === "view-driver") viewDriver(id);
   if (action === "edit-driver") editDriver(id);
   if (action === "remove-driver") removeDriver(id);
+  if (action === "reveal-driver-code") revealDriverCode(id, button);
+  if (action === "copy-driver-code") copyDriverCode(id, button);
   if (action === "driver-access") createDriverAccess(id);
   if (action === "toggle-driver") toggleDriver(id, button.dataset.active === "true");
   if (action === "create-vehicle") createVehicle();

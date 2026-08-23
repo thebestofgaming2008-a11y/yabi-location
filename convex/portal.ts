@@ -1217,6 +1217,38 @@ export const getAccountAccessCodeForAdmin = internalQuery({
   },
 });
 
+export const getDriverAccessCodeForManager = internalQuery({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    driverId: v.id("customerDrivers"),
+  },
+  returns: v.union(
+    v.null(),
+    v.object({ ciphertext: v.string(), iv: v.string() }),
+  ),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin", "customer"]);
+    const driver = await ctx.db.get(args.driverId);
+    if (!driver || driver.deletedAt !== undefined) throw new Error("driver_not_found");
+    if (actor.role === "customer" && driver.customerId !== actor.linkedCustomerId) {
+      throw new Error("forbidden");
+    }
+    if (!driver.portalAccountId) throw new Error("driver_not_linked");
+    const account = await ctx.db.get(driver.portalAccountId);
+    if (
+      !account ||
+      account.deletedAt !== undefined ||
+      account.role !== "driver" ||
+      account.linkedDriverId !== driver._id
+    ) {
+      throw new Error("driver_not_linked");
+    }
+    if (!account.accessCodeCiphertext || !account.accessCodeIv) return null;
+    return { ciphertext: account.accessCodeCiphertext, iv: account.accessCodeIv };
+  },
+});
+
 export const setAccountActive = internalMutation({
   args: {
     actorAccountId: v.id("portalAccounts"),
