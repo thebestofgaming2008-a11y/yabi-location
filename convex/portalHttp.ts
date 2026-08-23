@@ -1353,7 +1353,10 @@ export const portalUpload = httpAction(async (ctx, request) => {
     const category = clean(body.category, 40);
     const slot = clean(body.slot, 80).toLowerCase();
     const captureSource = clean(body.captureSource, 20).toLowerCase();
-    const size = boundedNumber(body.size, 1, 8_000_000);
+    const maximumSize = category === "vehicle_document" && contentType === "application/pdf"
+      ? 20_000_000
+      : 8_000_000;
+    const size = boundedNumber(body.size, 1, maximumSize);
     const sortOrder = boundedNumber(body.sortOrder, 0, 100);
     if (
       !fileName ||
@@ -1444,7 +1447,7 @@ export const portalMediaCallback = httpAction(async (ctx, request) => {
     }
     const body = await parseBody(request);
     const r2Key = clean(body.r2Key, 500);
-    const size = boundedNumber(body.size, 1, 8_000_000);
+    const size = boundedNumber(body.size, 1, 20_000_000);
     if (!r2Key || size === undefined) throw new Error("validation_failed");
     let updated = await ctx.runMutation(internal.portal.markMediaUploaded, {
       r2Key,

@@ -2966,7 +2966,10 @@ export const createPendingMedia = internalMutation({
   returns: v.id("mediaAssets"),
   handler: async (ctx, args) => {
     await requireActor(ctx, args.actorAccountId);
-    if (args.size <= 0 || args.size > 8_000_000) {
+    const maximumSize = args.category === "vehicle_document" && args.contentType === "application/pdf"
+      ? 20_000_000
+      : 8_000_000;
+    if (args.size <= 0 || args.size > maximumSize) {
       throw new Error("invalid_file_size");
     }
     if (

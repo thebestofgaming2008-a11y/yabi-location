@@ -579,6 +579,8 @@ const translations = {
     "This vehicle document no longer exists.": "Ce document du véhicule n’existe plus.",
     "A vehicle with this registration plate already exists.": "Un véhicule avec cette plaque d’immatriculation existe déjà.",
     "The file could not be prepared or uploaded. Please try another file.": "Le fichier n’a pas pu être préparé ou téléchargé. Essayez un autre fichier.",
+    "PDF documents up to 20 MB.": "Documents PDF jusqu’à 20 Mo.",
+    "This file is too large. Vehicle-document PDFs can be up to 20 MB.": "Ce fichier est trop volumineux. Les PDF des véhicules peuvent atteindre 20 Mo.",
   },
   nl: {
     "Skip to content": "Ga naar inhoud",
@@ -1154,6 +1156,8 @@ const translations = {
     "This vehicle document no longer exists.": "Dit voertuigdocument bestaat niet meer.",
     "A vehicle with this registration plate already exists.": "Er bestaat al een voertuig met deze nummerplaat.",
     "The file could not be prepared or uploaded. Please try another file.": "Het bestand kon niet worden voorbereid of geüpload. Probeer een ander bestand.",
+    "PDF documents up to 20 MB.": "PDF-documenten tot 20 MB.",
+    "This file is too large. Vehicle-document PDFs can be up to 20 MB.": "Dit bestand is te groot. PDF-voertuigdocumenten mogen maximaal 20 MB zijn.",
   },
 };
 
@@ -1603,6 +1607,7 @@ function messageFor(error) {
     vehicle_document_not_found: "This vehicle document no longer exists.",
     vehicle_exists: "A vehicle with this registration plate already exists.",
     upload_failed: "The file could not be prepared or uploaded. Please try another file.",
+    invalid_file_size: "This file is too large. Vehicle-document PDFs can be up to 20 MB.",
   };
   return tr(messages[error?.message] || "Something went wrong. Please try again.");
 }
@@ -2253,7 +2258,7 @@ function addVehicleDocument(vehicleId) {
   closeModal();
   modal({
     kicker: vehicle.registrationPlate, title: "Add vehicle document", submit: "Upload document",
-    content: `<form class="portal-form"><div class="form-grid">${field("Document title", "title", "", true)}${select("Document type", "documentType", vehicleDocumentTypes, true)}${field("Valid until", "validUntil", "", false, "date")}${select("Visible to customer", "visibleToCustomer", [["true", "Yes"], ["false", "No"]], true)}</div>${uploadField("File", "vehicle_document", "vehicle_document", true, "vehicle_document", false, "image/jpeg,image/png,image/webp,application/pdf")}</form>`,
+    content: `<form class="portal-form"><div class="form-grid">${field("Document title", "title", "", true)}${select("Document type", "documentType", vehicleDocumentTypes, true)}${field("Valid until", "validUntil", "", false, "date")}${select("Visible to customer", "visibleToCustomer", [["true", "Yes"], ["false", "No"]], true)}</div>${uploadField("File", "vehicle_document", "vehicle_document", true, "vehicle_document", false, "image/jpeg,image/png,image/webp,application/pdf")}<p class="field-help">${clean(tr("PDF documents up to 20 MB."))}</p></form>`,
     handler: async (data, form) => {
       const input = form.querySelector('input[type="file"]');
       if (!input.files[0]) throw new Error("media_required");
@@ -3574,10 +3579,11 @@ function bindSignature() {
   });
 }
 
-async function optimise(file) {
+async function optimise(file, category) {
   if (file.size > 20_000_000) throw new Error("upload_failed");
   if (file.type === "application/pdf") {
-    if (file.size > 8_000_000) throw new Error("upload_failed");
+    const maximumPdfSize = category === "vehicle_document" ? 20_000_000 : 8_000_000;
+    if (file.size > maximumPdfSize) throw new Error("upload_failed");
     return file;
   }
   const bitmap = await createImageBitmap(file);
@@ -3600,7 +3606,7 @@ async function upload(files, uploadGroupId, progress) {
   const ids = [];
   for (let index = 0; index < files.length; index += 1) {
     progress(index, files.length);
-    const file = await optimise(files[index].file);
+    const file = await optimise(files[index].file, files[index].category);
     const prepared = await api("/api/portal/uploads", {
       method: "POST",
       body: {

@@ -1331,6 +1331,7 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .document-viewer iframe { width: 100%; min-height: 62vh; border: 1px solid var(--line); background: var(--surface); }
 .document-image-viewer { margin: 0; display: grid; place-items: center; }
 .document-image-viewer img { max-width: 100%; max-height: 68vh; object-fit: contain; border: 1px solid var(--line); }
+.field-help { margin: -.35rem 0 .25rem; color: var(--muted); font-size: .66rem; line-height: 1.5; }
 
 @media (max-width: 640px) {
   .record-detail-grid { grid-template-columns: 1fr; }

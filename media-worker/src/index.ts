@@ -21,7 +21,7 @@ const allowedContentTypes = new Set([
   "image/webp",
   "application/pdf",
 ]);
-const maximumUploadSize = 8_000_000;
+const maximumUploadSize = 20_000_000;
 
 function base64UrlBytes(value: string): Uint8Array {
   const padded = value.replace(/-/g, "+").replace(/_/g, "/");
