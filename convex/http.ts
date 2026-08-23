@@ -13,7 +13,9 @@ import {
   portalOptions,
   portalProfile,
   portalRecordMedia,
+  portalReplacementMedia,
   portalUpload,
+  portalVehicleDocumentMedia,
   portalWorkflow,
 } from "./portalHttp";
 import {
@@ -338,6 +340,16 @@ http.route({
   path: "/api/portal/record-media",
   method: "POST",
   handler: portalRecordMedia,
+});
+http.route({
+  path: "/api/portal/replacement-media",
+  method: "POST",
+  handler: portalReplacementMedia,
+});
+http.route({
+  path: "/api/portal/vehicle-document-media",
+  method: "POST",
+  handler: portalVehicleDocumentMedia,
 });
 http.route({
   path: "/api/portal/bootstrap",

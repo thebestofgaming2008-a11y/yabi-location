@@ -512,6 +512,73 @@ const translations = {
     "Add a customer before adding a driver.": "Ajoutez un client avant d’ajouter un chauffeur.",
     "Something went wrong. Please try again.": "Une erreur s’est produite. Réessayez.",
     "This vehicle still has a scheduled or active rental.": "Ce véhicule a encore une location planifiée ou active.",
+    "Vehicle replacements": "Remplacements de véhicules",
+    "Plan and document every damaged-vehicle replacement.": "Planifiez et documentez chaque remplacement d’un véhicule endommagé.",
+    "Vehicle replacement": "Remplacement de véhicule",
+    "Replace a damaged vehicle": "Remplacer un véhicule endommagé",
+    "Create replacement case": "Créer un dossier de remplacement",
+    "Edit replacement case": "Modifier le dossier de remplacement",
+    "Remove replacement case": "Supprimer le dossier de remplacement",
+    "No replacement cases": "Aucun dossier de remplacement",
+    "Create a replacement case when a damaged vehicle must be exchanged.": "Créez un dossier lorsqu’un véhicule endommagé doit être remplacé.",
+    "Customer and damaged vehicle": "Client et véhicule endommagé",
+    "Boss / customer": "Responsable / client",
+    "Boss / driver": "Responsable / chauffeur",
+    "Damaged vehicle": "Véhicule endommagé",
+    "Damaged vehicle mileage": "Kilométrage du véhicule endommagé",
+    "Reason for replacement": "Motif du remplacement",
+    "Replacement vehicle": "Véhicule de remplacement",
+    "Replacement source": "Origine du véhicule de remplacement",
+    "Replacement status": "Statut du remplacement",
+    "Existing fleet vehicle": "Véhicule existant de la flotte",
+    "Add a new vehicle": "Ajouter un nouveau véhicule",
+    "New replacement vehicle": "Nouveau véhicule de remplacement",
+    "Damage evidence": "Preuves des dommages",
+    "Damage evidence (optional)": "Preuves des dommages (facultatif)",
+    "Add clear photos when available. You can complete the case without photos.": "Ajoutez des photos nettes si elles sont disponibles. Le dossier peut être terminé sans photos.",
+    "No photos were added to this case.": "Aucune photo n’a été ajoutée à ce dossier.",
+    "Add a customer, driver and vehicle before creating a replacement case.": "Ajoutez un client, un chauffeur et un véhicule avant de créer un dossier de remplacement.",
+    "Replacement case created.": "Dossier de remplacement créé.",
+    "Replacement case updated.": "Dossier de remplacement mis à jour.",
+    "Replacement case removed.": "Dossier de remplacement supprimé.",
+    "The case and its uploaded evidence will no longer be accessible.": "Le dossier et les preuves téléchargées ne seront plus accessibles.",
+    Planned: "Planifié",
+    Completed: "Terminé",
+    Cancelled: "Annulé",
+    planned: "planifié",
+    completed: "terminé",
+    "Vehicle documents": "Documents du véhicule",
+    Documents: "Documents",
+    "Manage documents": "Gérer les documents",
+    "View documents": "Voir les documents",
+    "Add document": "Ajouter un document",
+    "Add vehicle document": "Ajouter un document au véhicule",
+    "Edit vehicle document": "Modifier le document du véhicule",
+    "Document title": "Titre du document",
+    "Document type": "Type de document",
+    Registration: "Immatriculation",
+    Insurance: "Assurance",
+    Contract: "Contrat",
+    "Valid until": "Valable jusqu’au",
+    "Visible to customer": "Visible par le client",
+    "Admin only": "Administrateur uniquement",
+    File: "Fichier",
+    Open: "Ouvrir",
+    "Open PDF": "Ouvrir le PDF",
+    "Upload document": "Télécharger le document",
+    "No documents": "Aucun document",
+    "Upload registration, insurance, inspection or other vehicle documents.": "Téléchargez les documents d’immatriculation, d’assurance, de contrôle ou d’autres documents du véhicule.",
+    "No documents are available for this vehicle.": "Aucun document n’est disponible pour ce véhicule.",
+    "Vehicle document added.": "Document du véhicule ajouté.",
+    "Vehicle document updated.": "Document du véhicule mis à jour.",
+    "Vehicle document removed.": "Document du véhicule supprimé.",
+    "A Belgian VAT number is required for a company and must be valid.": "Un numéro de TVA belge valide est obligatoire pour une entreprise.",
+    "The selected vehicle is not linked to this customer or driver.": "Le véhicule sélectionné n’est pas lié à ce client ou à ce chauffeur.",
+    "Choose a different replacement vehicle.": "Choisissez un autre véhicule de remplacement.",
+    "This replacement case no longer exists.": "Ce dossier de remplacement n’existe plus.",
+    "This vehicle document no longer exists.": "Ce document du véhicule n’existe plus.",
+    "A vehicle with this registration plate already exists.": "Un véhicule avec cette plaque d’immatriculation existe déjà.",
+    "The file could not be prepared or uploaded. Please try another file.": "Le fichier n’a pas pu être préparé ou téléchargé. Essayez un autre fichier.",
   },
   nl: {
     "Skip to content": "Ga naar inhoud",
@@ -1020,6 +1087,73 @@ const translations = {
     "Add a customer before adding a driver.": "Voeg eerst een klant toe voordat u een chauffeur toevoegt.",
     "Something went wrong. Please try again.": "Er is iets misgegaan. Probeer opnieuw.",
     "This vehicle still has a scheduled or active rental.": "Dit voertuig heeft nog een geplande of actieve verhuur.",
+    "Vehicle replacements": "Voertuigvervangingen",
+    "Plan and document every damaged-vehicle replacement.": "Plan en documenteer elke vervanging van een beschadigd voertuig.",
+    "Vehicle replacement": "Voertuigvervanging",
+    "Replace a damaged vehicle": "Een beschadigd voertuig vervangen",
+    "Create replacement case": "Vervangingsdossier aanmaken",
+    "Edit replacement case": "Vervangingsdossier wijzigen",
+    "Remove replacement case": "Vervangingsdossier verwijderen",
+    "No replacement cases": "Geen vervangingsdossiers",
+    "Create a replacement case when a damaged vehicle must be exchanged.": "Maak een dossier aan wanneer een beschadigd voertuig moet worden vervangen.",
+    "Customer and damaged vehicle": "Klant en beschadigd voertuig",
+    "Boss / customer": "Zaakvoerder / klant",
+    "Boss / driver": "Zaakvoerder / chauffeur",
+    "Damaged vehicle": "Beschadigd voertuig",
+    "Damaged vehicle mileage": "Kilometerstand beschadigd voertuig",
+    "Reason for replacement": "Reden van vervanging",
+    "Replacement vehicle": "Vervangvoertuig",
+    "Replacement source": "Bron van het vervangvoertuig",
+    "Replacement status": "Status van de vervanging",
+    "Existing fleet vehicle": "Bestaand voertuig uit de vloot",
+    "Add a new vehicle": "Nieuw voertuig toevoegen",
+    "New replacement vehicle": "Nieuw vervangvoertuig",
+    "Damage evidence": "Schadebewijs",
+    "Damage evidence (optional)": "Schadebewijs (optioneel)",
+    "Add clear photos when available. You can complete the case without photos.": "Voeg duidelijke foto’s toe indien beschikbaar. U kunt het dossier zonder foto’s voltooien.",
+    "No photos were added to this case.": "Er zijn geen foto’s aan dit dossier toegevoegd.",
+    "Add a customer, driver and vehicle before creating a replacement case.": "Voeg een klant, chauffeur en voertuig toe voordat u een vervangingsdossier aanmaakt.",
+    "Replacement case created.": "Vervangingsdossier aangemaakt.",
+    "Replacement case updated.": "Vervangingsdossier bijgewerkt.",
+    "Replacement case removed.": "Vervangingsdossier verwijderd.",
+    "The case and its uploaded evidence will no longer be accessible.": "Het dossier en het geüploade bewijs zijn daarna niet meer toegankelijk.",
+    Planned: "Gepland",
+    Completed: "Voltooid",
+    Cancelled: "Geannuleerd",
+    planned: "gepland",
+    completed: "voltooid",
+    "Vehicle documents": "Voertuigdocumenten",
+    Documents: "Documenten",
+    "Manage documents": "Documenten beheren",
+    "View documents": "Documenten bekijken",
+    "Add document": "Document toevoegen",
+    "Add vehicle document": "Voertuigdocument toevoegen",
+    "Edit vehicle document": "Voertuigdocument wijzigen",
+    "Document title": "Documenttitel",
+    "Document type": "Documenttype",
+    Registration: "Inschrijving",
+    Insurance: "Verzekering",
+    Contract: "Contract",
+    "Valid until": "Geldig tot",
+    "Visible to customer": "Zichtbaar voor klant",
+    "Admin only": "Alleen beheerder",
+    File: "Bestand",
+    Open: "Openen",
+    "Open PDF": "PDF openen",
+    "Upload document": "Document uploaden",
+    "No documents": "Geen documenten",
+    "Upload registration, insurance, inspection or other vehicle documents.": "Upload inschrijvings-, verzekerings-, keurings- of andere voertuigdocumenten.",
+    "No documents are available for this vehicle.": "Er zijn geen documenten beschikbaar voor dit voertuig.",
+    "Vehicle document added.": "Voertuigdocument toegevoegd.",
+    "Vehicle document updated.": "Voertuigdocument bijgewerkt.",
+    "Vehicle document removed.": "Voertuigdocument verwijderd.",
+    "A Belgian VAT number is required for a company and must be valid.": "Een geldig Belgisch btw-nummer is verplicht voor een bedrijf.",
+    "The selected vehicle is not linked to this customer or driver.": "Het geselecteerde voertuig is niet aan deze klant of chauffeur gekoppeld.",
+    "Choose a different replacement vehicle.": "Kies een ander vervangvoertuig.",
+    "This replacement case no longer exists.": "Dit vervangingsdossier bestaat niet meer.",
+    "This vehicle document no longer exists.": "Dit voertuigdocument bestaat niet meer.",
+    "A vehicle with this registration plate already exists.": "Er bestaat al een voertuig met deze nummerplaat.",
+    "The file could not be prepared or uploaded. Please try another file.": "Het bestand kon niet worden voorbereid of geüpload. Probeer een ander bestand.",
   },
 };
 
@@ -1033,7 +1167,7 @@ const roles = {
 };
 
 const roleViews = {
-  admin: ["overview", "applications", "access", "customers", "drivers", "fleet", "rentals", "operations", "audit"],
+  admin: ["overview", "applications", "access", "customers", "drivers", "fleet", "rentals", "replacements", "operations", "audit"],
   employee: ["overview", "customers", "fleet", "rentals", "operations"],
   mechanic: ["overview", "fleet", "operations"],
   contractor: ["overview", "rentals", "operations"],
@@ -1058,6 +1192,7 @@ const viewCopy = {
   drivers: ["Drivers", "Manage company drivers and their personal access."],
   fleet: ["Fleet", "Availability, mileage, and vehicle status at a glance."],
   rentals: ["Rentals", "Follow every rental from planning to closure."],
+  replacements: ["Vehicle replacements", "Plan and document every damaged-vehicle replacement."],
   operations: ["Operations", "Guided procedures with time-stamped evidence."],
   audit: ["Audit trail", "A traceable record of sensitive actions."],
   profile: ["My details", "Keep your personal and licence information accurate."],
@@ -1313,7 +1448,8 @@ function actionPictogram(target) {
 }
 
 function navigationPictogram(view) {
-  return pictogram(view === "overview" ? "home" : view, "nav-pictogram");
+  const aliases = { overview: "home", replacements: "breakdown_replacement" };
+  return pictogram(aliases[view] || view, "nav-pictogram");
 }
 
 function vehicleBrandMark(make, className = "vehicle-brand-mark") {
@@ -1372,7 +1508,7 @@ function applyLanguage(language, rerender = true) {
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     node.textContent = tr(node.dataset.i18n);
   });
-  document.querySelectorAll('[aria-label="Language"]').forEach((node) => node.setAttribute("aria-label", tr("Language")));
+  document.querySelectorAll(".language-switch").forEach((node) => node.setAttribute("aria-label", tr("Language")));
   el.menu.setAttribute("aria-label", tr("Open navigation"));
   el.backdrop.setAttribute("aria-label", tr("Close navigation"));
   el.modalClose.setAttribute("aria-label", tr("Close"));
@@ -1460,6 +1596,13 @@ function messageFor(error) {
     confirmation_mismatch: "The confirmation text does not match.",
     vehicle_unavailable: "That vehicle is not available for a new rental.",
     code_not_captured_yet: "This unchanged legacy code will become revealable after its next successful sign-in.",
+    invalid_vat_number: "A Belgian VAT number is required for a company and must be valid.",
+    vehicle_customer_mismatch: "The selected vehicle is not linked to this customer or driver.",
+    replacement_vehicle_required: "Choose a different replacement vehicle.",
+    replacement_case_not_found: "This replacement case no longer exists.",
+    vehicle_document_not_found: "This vehicle document no longer exists.",
+    vehicle_exists: "A vehicle with this registration plate already exists.",
+    upload_failed: "The file could not be prepared or uploaded. Please try another file.",
   };
   return tr(messages[error?.message] || "Something went wrong. Please try again.");
 }
@@ -1579,6 +1722,7 @@ function render() {
     drivers: renderDrivers,
     fleet: renderFleet,
     rentals: renderRentals,
+    replacements: renderReplacements,
     operations: renderOperations,
     audit: renderAudit,
     profile: renderProfile,
@@ -1602,6 +1746,7 @@ function quickActions() {
       ["Access", "Create a personal code", "access"],
       ["Fleet", "Register a vehicle", "fleet"],
       ["Rental", "Connect customer and vehicle", "rentals"],
+      ["Vehicle replacement", "Replace a damaged vehicle", "replacements"],
       ["Report", "Record a new issue", "report"],
     ],
     employee: [
@@ -1821,16 +1966,346 @@ function renderDrivers() {
 function renderFleet() {
   const vehicles = state.data.vehicles;
   const canUpdate = ["admin", "employee"].includes(state.data.account.role);
+  const canSeeDocuments = ["admin", "customer", "driver"].includes(state.data.account.role);
   const rows = vehicles
     .map(
       (vehicle) => `<tr><td><span class="vehicle-table-identity">${vehicleBrandMark(vehicle.make)}<span><strong>${clean(vehicle.registrationPlate)}</strong><small>${clean(vehicle.make)} ${clean(vehicle.model)}</small></span></span></td>
       <td>${clean(vehicle.format.toUpperCase())}</td><td>${clean(vehicle.year)}</td><td>${clean(vehicle.color)}</td>
       <td>${vehicle.currentMileage.toLocaleString(languageLocales[state.language])} km</td><td>${badge(vehicle.status)}</td>
+      ${canSeeDocuments ? `<td><button class="document-count-button" data-action="manage-vehicle-documents" data-id="${vehicle.id}"><strong>${(state.data.vehicleDocuments || []).filter((item) => item.vehicleId === vehicle.id).length}</strong><span>${clean(tr(state.data.account.role === "admin" ? "Manage documents" : "View documents"))}</span></button></td>` : ""}
       ${canUpdate ? `<td><div class="table-actions"><button class="icon-button" data-action="vehicle-status" data-id="${vehicle.id}">${state.data.account.role === "admin" ? "Edit" : "Update"}</button>${state.data.account.role === "admin" ? `<button class="icon-button is-danger" data-action="remove-vehicle" data-id="${vehicle.id}">Remove</button>` : ""}</div></td>` : ""}</tr>`,
     )
     .join("");
   el.view.innerHTML = `${header(state.data.account.role === "admin" ? '<button class="primary-button" data-action="create-vehicle">Add vehicle</button>' : "")}
-    ${vehicles.length ? table(["Vehicle", "Format", "Year", "Colour", "Mileage", "Status", ...(canUpdate ? [""] : [])], rows) : empty("No vehicles", "An administrator must register the fleet.")}`;
+    ${vehicles.length ? table(["Vehicle", "Format", "Year", "Colour", "Mileage", "Status", ...(canSeeDocuments ? ["Documents"] : []), ...(canUpdate ? [""] : [])], rows) : empty("No vehicles", "An administrator must register the fleet.")}`;
+}
+
+function replacementStatusOptions() {
+  return [["planned", "Planned"], ["active", "Active"], ["completed", "Completed"], ["cancelled", "Cancelled"]];
+}
+
+function vehicleSelectOptions(vehicles = state.data.vehicles) {
+  return vehicles.map((vehicle) => [
+    vehicle.id,
+    `${vehicle.registrationPlate} · ${vehicle.make} ${vehicle.model}`,
+    vehicleBrandMark(vehicle.make, "vehicle-brand-mark is-select"),
+  ]);
+}
+
+function renderReplacements() {
+  const dataMaps = maps();
+  const cases = state.data.vehicleReplacements || [];
+  const rows = cases.map((item) => {
+    const customer = dataMaps.customers.get(item.customerId);
+    const driver = dataMaps.drivers.get(item.driverId);
+    const damaged = dataMaps.vehicles.get(item.damagedVehicleId);
+    const replacement = dataMaps.vehicles.get(item.replacementVehicleId);
+    return `<tr><td><strong>${clean(item.reference)}</strong><small>${date(item.occurredAt, true)}</small></td>
+      <td><strong>${clean(customer?.company || customer?.fullName || "—")}</strong><small>${clean(driver?.fullName || "—")}</small></td>
+      <td>${damaged ? `<span class="vehicle-table-identity is-inline">${vehicleBrandMark(damaged.make, "vehicle-brand-mark is-compact")}<span>${clean(damaged.registrationPlate)}</span></span>` : "—"}</td>
+      <td>${replacement ? `<span class="vehicle-table-identity is-inline">${vehicleBrandMark(replacement.make, "vehicle-brand-mark is-compact")}<span>${clean(replacement.registrationPlate)}</span></span>` : "—"}</td>
+      <td>${Number(item.damagedMileage).toLocaleString(languageLocales[state.language])} km</td><td>${badge(item.status)}</td>
+      <td><div class="table-actions"><button class="icon-button" data-action="view-replacement-case" data-id="${item.id}">View</button><button class="icon-button" data-action="edit-replacement-case" data-id="${item.id}">Edit</button><button class="icon-button is-danger" data-action="remove-replacement-case" data-id="${item.id}">Remove</button></div></td></tr>`;
+  }).join("");
+  el.view.innerHTML = `${header('<button class="primary-button" data-action="create-replacement-case">Create replacement case</button>')}
+    ${cases.length ? table(["Reference", "Boss / driver", "Damaged vehicle", "Replacement vehicle", "Mileage", "Status", ""], rows) : empty("No replacement cases", "Create a replacement case when a damaged vehicle must be exchanged.", '<button class="primary-button" data-action="create-replacement-case">Create replacement case</button>')}`;
+}
+
+function vehiclesForReplacementCustomer(customerId, driverId = "") {
+  const ids = new Set(
+    (state.data.rentals || [])
+      .filter((rental) => rental.customerId === customerId && !["closed", "cancelled"].includes(rental.status))
+      .map((rental) => rental.vehicleId),
+  );
+  (state.data.drivers || [])
+    .filter((driver) => driver.customerId === customerId && (!driverId || driver.id === driverId))
+    .forEach((driver) => (driver.assignedVehicleIds || []).forEach((vehicleId) => ids.add(vehicleId)));
+  return state.data.vehicles.filter((vehicle) => ids.has(vehicle.id));
+}
+
+function replaceCustomSelect(wrapper, label, name, options, required = true, selectedValue = "") {
+  wrapper.innerHTML = select(label, name, options, required);
+  translateTree(wrapper);
+  setupCustomSelects(wrapper);
+  if (selectedValue) setCustomValue(wrapper, name, selectedValue);
+  return wrapper.querySelector(`input[name="${CSS.escape(name)}"]`);
+}
+
+function bindReplacementRelationships(form, selected = {}) {
+  const customerInput = form.querySelector('[name="customerId"]');
+  const driverWrap = form.querySelector("[data-replacement-driver]");
+  const damagedWrap = form.querySelector("[data-replacement-damaged]");
+  const rebuildDamaged = (driverId = "", selectedVehicleId = "") => {
+    const damagedInput = replaceCustomSelect(
+      damagedWrap,
+      "Damaged vehicle",
+      "damagedVehicleId",
+      vehicleSelectOptions(vehiclesForReplacementCustomer(customerInput.value, driverId)),
+      true,
+      selectedVehicleId,
+    );
+    const replacementWrap = form.querySelector("[data-existing-replacement]");
+    const rebuildReplacement = () => {
+      if (!replacementWrap) return;
+      replaceCustomSelect(replacementWrap, "Replacement vehicle", "replacementVehicleId", vehicleSelectOptions(state.data.vehicles.filter((vehicle) => vehicle.id !== damagedInput.value)), true);
+    };
+    damagedInput.addEventListener("change", rebuildReplacement);
+    rebuildReplacement();
+    return damagedInput;
+  };
+  const rebuildDrivers = (selectedDriverId = "", selectedVehicleId = "") => {
+    const drivers = (state.data.drivers || []).filter((driver) => driver.customerId === customerInput.value && driver.active !== false);
+    const driverInput = replaceCustomSelect(driverWrap, "Driver", "driverId", drivers.map((driver) => [driver.id, driver.fullName]), true, selectedDriverId);
+    rebuildDamaged(driverInput.value, selectedVehicleId);
+    driverInput.addEventListener("change", () => rebuildDamaged(driverInput.value));
+  };
+  customerInput.addEventListener("change", () => rebuildDrivers());
+  if (selected.customerId) {
+    setCustomValue(form, "customerId", selected.customerId);
+    rebuildDrivers(selected.driverId, selected.damagedVehicleId);
+  }
+}
+
+function bindReplacementSource(form) {
+  const source = form.querySelector('[name="replacementSource"]');
+  const existing = form.querySelector("[data-existing-replacement]");
+  const newVehicle = form.querySelector("[data-new-replacement]");
+  const sync = () => {
+    const addingNew = source.value === "new";
+    existing.hidden = addingNew;
+    newVehicle.hidden = !addingNew;
+    existing.querySelector("[data-custom-select]").dataset.required = String(!addingNew);
+    const newFormat = newVehicle.querySelector('[name="newFormat"]')?.closest("[data-custom-select]");
+    if (newFormat) newFormat.dataset.required = String(addingNew);
+    newVehicle.querySelectorAll("[data-new-required]").forEach((input) => { input.required = addingNew; });
+  };
+  source.addEventListener("change", sync);
+  sync();
+}
+
+function replacementEvidenceFields() {
+  return `<section class="form-section"><h3>${clean(tr("Damage evidence (optional)"))}</h3><p>${clean(tr("Add clear photos when available. You can complete the case without photos."))}</p><div class="evidence-grid">
+    ${uploadField("Front", "replacement_front", "replacement", false, "front")}
+    ${uploadField("Left side", "replacement_left", "replacement", false, "left")}
+    ${uploadField("Rear", "replacement_rear", "replacement", false, "rear")}
+    ${uploadField("Right side", "replacement_right", "replacement", false, "right")}
+    ${uploadField("Dashboard", "replacement_dashboard", "replacement", false, "dashboard")}
+  </div></section>`;
+}
+
+function createReplacementCase() {
+  if (!state.data.customers.length || !state.data.drivers.length || !state.data.vehicles.length) {
+    toast("Add a customer, driver and vehicle before creating a replacement case.", "error");
+    return;
+  }
+  modal({
+    kicker: "Administrator control",
+    title: "Create replacement case",
+    submit: "Create replacement case",
+    content: `<form class="portal-form replacement-case-form">
+      <section class="form-section"><h3>${clean(tr("Customer and damaged vehicle"))}</h3><div class="form-grid">
+        ${select("Boss / customer", "customerId", state.data.customers.filter((customer) => customer.status !== "inactive").map((customer) => [customer.id, customer.company || customer.fullName]), true)}
+        <div data-replacement-driver>${select("Driver", "driverId", [], true)}</div>
+        <div data-replacement-damaged>${select("Damaged vehicle", "damagedVehicleId", [], true)}</div>
+        ${field("Damaged vehicle mileage", "damagedMileage", "", true, "number", 'min="0" max="2000000"')}
+      </div>${textareaField("Reason for replacement", "reason", "", true)}${textareaField("Internal notes", "notes")}</section>
+      ${replacementEvidenceFields()}
+      <section class="form-section"><h3>${clean(tr("Replacement vehicle"))}</h3><div class="form-grid">
+        ${select("Replacement source", "replacementSource", [["existing", "Existing fleet vehicle"], ["new", "Add a new vehicle"]], true)}
+        <div data-existing-replacement>${select("Replacement vehicle", "replacementVehicleId", vehicleSelectOptions(), true)}</div>
+        ${select("Replacement status", "status", [["planned", "Planned"], ["active", "Active"]], true)}
+      </div><div class="new-replacement-panel" data-new-replacement hidden><h4>${clean(tr("New replacement vehicle"))}</h4><div class="form-grid">
+        ${field("Licence plate", "newRegistrationPlate", "", false, "text", "data-new-required")}${field("Make", "newMake", "", false, "text", "data-new-required")}
+        ${field("Model", "newModel", "", false, "text", "data-new-required")}${select("Format", "newFormat", [["l1h1", "L1H1"], ["l2h2", "L2H2"], ["l3h2", "L3H2"]])}
+        ${field("Year", "newYear", "", false, "number", 'min="1990" max="2100" data-new-required')}${field("Colour", "newColor", "", false, "text", "data-new-required")}
+        ${field("Current mileage", "newCurrentMileage", "0", false, "number", 'min="0" max="2000000" data-new-required')}${field("VIN", "newVin")}
+      </div></div></section></form>`,
+    handler: async (data, form) => {
+      const files = [...form.querySelectorAll('input[type="file"]')]
+        .filter((input) => input.files[0])
+        .map((input, sortOrder) => ({ file: input.files[0], category: "replacement", slot: input.dataset.slot, captureSource: "gallery", sortOrder }));
+      const uploadGroupId = crypto.randomUUID();
+      const progress = driverUploadProgress(form);
+      progress.querySelector("span").textContent = tr(files.length ? "Preparing evidence…" : "Saving record…");
+      try {
+        const mediaIds = await upload(files, uploadGroupId, (done, total) => {
+          progress.querySelector("i").style.width = `${Math.round((done / Math.max(1, total)) * 100)}%`;
+          progress.querySelector("span").textContent = `${tr("Uploading evidence")} ${done} ${tr("of")} ${total}`;
+        });
+        const values = Object.fromEntries([...data.entries()].filter(([, value]) => !(value instanceof File)));
+        ["damagedMileage", "newYear", "newCurrentMileage"].forEach((key) => {
+          if (values[key] !== "" && values[key] != null) values[key] = Number(values[key]);
+          else delete values[key];
+        });
+        const result = await api("/api/portal/admin", { method: "POST", body: { operation: "create_replacement_case", uploadGroupId, mediaIds, ...values } });
+        closeModal();
+        toast("Replacement case created.");
+        await refresh();
+        navigate("replacements");
+        await viewReplacementCase(result.replacementCaseId);
+      } catch (error) {
+        await discardUploadGroup(uploadGroupId);
+        showDriverUploadError(progress, error);
+        throw error;
+      }
+    },
+  });
+  bindReplacementRelationships(el.modalBody.querySelector("form"));
+  bindReplacementSource(el.modalBody.querySelector("form"));
+  setCustomValue(el.modalBody, "replacementSource", "existing");
+  setCustomValue(el.modalBody, "status", "planned");
+  bindUploads();
+}
+
+async function viewReplacementCase(id) {
+  const item = (state.data.vehicleReplacements || []).find((entry) => entry.id === id);
+  if (!item) return;
+  try {
+    const result = await api("/api/portal/replacement-media", { method: "POST", body: { replacementCaseId: id } });
+    const dataMaps = maps();
+    const customer = dataMaps.customers.get(item.customerId);
+    const driver = dataMaps.drivers.get(item.driverId);
+    const damaged = dataMaps.vehicles.get(item.damagedVehicleId);
+    const replacement = dataMaps.vehicles.get(item.replacementVehicleId);
+    const details = [
+      ["Boss / customer", customer?.company || customer?.fullName], ["Driver", driver?.fullName],
+      ["Damaged vehicle", damaged ? `${damaged.registrationPlate} · ${damaged.make} ${damaged.model}` : ""],
+      ["Damaged vehicle mileage", `${Number(item.damagedMileage).toLocaleString(languageLocales[state.language])} km`],
+      ["Replacement vehicle", replacement ? `${replacement.registrationPlate} · ${replacement.make} ${replacement.model}` : ""],
+      ["Replacement status", tr(item.status)], ["Reason for replacement", item.reason], ["Internal notes", item.notes],
+      ["Server date and time", date(item.occurredAt, true)],
+    ].filter(([, value]) => value);
+    modal({
+      kicker: item.reference,
+      title: "Vehicle replacement",
+      content: `<div class="portal-form replacement-case-view"><div class="record-detail-grid">${details.map(([label, value]) => `<div class="field readonly-field"><label>${clean(tr(label))}</label>${recordDetailValue(value)}</div>`).join("")}</div>
+        <section class="accepted-evidence"><h3>${clean(tr("Damage evidence"))}</h3>${result.items.length ? `<div class="media-gallery">${result.items.sort((a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99)).map((media) => `<figure><img src="${clean(media.url)}" alt="${clean(mediaSlotLabel(media.slot, media.category))}" loading="lazy"><figcaption>${clean(mediaSlotLabel(media.slot, media.category))}</figcaption></figure>`).join("")}</div>` : `<p>${clean(tr("No photos were added to this case."))}</p>`}</section>
+        <div class="form-submit-row"><button class="ghost-button" type="button" data-edit-replacement>${clean(tr("Edit replacement case"))}</button><button class="ghost-button danger-button" type="button" data-remove-replacement>${clean(tr("Remove replacement case"))}</button></div></div>`,
+    });
+    el.modalBody.querySelector("[data-edit-replacement]").addEventListener("click", () => editReplacementCase(id));
+    el.modalBody.querySelector("[data-remove-replacement]").addEventListener("click", () => removeReplacementCase(id));
+  } catch (error) { toast(messageFor(error), "error"); }
+}
+
+function editReplacementCase(id) {
+  const item = (state.data.vehicleReplacements || []).find((entry) => entry.id === id);
+  if (!item) return;
+  closeModal();
+  modal({
+    kicker: item.reference,
+    title: "Edit replacement case",
+    submit: "Save changes",
+    content: `<form class="portal-form"><section class="form-section"><div class="form-grid">
+      ${select("Boss / customer", "customerId", state.data.customers.map((customer) => [customer.id, customer.company || customer.fullName]), true)}
+      <div data-replacement-driver>${select("Driver", "driverId", [], true)}</div><div data-replacement-damaged>${select("Damaged vehicle", "damagedVehicleId", [], true)}</div>
+      ${select("Replacement vehicle", "replacementVehicleId", vehicleSelectOptions(), true)}${field("Damaged vehicle mileage", "damagedMileage", item.damagedMileage, true, "number", 'min="0" max="2000000"')}
+      ${select("Replacement status", "status", replacementStatusOptions(), true)}</div>
+      ${textareaField("Reason for replacement", "reason", item.reason, true)}${textareaField("Internal notes", "notes", item.notes || "")}</section></form>`,
+    handler: async (data) => {
+      const values = Object.fromEntries(data);
+      values.damagedMileage = Number(values.damagedMileage);
+      await api("/api/portal/admin", { method: "POST", body: { operation: "update_replacement_case", replacementCaseId: id, ...values } });
+      closeModal(); toast("Replacement case updated."); await refresh(); navigate("replacements");
+    },
+  });
+  bindReplacementRelationships(el.modalBody.querySelector("form"), item);
+  setCustomValue(el.modalBody, "replacementVehicleId", item.replacementVehicleId);
+  setCustomValue(el.modalBody, "status", item.status);
+}
+
+function removeReplacementCase(id) {
+  const item = (state.data.vehicleReplacements || []).find((entry) => entry.id === id);
+  if (!item) return;
+  closeModal();
+  modal({
+    kicker: "Administrator control", title: "Remove replacement case", submit: "Remove replacement case",
+    content: `<form class="portal-form destructive-confirmation"><p>${clean(tr("The case and its uploaded evidence will no longer be accessible."))}</p>${readonlyField("Reference", item.reference)}${field("Type the reference to confirm", "confirmation", "", true)}</form>`,
+    handler: async (data) => {
+      if (String(data.get("confirmation") || "").trim().toUpperCase() !== item.reference.toUpperCase()) throw new Error("confirmation_mismatch");
+      await api("/api/portal/admin", { method: "POST", body: { operation: "remove_replacement_case", replacementCaseId: id } });
+      closeModal(); toast("Replacement case removed."); await refresh(); navigate("replacements");
+    },
+  });
+}
+
+const vehicleDocumentTypes = [["registration", "Registration"], ["insurance", "Insurance"], ["inspection", "Technical inspection"], ["maintenance", "Maintenance"], ["contract", "Contract"], ["other", "Other"]];
+
+function manageVehicleDocuments(vehicleId) {
+  const vehicle = state.data.vehicles.find((item) => item.id === vehicleId);
+  if (!vehicle) return;
+  const admin = state.data.account.role === "admin";
+  const documents = (state.data.vehicleDocuments || []).filter((item) => item.vehicleId === vehicleId);
+  modal({
+    kicker: vehicle.registrationPlate,
+    title: "Vehicle documents",
+    content: `<div class="portal-form vehicle-document-manager">${admin ? `<div class="form-submit-row is-top"><button class="primary-button" type="button" data-add-vehicle-document>${clean(tr("Add document"))}</button></div>` : ""}
+      ${documents.length ? `<div class="vehicle-document-list">${documents.map((document) => `<article class="vehicle-document-card"><div class="vehicle-document-icon">${document.contentType === "application/pdf" ? "PDF" : "IMG"}</div><div><strong>${clean(document.title)}</strong><span>${clean(tr(vehicleDocumentTypes.find(([type]) => type === document.documentType)?.[1] || document.documentType))}${document.validUntil ? ` · ${clean(tr("Valid until"))} ${date(document.validUntil)}` : ""}</span>${admin ? `<small>${clean(tr(document.visibleToCustomer ? "Visible to customer" : "Admin only"))}</small>` : ""}</div><div class="table-actions"><button class="icon-button" type="button" data-open-vehicle-document="${document.id}">${clean(tr("Open"))}</button>${admin ? `<button class="icon-button" type="button" data-edit-vehicle-document="${document.id}">${clean(tr("Edit"))}</button><button class="icon-button is-danger" type="button" data-remove-vehicle-document="${document.id}">${clean(tr("Remove"))}</button>` : ""}</div></article>`).join("")}</div>` : empty("No documents", admin ? "Upload registration, insurance, inspection or other vehicle documents." : "No documents are available for this vehicle.")}</div>`,
+  });
+  el.modalBody.querySelector("[data-add-vehicle-document]")?.addEventListener("click", () => addVehicleDocument(vehicleId));
+  el.modalBody.querySelectorAll("[data-open-vehicle-document]").forEach((button) => button.addEventListener("click", () => openVehicleDocument(button.dataset.openVehicleDocument)));
+  el.modalBody.querySelectorAll("[data-edit-vehicle-document]").forEach((button) => button.addEventListener("click", () => editVehicleDocument(button.dataset.editVehicleDocument)));
+  el.modalBody.querySelectorAll("[data-remove-vehicle-document]").forEach((button) => button.addEventListener("click", () => removeVehicleDocument(button.dataset.removeVehicleDocument, vehicleId)));
+}
+
+function addVehicleDocument(vehicleId) {
+  const vehicle = state.data.vehicles.find((item) => item.id === vehicleId);
+  if (!vehicle || state.data.account.role !== "admin") return;
+  closeModal();
+  modal({
+    kicker: vehicle.registrationPlate, title: "Add vehicle document", submit: "Upload document",
+    content: `<form class="portal-form"><div class="form-grid">${field("Document title", "title", "", true)}${select("Document type", "documentType", vehicleDocumentTypes, true)}${field("Valid until", "validUntil", "", false, "date")}${select("Visible to customer", "visibleToCustomer", [["true", "Yes"], ["false", "No"]], true)}</div>${uploadField("File", "vehicle_document", "vehicle_document", true, "vehicle_document", false, "image/jpeg,image/png,image/webp,application/pdf")}</form>`,
+    handler: async (data, form) => {
+      const input = form.querySelector('input[type="file"]');
+      if (!input.files[0]) throw new Error("media_required");
+      const uploadGroupId = crypto.randomUUID();
+      const progress = driverUploadProgress(form);
+      try {
+        const [mediaId] = await upload([{ file: input.files[0], category: "vehicle_document", slot: "vehicle_document", captureSource: "gallery", sortOrder: 0 }], uploadGroupId, (done, total) => {
+          progress.querySelector("i").style.width = `${Math.round((done / total) * 100)}%`;
+          progress.querySelector("span").textContent = `${tr("Uploading evidence")} ${done} ${tr("of")} ${total}`;
+        });
+        await api("/api/portal/admin", { method: "POST", body: { operation: "create_vehicle_document", vehicleId, title: data.get("title"), documentType: data.get("documentType"), validUntil: data.get("validUntil") || undefined, visibleToCustomer: data.get("visibleToCustomer") === "true", uploadGroupId, mediaId } });
+        closeModal(); toast("Vehicle document added."); await refresh(); manageVehicleDocuments(vehicleId);
+      } catch (error) { await discardUploadGroup(uploadGroupId); showDriverUploadError(progress, error); throw error; }
+    },
+  });
+  setCustomValue(el.modalBody, "visibleToCustomer", "true");
+  bindUploads();
+}
+
+async function openVehicleDocument(id) {
+  const document = (state.data.vehicleDocuments || []).find((item) => item.id === id);
+  if (!document) return;
+  try {
+    const result = await api("/api/portal/vehicle-document-media", { method: "POST", body: { vehicleDocumentId: id } });
+    closeModal();
+    modal({ kicker: tr(vehicleDocumentTypes.find(([type]) => type === document.documentType)?.[1] || document.documentType), title: document.title, content: result.item.contentType === "application/pdf" ? `<div class="document-viewer"><a class="primary-button" href="${clean(result.item.url)}" target="_blank" rel="noopener">${clean(tr("Open PDF"))}</a><iframe src="${clean(result.item.url)}" title="${clean(document.title)}"></iframe></div>` : `<figure class="document-image-viewer"><img src="${clean(result.item.url)}" alt="${clean(document.title)}"></figure>` });
+  } catch (error) { toast(messageFor(error), "error"); }
+}
+
+function editVehicleDocument(id) {
+  const document = (state.data.vehicleDocuments || []).find((item) => item.id === id);
+  if (!document || state.data.account.role !== "admin") return;
+  closeModal();
+  modal({
+    title: "Edit vehicle document", submit: "Save changes",
+    content: `<form class="portal-form"><div class="form-grid">${field("Document title", "title", document.title, true)}${select("Document type", "documentType", vehicleDocumentTypes, true)}${field("Valid until", "validUntil", document.validUntil || "", false, "date")}${select("Visible to customer", "visibleToCustomer", [["true", "Yes"], ["false", "No"]], true)}</div></form>`,
+    handler: async (data) => {
+      await api("/api/portal/admin", { method: "POST", body: { operation: "update_vehicle_document", vehicleDocumentId: id, title: data.get("title"), documentType: data.get("documentType"), validUntil: data.get("validUntil") || undefined, visibleToCustomer: data.get("visibleToCustomer") === "true" } });
+      closeModal(); toast("Vehicle document updated."); await refresh(); manageVehicleDocuments(document.vehicleId);
+    },
+  });
+  setCustomValue(el.modalBody, "documentType", document.documentType);
+  setCustomValue(el.modalBody, "visibleToCustomer", String(document.visibleToCustomer));
+}
+
+async function removeVehicleDocument(id, vehicleId) {
+  const document = (state.data.vehicleDocuments || []).find((item) => item.id === id);
+  if (!document || state.data.account.role !== "admin" || !confirm(`${tr("Remove")} ${document.title}?`)) return;
+  try {
+    await api("/api/portal/admin", { method: "POST", body: { operation: "remove_vehicle_document", vehicleDocumentId: id } });
+    closeModal(); toast("Vehicle document removed."); await refresh(); manageVehicleDocuments(vehicleId);
+  } catch (error) { toast(messageFor(error), "error"); }
 }
 
 function renderRentals() {
@@ -1914,6 +2389,7 @@ function renderProfile() {
     <div class="form-grid">
       ${field("Full name", "fullName", customer.fullName, true)}
       ${field("Company", "company", customer.company || "")}
+      ${field("Belgian VAT number", "companyVatNumber", customer.companyVatNumber || "", false, "text", 'placeholder="BE 0123.456.789"')}
       ${field("Email", "email", customer.email, true, "email")}
       ${field("Phone", "phone", customer.phone, true, "tel")}
       ${field("Address", "address", customer.address || "", true)}
@@ -1924,6 +2400,7 @@ function renderProfile() {
     </div>
     <div class="form-submit-row"><button class="primary-button" type="submit">Save my details</button></div>
   </form></section>`;
+  bindCompanyVatRequirement(el.view);
 }
 
 function field(label, name, value = "", required = false, type = "text", attributes = "") {
@@ -2278,7 +2755,7 @@ function createCustomer() {
     title: "Add a customer",
     submit: "Add customer",
     content: `<form class="portal-form"><div class="form-grid">${field("Full name", "fullName", "", true)}
-      ${field("Company", "company")}${field("Email", "email", "", true, "email")}${field("Phone", "phone", "", true, "tel")}</div>
+      ${field("Company", "company")}${field("Belgian VAT number", "companyVatNumber", "", false, "text", 'placeholder="BE 0123.456.789"')}${field("Email", "email", "", true, "email")}${field("Phone", "phone", "", true, "tel")}</div>
       <div class="field"><label>Internal notes</label><textarea name="notes"></textarea></div></form>`,
     handler: async (data) => {
       await api("/api/portal/admin", { method: "POST", body: { operation: "create_customer", ...Object.fromEntries(data) } });
@@ -2287,6 +2764,20 @@ function createCustomer() {
       await refresh();
     },
   });
+  bindCompanyVatRequirement(el.modalBody);
+}
+
+function bindCompanyVatRequirement(root) {
+  const company = root.querySelector('[name="company"]');
+  const vat = root.querySelector('[name="companyVatNumber"]');
+  if (!company || !vat) return;
+  const sync = () => {
+    const required = Boolean(company.value.trim());
+    vat.required = required;
+    vat.setAttribute("aria-required", String(required));
+  };
+  company.addEventListener("input", sync);
+  sync();
 }
 
 const provinceOptions = [
@@ -2301,7 +2792,7 @@ function editCustomer(id) {
   const admin = state.data.account.role === "admin";
   const detail = (label, value) => `<div class="field readonly-field"><label>${clean(tr(label))}</label><div class="readonly-value">${clean(value || "—")}</div></div>`;
   if (!admin) {
-    modal({ title: customer.fullName, content: `<div class="portal-form"><div class="form-grid">${detail("Company", customer.company)}${detail("Email", customer.email)}${detail("Phone", customer.phone)}${detail("Address", [customer.street, customer.houseNumber, customer.addressBox, customer.postalCode, customer.city].filter(Boolean).join(" "))}</div></div>` });
+    modal({ title: customer.fullName, content: `<div class="portal-form"><div class="form-grid">${detail("Company", customer.company)}${detail("Belgian VAT number", customer.companyVatNumber)}${detail("Email", customer.email)}${detail("Phone", customer.phone)}${detail("Address", [customer.street, customer.houseNumber, customer.addressBox, customer.postalCode, customer.city].filter(Boolean).join(" "))}</div></div>` });
     return;
   }
   modal({
@@ -2325,6 +2816,7 @@ function editCustomer(id) {
   });
   setCustomValue(el.modalBody, "province", customer.province || "");
   setCustomValue(el.modalBody, "status", customer.status);
+  bindCompanyVatRequirement(el.modalBody);
 }
 
 async function removeCustomer(id) {
@@ -3439,7 +3931,12 @@ el.view.addEventListener("click", async (event) => {
   if (action === "driver-access") createDriverAccess(id);
   if (action === "toggle-driver") toggleDriver(id, button.dataset.active === "true");
   if (action === "create-vehicle") createVehicle();
+  if (action === "manage-vehicle-documents") manageVehicleDocuments(id);
   if (action === "create-rental") createRental();
+  if (action === "create-replacement-case") createReplacementCase();
+  if (action === "view-replacement-case") viewReplacementCase(id);
+  if (action === "edit-replacement-case") editReplacementCase(id);
+  if (action === "remove-replacement-case") removeReplacementCase(id);
   if (action === "vehicle-status") updateVehicle(id);
   if (action === "rental-status") updateRental(id);
   if (action === "remove-vehicle") removeVehicle(id);

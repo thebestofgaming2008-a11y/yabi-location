@@ -15,7 +15,9 @@ import {
   operationalVehicleStatusValidator,
   portalRoleValidator,
   rentalStatusValidator,
+  vehicleDocumentTypeValidator,
   vehicleFormatValidator,
+  vehicleReplacementStatusValidator,
   workflowTypeValidator,
   vehicleDispositionValidator,
 } from "./schema";
@@ -25,6 +27,7 @@ import { portalRateLimiter } from "./rateLimits";
 type PortalRole = Doc<"portalAccounts">["role"];
 type WorkflowType = Doc<"workflowRecords">["type"];
 const maintenanceItemCodeSet = new Set<string>(maintenanceItemCodes);
+const replacementEvidenceSlotSet = new Set(["front", "left", "rear", "right", "dashboard"]);
 
 const accountPublicValidator = v.object({
   id: v.id("portalAccounts"),
@@ -127,6 +130,36 @@ const rentalPublicValidator = v.object({
   mileageAllowance: v.optional(v.number()),
   notes: v.optional(v.string()),
   createdBy: v.id("portalAccounts"),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
+
+const vehicleReplacementPublicValidator = v.object({
+  id: v.id("vehicleReplacementCases"),
+  reference: v.string(),
+  customerId: v.id("customers"),
+  driverId: v.id("customerDrivers"),
+  damagedVehicleId: v.id("operationalVehicles"),
+  replacementVehicleId: v.id("operationalVehicles"),
+  reason: v.string(),
+  damagedMileage: v.number(),
+  status: vehicleReplacementStatusValidator,
+  notes: v.optional(v.string()),
+  occurredAt: v.number(),
+  createdBy: v.id("portalAccounts"),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
+
+const vehicleDocumentPublicValidator = v.object({
+  id: v.id("vehicleDocuments"),
+  vehicleId: v.id("operationalVehicles"),
+  title: v.string(),
+  documentType: vehicleDocumentTypeValidator,
+  fileName: v.string(),
+  contentType: v.string(),
+  validUntil: v.optional(v.string()),
+  visibleToCustomer: v.boolean(),
   createdAt: v.number(),
   updatedAt: v.number(),
 });
@@ -342,6 +375,40 @@ function publicRental(rental: Doc<"rentals">) {
   };
 }
 
+function publicVehicleReplacement(replacement: Doc<"vehicleReplacementCases">) {
+  return {
+    id: replacement._id,
+    reference: replacement.reference,
+    customerId: replacement.customerId,
+    driverId: replacement.driverId,
+    damagedVehicleId: replacement.damagedVehicleId,
+    replacementVehicleId: replacement.replacementVehicleId,
+    reason: replacement.reason,
+    damagedMileage: replacement.damagedMileage,
+    status: replacement.status,
+    notes: replacement.notes,
+    occurredAt: replacement.occurredAt,
+    createdBy: replacement.createdBy,
+    createdAt: replacement.createdAt,
+    updatedAt: replacement.updatedAt,
+  };
+}
+
+function publicVehicleDocument(document: Doc<"vehicleDocuments">) {
+  return {
+    id: document._id,
+    vehicleId: document.vehicleId,
+    title: document.title,
+    documentType: document.documentType,
+    fileName: document.fileName,
+    contentType: document.contentType,
+    validUntil: document.validUntil,
+    visibleToCustomer: document.visibleToCustomer,
+    createdAt: document.createdAt,
+    updatedAt: document.updatedAt,
+  };
+}
+
 function publicWorkflow(record: Doc<"workflowRecords">) {
   return {
     id: record._id,
@@ -439,11 +506,19 @@ async function customerHasVehicle(
     .withIndex("by_customer_id", (q) => q.eq("customerId", customerId))
     .order("desc")
     .take(100);
-  return rentals.some(
+  if (rentals.some(
     (rental) =>
       rental.vehicleId === vehicleId &&
       ["draft", "scheduled", "active"].includes(rental.status),
-  );
+  )) return true;
+  const drivers = await ctx.db
+    .query("customerDrivers")
+    .withIndex("by_customer_id", (q) => q.eq("customerId", customerId))
+    .take(100);
+  for (const driver of drivers.filter((item) => item.deletedAt === undefined && item.active)) {
+    if (await driverHasDirectVehicle(ctx, driver._id, vehicleId)) return true;
+  }
+  return false;
 }
 
 async function driverHasDirectVehicle(
@@ -460,10 +535,55 @@ async function driverHasDirectVehicle(
   return assignment !== null;
 }
 
+async function actorCanAccessVehicle(
+  ctx: QueryCtx | MutationCtx,
+  actor: Doc<"portalAccounts">,
+  vehicleId: Id<"operationalVehicles">,
+): Promise<boolean> {
+  if (actor.role === "admin") return true;
+  if (actor.role === "customer" && actor.linkedCustomerId) {
+    return await customerHasVehicle(ctx, actor.linkedCustomerId, vehicleId);
+  }
+  if (actor.role === "driver" && actor.linkedCustomerId && actor.linkedDriverId) {
+    return (
+      (await driverHasDirectVehicle(ctx, actor.linkedDriverId, vehicleId)) ||
+      (await customerHasVehicle(ctx, actor.linkedCustomerId, vehicleId))
+    );
+  }
+  return false;
+}
+
+async function ensureDriverVehicleAssignment(
+  ctx: MutationCtx,
+  actorAccountId: Id<"portalAccounts">,
+  driverId: Id<"customerDrivers">,
+  vehicleId: Id<"operationalVehicles">,
+): Promise<Id<"driverVehicleAssignments"> | undefined> {
+  const existing = await ctx.db
+    .query("driverVehicleAssignments")
+    .withIndex("by_driver_id_and_vehicle_id", (q) =>
+      q.eq("driverId", driverId).eq("vehicleId", vehicleId),
+    )
+    .unique();
+  if (existing) return undefined;
+  const now = Date.now();
+  return await ctx.db.insert("driverVehicleAssignments", {
+    driverId,
+    vehicleId,
+    assignedBy: actorAccountId,
+    createdAt: now,
+    updatedAt: now,
+  });
+}
+
 function yearsBeforeToday(years: number): string {
   const date = new Date();
   date.setUTCFullYear(date.getUTCFullYear() - years);
   return date.toISOString().slice(0, 10);
+}
+
+function belgianVatNumberValid(value: string): boolean {
+  return /^(?:BE)?[01]\d{9}$/.test(value.replace(/[.\s-]/g, "").toUpperCase());
 }
 
 const workflowRoles: Record<WorkflowType, PortalRole[]> = {
@@ -724,6 +844,8 @@ export const getPortalData = internalQuery({
     drivers: v.array(driverPublicValidator),
     vehicles: v.array(operationalVehiclePublicValidator),
     rentals: v.array(rentalPublicValidator),
+    vehicleReplacements: v.array(vehicleReplacementPublicValidator),
+    vehicleDocuments: v.array(vehicleDocumentPublicValidator),
     workflows: v.array(workflowPublicValidator),
     auditEvents: v.array(auditPublicValidator),
   }),
@@ -743,11 +865,13 @@ export const getPortalData = internalQuery({
     let customers: Doc<"customers">[] = [];
     let drivers: Doc<"customerDrivers">[] = [];
     let rentals: Doc<"rentals">[] = [];
+    let vehicleReplacements: Doc<"vehicleReplacementCases">[] = [];
+    let vehicleDocuments: Doc<"vehicleDocuments">[] = [];
     let workflows: Doc<"workflowRecords">[] = [];
     let auditEvents: Doc<"auditEvents">[] = [];
 
     if (actor.role === "admin") {
-      [accounts, customers, drivers, rentals, workflows, auditEvents] = await Promise.all([
+      [accounts, customers, drivers, rentals, vehicleReplacements, vehicleDocuments, workflows, auditEvents] = await Promise.all([
         ctx.db
           .query("portalAccounts")
           .withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined))
@@ -756,6 +880,8 @@ export const getPortalData = internalQuery({
         ctx.db.query("customers").withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined)).order("desc").take(100),
         ctx.db.query("customerDrivers").withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined)).order("desc").take(100),
         ctx.db.query("rentals").withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined)).order("desc").take(100),
+        ctx.db.query("vehicleReplacementCases").withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined)).order("desc").take(100),
+        ctx.db.query("vehicleDocuments").withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined)).order("desc").take(300),
         ctx.db.query("workflowRecords").order("desc").take(100),
         ctx.db.query("auditEvents").order("desc").take(100),
       ]);
@@ -834,6 +960,24 @@ export const getPortalData = internalQuery({
           )
           .order("desc")
           .take(100);
+        const companyAssignments = await Promise.all(
+          drivers
+            .filter((driver) => driver.deletedAt === undefined && driver.active)
+            .map((driver) =>
+              ctx.db
+                .query("driverVehicleAssignments")
+                .withIndex("by_driver_id", (q) => q.eq("driverId", driver._id))
+                .take(100),
+            ),
+        );
+        const directlyAssignedVehicles = await Promise.all(
+          companyAssignments.flat().map((assignment) => ctx.db.get(assignment.vehicleId)),
+        );
+        const vehicleMap = new Map(vehicles.map((vehicle) => [String(vehicle._id), vehicle]));
+        for (const vehicle of directlyAssignedVehicles) {
+          if (vehicle && vehicle.deletedAt === undefined) vehicleMap.set(String(vehicle._id), vehicle);
+        }
+        vehicles = [...vehicleMap.values()];
       } else {
         workflows = await ctx.db
           .query("workflowRecords")
@@ -882,6 +1026,20 @@ export const getPortalData = internalQuery({
           ),
         )
       : [];
+    if (actor.role === "customer" || actor.role === "driver") {
+      const documentGroups = await Promise.all(
+        vehicles.map((vehicle) =>
+          ctx.db
+            .query("vehicleDocuments")
+            .withIndex("by_vehicle_id", (q) => q.eq("vehicleId", vehicle._id))
+            .order("desc")
+            .take(50),
+        ),
+      );
+      vehicleDocuments = documentGroups
+        .flat()
+        .filter((document) => document.deletedAt === undefined && document.visibleToCustomer);
+    }
 
     return {
       account: publicAccount(actor),
@@ -898,6 +1056,8 @@ export const getPortalData = internalQuery({
       ),
       vehicles: vehicles.map((vehicle) => publicVehicle(vehicle, actor.role === "customer" || actor.role === "driver")),
       rentals: rentals.map(publicRental),
+      vehicleReplacements: vehicleReplacements.map(publicVehicleReplacement),
+      vehicleDocuments: vehicleDocuments.map(publicVehicleDocument),
       workflows: workflows.map(publicWorkflow),
       auditEvents: auditEvents.map((event) => ({
         id: event._id,
@@ -1346,6 +1506,7 @@ export const createCustomer = internalMutation({
     actorAccountId: v.id("portalAccounts"),
     fullName: v.string(),
     company: v.optional(v.string()),
+    companyVatNumber: v.optional(v.string()),
     email: v.string(),
     phone: v.string(),
     notes: v.optional(v.string()),
@@ -1354,10 +1515,17 @@ export const createCustomer = internalMutation({
   handler: async (ctx, args) => {
     const actor = await requireActor(ctx, args.actorAccountId);
     requireRole(actor, ["admin", "employee"]);
+    if (
+      (args.company && !args.companyVatNumber) ||
+      (args.companyVatNumber && !belgianVatNumberValid(args.companyVatNumber))
+    ) {
+      throw new Error("invalid_vat_number");
+    }
     const now = Date.now();
     const customerId = await ctx.db.insert("customers", {
       fullName: args.fullName,
       company: args.company,
+      companyVatNumber: args.companyVatNumber,
       email: args.email,
       phone: args.phone,
       notes: args.notes,
@@ -1406,6 +1574,12 @@ export const updateCustomer = internalMutation({
     requireRole(actor, ["admin"]);
     const customer = await ctx.db.get(args.customerId);
     if (!customer) throw new Error("customer_not_found");
+    if (
+      (args.company && !args.companyVatNumber) ||
+      (args.companyVatNumber && !belgianVatNumberValid(args.companyVatNumber))
+    ) {
+      throw new Error("invalid_vat_number");
+    }
     await ctx.db.patch(customer._id, {
       fullName: args.fullName,
       company: args.company,
@@ -1455,6 +1629,10 @@ export const removeCustomer = internalMutation({
       .query("customerDrivers")
       .withIndex("by_customer_id", (q) => q.eq("customerId", customer._id))
       .take(100);
+    const replacementCases = await ctx.db
+      .query("vehicleReplacementCases")
+      .withIndex("by_customer_id", (q) => q.eq("customerId", customer._id))
+      .take(100);
     const accountIds = [customer.portalAccountId, ...drivers.map((driver) => driver.portalAccountId)]
       .filter((id): id is Id<"portalAccounts"> => id !== undefined);
     const now = Date.now();
@@ -1467,6 +1645,14 @@ export const removeCustomer = internalMutation({
       removedAssignments.push(...assignments);
     }
     await Promise.all(removedAssignments.map((assignment) => ctx.db.delete(assignment._id)));
+    for (const replacementCase of replacementCases.filter((item) => item.deletedAt === undefined)) {
+      const evidence = await ctx.db
+        .query("mediaAssets")
+        .withIndex("by_replacement_case_id", (q) => q.eq("replacementCaseId", replacementCase._id))
+        .take(5);
+      await Promise.all(evidence.map((item) => ctx.db.patch(item._id, { status: "deleted", replacementCaseId: undefined })));
+      await ctx.db.patch(replacementCase._id, { assignmentId: undefined, deletedAt: now, deletedBy: actor._id, updatedAt: now });
+    }
     const activeRentals = rentals.filter((rental) => rental.deletedAt === undefined);
     await Promise.all(activeRentals.map((rental) => ctx.db.patch(rental._id, {
       status: "cancelled",
@@ -1518,7 +1704,7 @@ export const removeCustomer = internalMutation({
       deletedBy: actor._id,
       updatedAt: now,
     });
-    await audit(ctx, actor._id, "customer.removed", "customer", String(customer._id), `Customer ${customer.fullName} removed`, JSON.stringify({ removedRentals: activeRentals.length, removedDrivers: drivers.length, removedVehicleAssignments: removedAssignments.length }));
+    await audit(ctx, actor._id, "customer.removed", "customer", String(customer._id), `Customer ${customer.fullName} removed`, JSON.stringify({ removedRentals: activeRentals.length, removedDrivers: drivers.length, removedVehicleAssignments: removedAssignments.length, removedReplacementCases: replacementCases.filter((item) => item.deletedAt === undefined).length }));
     return null;
   },
 });
@@ -1528,6 +1714,7 @@ export const updateOwnCustomerProfile = internalMutation({
     actorAccountId: v.id("portalAccounts"),
     fullName: v.string(),
     company: v.optional(v.string()),
+    companyVatNumber: v.optional(v.string()),
     email: v.string(),
     phone: v.string(),
     address: v.string(),
@@ -1543,10 +1730,17 @@ export const updateOwnCustomerProfile = internalMutation({
     if (!actor.linkedCustomerId) throw new Error("customer_not_linked");
     const customer = await ctx.db.get(actor.linkedCustomerId);
     if (!customer) throw new Error("customer_not_found");
+    if (
+      (args.company && !args.companyVatNumber) ||
+      (args.companyVatNumber && !belgianVatNumberValid(args.companyVatNumber))
+    ) {
+      throw new Error("invalid_vat_number");
+    }
     const now = Date.now();
     await ctx.db.patch(customer._id, {
       fullName: args.fullName,
       company: args.company,
+      companyVatNumber: args.companyVatNumber,
       email: args.email,
       phone: args.phone,
       address: args.address,
@@ -1636,7 +1830,9 @@ export const createDriverWithAccount = internalMutation({
           item.category !== "driver_document" ||
           !item.contentType.startsWith("image/") ||
           item.recordId !== undefined ||
-          item.driverId !== undefined,
+          item.driverId !== undefined ||
+          item.replacementCaseId !== undefined ||
+          item.vehicleDocumentId !== undefined,
       )
     ) {
       throw new Error("invalid_media");
@@ -1968,7 +2164,19 @@ export const removeDriver = internalMutation({
       .query("driverVehicleAssignments")
       .withIndex("by_driver_id", (q) => q.eq("driverId", driver._id))
       .take(100);
+    const replacementCases = await ctx.db
+      .query("vehicleReplacementCases")
+      .withIndex("by_driver_id", (q) => q.eq("driverId", driver._id))
+      .take(100);
     await Promise.all(assignments.map((assignment) => ctx.db.delete(assignment._id)));
+    for (const replacementCase of replacementCases.filter((item) => item.deletedAt === undefined)) {
+      const evidence = await ctx.db
+        .query("mediaAssets")
+        .withIndex("by_replacement_case_id", (q) => q.eq("replacementCaseId", replacementCase._id))
+        .take(5);
+      await Promise.all(evidence.map((item) => ctx.db.patch(item._id, { status: "deleted", replacementCaseId: undefined })));
+      await ctx.db.patch(replacementCase._id, { assignmentId: undefined, deletedAt: now, deletedBy: actor._id, updatedAt: now });
+    }
     if (driver.portalAccountId) {
       const sessions = await ctx.db.query("portalSessions")
         .withIndex("by_account_id_and_revoked_at", (q) => q.eq("accountId", driver.portalAccountId!).eq("revokedAt", undefined))
@@ -2000,7 +2208,7 @@ export const removeDriver = internalMutation({
       .withIndex("by_driver_id", (q) => q.eq("driverId", driver._id))
       .take(24);
     await Promise.all(media.filter((item) => item.status !== "deleted").map((item) => ctx.db.patch(item._id, { status: "deleted" })));
-    await audit(ctx, actor._id, "driver.removed", "customerDriver", String(driver._id), `${driver.fullName} removed`, JSON.stringify({ removedMedia: media.length, removedVehicleAssignments: assignments.length }));
+    await audit(ctx, actor._id, "driver.removed", "customerDriver", String(driver._id), `${driver.fullName} removed`, JSON.stringify({ removedMedia: media.length, removedVehicleAssignments: assignments.length, removedReplacementCases: replacementCases.filter((item) => item.deletedAt === undefined).length }));
     return null;
   },
 });
@@ -2224,8 +2432,28 @@ export const removeVehicle = internalMutation({
       .query("driverVehicleAssignments")
       .withIndex("by_vehicle_id", (q) => q.eq("vehicleId", vehicle._id))
       .take(100);
+    const [damagedCases, replacementCases, vehicleDocuments] = await Promise.all([
+      ctx.db.query("vehicleReplacementCases").withIndex("by_damaged_vehicle_id", (q) => q.eq("damagedVehicleId", vehicle._id)).take(100),
+      ctx.db.query("vehicleReplacementCases").withIndex("by_replacement_vehicle_id", (q) => q.eq("replacementVehicleId", vehicle._id)).take(100),
+      ctx.db.query("vehicleDocuments").withIndex("by_vehicle_id", (q) => q.eq("vehicleId", vehicle._id)).take(100),
+    ]);
     const now = Date.now();
     await Promise.all(assignments.map((assignment) => ctx.db.delete(assignment._id)));
+    const relatedCases = [...new Map([...damagedCases, ...replacementCases].map((item) => [String(item._id), item])).values()]
+      .filter((item) => item.deletedAt === undefined);
+    for (const replacementCase of relatedCases) {
+      const evidence = await ctx.db
+        .query("mediaAssets")
+        .withIndex("by_replacement_case_id", (q) => q.eq("replacementCaseId", replacementCase._id))
+        .take(5);
+      await Promise.all(evidence.map((item) => ctx.db.patch(item._id, { status: "deleted", replacementCaseId: undefined })));
+      await ctx.db.patch(replacementCase._id, { assignmentId: undefined, deletedAt: now, deletedBy: actor._id, updatedAt: now });
+    }
+    for (const document of vehicleDocuments.filter((item) => item.deletedAt === undefined)) {
+      const media = await ctx.db.get(document.mediaId);
+      if (media) await ctx.db.patch(media._id, { status: "deleted", vehicleDocumentId: undefined });
+      await ctx.db.patch(document._id, { deletedAt: now, deletedBy: actor._id, updatedAt: now });
+    }
     await Promise.all(rentals.filter((rental) => rental.deletedAt === undefined).map((rental) => ctx.db.patch(rental._id, {
       status: "cancelled",
       deletedAt: now,
@@ -2233,7 +2461,7 @@ export const removeVehicle = internalMutation({
       updatedAt: now,
     })));
     await ctx.db.patch(vehicle._id, { status: "inactive", deletedAt: now, deletedBy: actor._id, updatedAt: now });
-    await audit(ctx, actor._id, "vehicle.removed", "vehicle", String(vehicle._id), `${vehicle.registrationPlate} removed from fleet`, JSON.stringify({ removedRentals: rentals.filter((rental) => rental.deletedAt === undefined).length, removedDriverAssignments: assignments.length }));
+    await audit(ctx, actor._id, "vehicle.removed", "vehicle", String(vehicle._id), `${vehicle.registrationPlate} removed from fleet`, JSON.stringify({ removedRentals: rentals.filter((rental) => rental.deletedAt === undefined).length, removedDriverAssignments: assignments.length, removedReplacementCases: relatedCases.length, removedDocuments: vehicleDocuments.filter((item) => item.deletedAt === undefined).length }));
     return null;
   },
 });
@@ -2361,6 +2589,366 @@ export const removeRental = internalMutation({
   },
 });
 
+const newReplacementVehicleValidator = v.object({
+  registrationPlate: v.string(),
+  make: v.string(),
+  model: v.string(),
+  year: v.number(),
+  format: vehicleFormatValidator,
+  color: v.string(),
+  vin: v.optional(v.string()),
+  currentMileage: v.number(),
+});
+
+export const createVehicleReplacementCase = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    reference: v.string(),
+    customerId: v.id("customers"),
+    driverId: v.id("customerDrivers"),
+    damagedVehicleId: v.id("operationalVehicles"),
+    replacementVehicleId: v.optional(v.id("operationalVehicles")),
+    newReplacementVehicle: v.optional(newReplacementVehicleValidator),
+    reason: v.string(),
+    damagedMileage: v.number(),
+    status: vehicleReplacementStatusValidator,
+    notes: v.optional(v.string()),
+    uploadGroupId: v.string(),
+    mediaIds: v.array(v.id("mediaAssets")),
+  },
+  returns: v.object({
+    replacementCaseId: v.id("vehicleReplacementCases"),
+    replacementVehicleId: v.id("operationalVehicles"),
+    reference: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    if (
+      !args.reason.trim() ||
+      args.damagedMileage < 0 ||
+      args.mediaIds.length > 5 ||
+      Boolean(args.replacementVehicleId) === Boolean(args.newReplacementVehicle)
+    ) {
+      throw new Error("validation_failed");
+    }
+    if (new Set(args.mediaIds.map(String)).size !== args.mediaIds.length) {
+      throw new Error("invalid_media");
+    }
+    const [customer, driver, damagedVehicle] = await Promise.all([
+      ctx.db.get(args.customerId),
+      ctx.db.get(args.driverId),
+      ctx.db.get(args.damagedVehicleId),
+    ]);
+    if (!customer || customer.deletedAt !== undefined) throw new Error("customer_not_found");
+    if (!driver || driver.deletedAt !== undefined || driver.customerId !== customer._id) {
+      throw new Error("driver_customer_mismatch");
+    }
+    if (!damagedVehicle || damagedVehicle.deletedAt !== undefined) {
+      throw new Error("vehicle_not_found");
+    }
+    if (
+      !(await customerHasVehicle(ctx, customer._id, damagedVehicle._id)) &&
+      !(await driverHasDirectVehicle(ctx, driver._id, damagedVehicle._id))
+    ) {
+      throw new Error("vehicle_customer_mismatch");
+    }
+    const media = await Promise.all(args.mediaIds.map((mediaId) => ctx.db.get(mediaId)));
+    const uploadedMedia = media.filter((item): item is Doc<"mediaAssets"> => item !== null);
+    if (
+      uploadedMedia.length !== args.mediaIds.length ||
+      uploadedMedia.some(
+        (item) =>
+          item.createdBy !== actor._id ||
+          item.uploadGroupId !== args.uploadGroupId ||
+          item.status !== "uploaded" ||
+          item.recordId !== undefined ||
+          item.driverId !== undefined ||
+          item.replacementCaseId !== undefined ||
+          item.vehicleDocumentId !== undefined ||
+          item.category !== "replacement" ||
+          !item.contentType.startsWith("image/") ||
+          !item.slot ||
+          !replacementEvidenceSlotSet.has(item.slot),
+      )
+    ) {
+      throw new Error("invalid_media");
+    }
+    const mediaSlots = uploadedMedia.map((item) => item.slot!);
+    if (new Set(mediaSlots).size !== mediaSlots.length) throw new Error("invalid_media");
+
+    const now = Date.now();
+    let replacementVehicle: Doc<"operationalVehicles"> | null = null;
+    if (args.replacementVehicleId) {
+      replacementVehicle = await ctx.db.get(args.replacementVehicleId);
+      if (!replacementVehicle || replacementVehicle.deletedAt !== undefined) {
+        throw new Error("vehicle_not_found");
+      }
+    } else if (args.newReplacementVehicle) {
+      const existing = await ctx.db
+        .query("operationalVehicles")
+        .withIndex("by_registration_plate", (q) =>
+          q.eq("registrationPlate", args.newReplacementVehicle!.registrationPlate),
+        )
+        .unique();
+      if (existing && existing.deletedAt === undefined) throw new Error("vehicle_exists");
+      if (existing) {
+        await ctx.db.patch(existing._id, {
+          ...args.newReplacementVehicle,
+          status: args.status === "planned" ? "reserved" : "rented",
+          deletedAt: undefined,
+          deletedBy: undefined,
+          updatedAt: now,
+        });
+        replacementVehicle = (await ctx.db.get(existing._id))!;
+      } else {
+        const replacementVehicleId = await ctx.db.insert("operationalVehicles", {
+          ...args.newReplacementVehicle,
+          status: args.status === "planned" ? "reserved" : "rented",
+          createdAt: now,
+          updatedAt: now,
+        });
+        replacementVehicle = (await ctx.db.get(replacementVehicleId))!;
+      }
+    }
+    if (!replacementVehicle || replacementVehicle._id === damagedVehicle._id) {
+      throw new Error("replacement_vehicle_required");
+    }
+    const assignmentId = args.status === "cancelled"
+      ? undefined
+      : await ensureDriverVehicleAssignment(ctx, actor._id, driver._id, replacementVehicle._id);
+    const replacementCaseId = await ctx.db.insert("vehicleReplacementCases", {
+      reference: args.reference,
+      customerId: customer._id,
+      driverId: driver._id,
+      damagedVehicleId: damagedVehicle._id,
+      replacementVehicleId: replacementVehicle._id,
+      reason: args.reason.trim(),
+      damagedMileage: args.damagedMileage,
+      status: args.status,
+      notes: args.notes,
+      assignmentId,
+      occurredAt: now,
+      createdBy: actor._id,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await Promise.all(
+      uploadedMedia.map((item) => ctx.db.patch(item._id, { replacementCaseId })),
+    );
+    if (args.status === "active" || args.status === "completed") {
+      await ctx.db.patch(damagedVehicle._id, { status: "maintenance", updatedAt: now });
+      await ctx.db.patch(replacementVehicle._id, { status: "rented", updatedAt: now });
+    } else if (args.status === "planned") {
+      await ctx.db.patch(replacementVehicle._id, { status: "reserved", updatedAt: now });
+    }
+    await audit(
+      ctx,
+      actor._id,
+      "vehicle_replacement.created",
+      "vehicleReplacementCase",
+      String(replacementCaseId),
+      `${args.reference} created for ${damagedVehicle.registrationPlate}`,
+      JSON.stringify({ customerId: String(customer._id), driverId: String(driver._id), replacementVehicleId: String(replacementVehicle._id), evidenceFiles: uploadedMedia.length }),
+    );
+    return { replacementCaseId, replacementVehicleId: replacementVehicle._id, reference: args.reference };
+  },
+});
+
+export const updateVehicleReplacementCase = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    replacementCaseId: v.id("vehicleReplacementCases"),
+    customerId: v.id("customers"),
+    driverId: v.id("customerDrivers"),
+    damagedVehicleId: v.id("operationalVehicles"),
+    replacementVehicleId: v.id("operationalVehicles"),
+    reason: v.string(),
+    damagedMileage: v.number(),
+    status: vehicleReplacementStatusValidator,
+    notes: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const [replacementCase, customer, driver, damagedVehicle, replacementVehicle] = await Promise.all([
+      ctx.db.get(args.replacementCaseId),
+      ctx.db.get(args.customerId),
+      ctx.db.get(args.driverId),
+      ctx.db.get(args.damagedVehicleId),
+      ctx.db.get(args.replacementVehicleId),
+    ]);
+    if (!replacementCase || replacementCase.deletedAt !== undefined) throw new Error("replacement_case_not_found");
+    if (!customer || customer.deletedAt !== undefined) throw new Error("customer_not_found");
+    if (!driver || driver.deletedAt !== undefined || driver.customerId !== customer._id) throw new Error("driver_customer_mismatch");
+    if (!damagedVehicle || damagedVehicle.deletedAt !== undefined || !replacementVehicle || replacementVehicle.deletedAt !== undefined) throw new Error("vehicle_not_found");
+    if (damagedVehicle._id === replacementVehicle._id || !args.reason.trim() || args.damagedMileage < 0) throw new Error("validation_failed");
+    if (
+      !(await customerHasVehicle(ctx, customer._id, damagedVehicle._id)) &&
+      !(await driverHasDirectVehicle(ctx, driver._id, damagedVehicle._id))
+    ) {
+      throw new Error("vehicle_customer_mismatch");
+    }
+    const assignmentChanged = replacementCase.driverId !== driver._id || replacementCase.replacementVehicleId !== replacementVehicle._id;
+    if ((assignmentChanged || args.status === "cancelled") && replacementCase.assignmentId) {
+      const oldAssignment = await ctx.db.get(replacementCase.assignmentId);
+      if (oldAssignment) await ctx.db.delete(oldAssignment._id);
+    }
+    let assignmentId = assignmentChanged ? undefined : replacementCase.assignmentId;
+    if (args.status !== "cancelled" && (!assignmentId || assignmentChanged)) {
+      assignmentId = await ensureDriverVehicleAssignment(ctx, actor._id, driver._id, replacementVehicle._id);
+    }
+    const now = Date.now();
+    await ctx.db.patch(replacementCase._id, {
+      customerId: customer._id,
+      driverId: driver._id,
+      damagedVehicleId: damagedVehicle._id,
+      replacementVehicleId: replacementVehicle._id,
+      reason: args.reason.trim(),
+      damagedMileage: args.damagedMileage,
+      status: args.status,
+      notes: args.notes,
+      assignmentId: args.status === "cancelled" ? undefined : assignmentId,
+      updatedAt: now,
+    });
+    if (args.status === "active" || args.status === "completed") {
+      await ctx.db.patch(damagedVehicle._id, { status: "maintenance", updatedAt: now });
+      await ctx.db.patch(replacementVehicle._id, { status: "rented", updatedAt: now });
+    } else if (args.status === "planned") {
+      await ctx.db.patch(replacementVehicle._id, { status: "reserved", updatedAt: now });
+    }
+    await audit(ctx, actor._id, "vehicle_replacement.updated", "vehicleReplacementCase", String(replacementCase._id), `${replacementCase.reference} updated`);
+    return null;
+  },
+});
+
+export const removeVehicleReplacementCase = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    replacementCaseId: v.id("vehicleReplacementCases"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const replacementCase = await ctx.db.get(args.replacementCaseId);
+    if (!replacementCase || replacementCase.deletedAt !== undefined) throw new Error("replacement_case_not_found");
+    const media = await ctx.db
+      .query("mediaAssets")
+      .withIndex("by_replacement_case_id", (q) => q.eq("replacementCaseId", replacementCase._id))
+      .take(5);
+    if (replacementCase.assignmentId) {
+      const assignment = await ctx.db.get(replacementCase.assignmentId);
+      if (assignment) await ctx.db.delete(assignment._id);
+    }
+    const now = Date.now();
+    await Promise.all(media.map((item) => ctx.db.patch(item._id, { status: "deleted", replacementCaseId: undefined })));
+    await ctx.db.patch(replacementCase._id, { assignmentId: undefined, deletedAt: now, deletedBy: actor._id, updatedAt: now });
+    await audit(ctx, actor._id, "vehicle_replacement.removed", "vehicleReplacementCase", String(replacementCase._id), `${replacementCase.reference} removed`, JSON.stringify({ evidenceFilesRemoved: media.length }));
+    return null;
+  },
+});
+
+export const createVehicleDocument = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    vehicleId: v.id("operationalVehicles"),
+    title: v.string(),
+    documentType: vehicleDocumentTypeValidator,
+    validUntil: v.optional(v.string()),
+    visibleToCustomer: v.boolean(),
+    uploadGroupId: v.string(),
+    mediaId: v.id("mediaAssets"),
+  },
+  returns: v.id("vehicleDocuments"),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const [vehicle, media] = await Promise.all([ctx.db.get(args.vehicleId), ctx.db.get(args.mediaId)]);
+    if (!vehicle || vehicle.deletedAt !== undefined) throw new Error("vehicle_not_found");
+    if (!args.title.trim()) throw new Error("validation_failed");
+    if (
+      !media ||
+      media.createdBy !== actor._id ||
+      media.uploadGroupId !== args.uploadGroupId ||
+      media.status !== "uploaded" ||
+      media.recordId !== undefined ||
+      media.driverId !== undefined ||
+      media.replacementCaseId !== undefined ||
+      media.vehicleDocumentId !== undefined ||
+      media.category !== "vehicle_document"
+    ) {
+      throw new Error("invalid_media");
+    }
+    const now = Date.now();
+    const vehicleDocumentId = await ctx.db.insert("vehicleDocuments", {
+      vehicleId: vehicle._id,
+      mediaId: media._id,
+      title: args.title.trim(),
+      documentType: args.documentType,
+      fileName: media.fileName,
+      contentType: media.contentType,
+      validUntil: args.validUntil,
+      visibleToCustomer: args.visibleToCustomer,
+      uploadedBy: actor._id,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await ctx.db.patch(media._id, { vehicleDocumentId });
+    await audit(ctx, actor._id, "vehicle_document.created", "vehicleDocument", String(vehicleDocumentId), `${args.title.trim()} added to ${vehicle.registrationPlate}`);
+    return vehicleDocumentId;
+  },
+});
+
+export const updateVehicleDocument = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    vehicleDocumentId: v.id("vehicleDocuments"),
+    title: v.string(),
+    documentType: vehicleDocumentTypeValidator,
+    validUntil: v.optional(v.string()),
+    visibleToCustomer: v.boolean(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const document = await ctx.db.get(args.vehicleDocumentId);
+    if (!document || document.deletedAt !== undefined) throw new Error("vehicle_document_not_found");
+    if (!args.title.trim()) throw new Error("validation_failed");
+    await ctx.db.patch(document._id, {
+      title: args.title.trim(),
+      documentType: args.documentType,
+      validUntil: args.validUntil,
+      visibleToCustomer: args.visibleToCustomer,
+      updatedAt: Date.now(),
+    });
+    await audit(ctx, actor._id, "vehicle_document.updated", "vehicleDocument", String(document._id), `${args.title.trim()} updated`);
+    return null;
+  },
+});
+
+export const removeVehicleDocument = internalMutation({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    vehicleDocumentId: v.id("vehicleDocuments"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const document = await ctx.db.get(args.vehicleDocumentId);
+    if (!document || document.deletedAt !== undefined) throw new Error("vehicle_document_not_found");
+    const media = await ctx.db.get(document.mediaId);
+    const now = Date.now();
+    if (media) await ctx.db.patch(media._id, { status: "deleted", vehicleDocumentId: undefined });
+    await ctx.db.patch(document._id, { deletedAt: now, deletedBy: actor._id, updatedAt: now });
+    await audit(ctx, actor._id, "vehicle_document.removed", "vehicleDocument", String(document._id), `${document.title} removed`);
+    return null;
+  },
+});
+
 export const createPendingMedia = internalMutation({
   args: {
     actorAccountId: v.id("portalAccounts"),
@@ -2448,6 +3036,8 @@ export const discardMediaUploadGroup = internalMutation({
         item.createdBy === actor._id &&
         item.recordId === undefined &&
         item.driverId === undefined &&
+        item.replacementCaseId === undefined &&
+        item.vehicleDocumentId === undefined &&
         item.status !== "deleted",
     );
     await Promise.all(removable.map((item) => ctx.db.patch(item._id, { status: "deleted" })));
@@ -2666,7 +3256,9 @@ export const createWorkflowRecord = internalMutation({
           item.uploadGroupId !== args.uploadGroupId ||
           item.status !== "uploaded" ||
           item.recordId !== undefined ||
-          item.driverId !== undefined,
+          item.driverId !== undefined ||
+          item.replacementCaseId !== undefined ||
+          item.vehicleDocumentId !== undefined,
       )
     ) {
       throw new Error("invalid_media");
@@ -3289,5 +3881,80 @@ export const getDriverMedia = internalQuery({
         captureSource: item.captureSource,
         sortOrder: item.sortOrder,
       }));
+  },
+});
+
+export const getReplacementMedia = internalQuery({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    replacementCaseId: v.id("vehicleReplacementCases"),
+  },
+  returns: v.array(
+    v.object({
+      id: v.id("mediaAssets"),
+      r2Key: v.string(),
+      fileName: v.string(),
+      contentType: v.string(),
+      category: mediaCategoryValidator,
+      slot: v.optional(v.string()),
+      captureSource: v.optional(captureSourceValidator),
+      sortOrder: v.optional(v.number()),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const replacementCase = await ctx.db.get(args.replacementCaseId);
+    if (!replacementCase || replacementCase.deletedAt !== undefined) throw new Error("replacement_case_not_found");
+    const media = await ctx.db
+      .query("mediaAssets")
+      .withIndex("by_replacement_case_id", (q) => q.eq("replacementCaseId", replacementCase._id))
+      .take(5);
+    return media
+      .filter((item) => item.status === "uploaded")
+      .map((item) => ({
+        id: item._id,
+        r2Key: item.r2Key,
+        fileName: item.fileName,
+        contentType: item.contentType,
+        category: item.category,
+        slot: item.slot,
+        captureSource: item.captureSource,
+        sortOrder: item.sortOrder,
+      }));
+  },
+});
+
+export const getVehicleDocumentMedia = internalQuery({
+  args: {
+    actorAccountId: v.id("portalAccounts"),
+    vehicleDocumentId: v.id("vehicleDocuments"),
+  },
+  returns: v.object({
+    id: v.id("mediaAssets"),
+    r2Key: v.string(),
+    fileName: v.string(),
+    contentType: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    const document = await ctx.db.get(args.vehicleDocumentId);
+    if (!document || document.deletedAt !== undefined) throw new Error("vehicle_document_not_found");
+    if (
+      actor.role !== "admin" &&
+      (!document.visibleToCustomer || !(await actorCanAccessVehicle(ctx, actor, document.vehicleId)))
+    ) {
+      throw new Error("forbidden");
+    }
+    const media = await ctx.db.get(document.mediaId);
+    if (!media || media.status !== "uploaded" || media.vehicleDocumentId !== document._id) {
+      throw new Error("vehicle_document_not_found");
+    }
+    return {
+      id: media._id,
+      r2Key: media.r2Key,
+      fileName: media.fileName,
+      contentType: media.contentType,
+    };
   },
 });

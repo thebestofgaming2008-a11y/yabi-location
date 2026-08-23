@@ -58,6 +58,8 @@ const allowedAccidentLiabilities = new Set(["at_fault", "not_at_fault"]);
 const allowedMaintenanceInterventionTypes = new Set<string>(maintenanceInterventionTypes);
 const allowedMaintenanceItemCodes = new Set<string>(maintenanceItemCodes);
 const allowedCaptureSources = new Set(["camera", "gallery", "signature"]);
+const allowedReplacementStatuses = new Set(["planned", "active", "completed", "cancelled"]);
+const allowedVehicleDocumentTypes = new Set(["registration", "insurance", "inspection", "maintenance", "contract", "other"]);
 const allowedMediaCategories = new Set([
   "vehicle_exterior",
   "vehicle_interior",
@@ -73,6 +75,8 @@ const allowedMediaCategories = new Set([
   "payment",
   "inspection",
   "driver_document",
+  "replacement",
+  "vehicle_document",
   "other",
 ]);
 const allowedReportCategories = new Set([
@@ -289,6 +293,11 @@ function safeError(error: unknown): string {
     "vehicle_not_found",
     "vehicle_exists",
     "vehicle_unavailable",
+    "vehicle_customer_mismatch",
+    "replacement_vehicle_required",
+    "replacement_case_not_found",
+    "vehicle_document_not_found",
+    "invalid_vat_number",
     "rental_not_found",
     "rental_mismatch",
     "rental_reference_exists",
@@ -610,6 +619,7 @@ export const portalAdmin = httpAction(async (ctx, request) => {
         actorAccountId: session.account.id,
         fullName,
         company: optionalString(body.company, 120),
+        companyVatNumber: optionalString(body.companyVatNumber, 40),
         email,
         phone,
         notes: optionalString(body.notes, 2000),
@@ -782,6 +792,158 @@ export const portalAdmin = httpAction(async (ctx, request) => {
           currentMileage,
           fuelPercent: boundedNumber(body.fuelPercent, 0, 100),
           notes: optionalString(body.notes, 2000),
+        });
+      }
+      return json({ ok: true }, 200, origin);
+    }
+
+    if (operation === "create_replacement_case") {
+      if (session.account.role !== "admin") throw new Error("forbidden");
+      const customerId = clean(body.customerId, 80);
+      const driverId = clean(body.driverId, 80);
+      const damagedVehicleId = clean(body.damagedVehicleId, 80);
+      const replacementSource = clean(body.replacementSource, 20);
+      const replacementVehicleId = optionalString(body.replacementVehicleId, 80);
+      const reason = clean(body.reason, 4000);
+      const status = clean(body.status, 20);
+      const uploadGroupId = clean(body.uploadGroupId, 80);
+      const damagedMileage = boundedNumber(body.damagedMileage, 0, 2_000_000);
+      const mediaIds = Array.isArray(body.mediaIds)
+        ? body.mediaIds.map((item) => clean(item, 80)).filter(Boolean).slice(0, 6)
+        : [];
+      if (
+        !customerId || !driverId || !damagedVehicleId || !reason || !uploadGroupId ||
+        damagedMileage === undefined || !allowedReplacementStatuses.has(status) ||
+        !["existing", "new"].includes(replacementSource) || mediaIds.length > 5 ||
+        (replacementSource === "existing" && !replacementVehicleId)
+      ) {
+        throw new Error("validation_failed");
+      }
+      let newReplacementVehicle:
+        | { registrationPlate: string; make: string; model: string; year: number; format: "l1h1" | "l2h2" | "l3h2"; color: string; vin?: string; currentMileage: number }
+        | undefined;
+      if (replacementSource === "new") {
+        const registrationPlate = normalizePlate(body.newRegistrationPlate);
+        const make = clean(body.newMake, 80);
+        const model = clean(body.newModel, 80);
+        const color = clean(body.newColor, 50);
+        const format = clean(body.newFormat, 10);
+        const year = boundedNumber(body.newYear, 1990, 2100);
+        const currentMileage = boundedNumber(body.newCurrentMileage, 0, 2_000_000);
+        if (!registrationPlate || !make || !model || !color || !allowedFormats.has(format) || year === undefined || currentMileage === undefined) {
+          throw new Error("validation_failed");
+        }
+        newReplacementVehicle = {
+          registrationPlate,
+          make,
+          model,
+          color,
+          year,
+          format: format as "l1h1" | "l2h2" | "l3h2",
+          vin: optionalString(body.newVin, 40),
+          currentMileage,
+        };
+      }
+      const reference = `VR-${new Date().getUTCFullYear()}-${base64Url(randomBytes(5)).toUpperCase().slice(0, 7)}`;
+      const result = await ctx.runMutation(internal.portal.createVehicleReplacementCase, {
+        actorAccountId: session.account.id,
+        reference,
+        customerId: customerId as Id<"customers">,
+        driverId: driverId as Id<"customerDrivers">,
+        damagedVehicleId: damagedVehicleId as Id<"operationalVehicles">,
+        replacementVehicleId: replacementSource === "existing" ? replacementVehicleId as Id<"operationalVehicles"> : undefined,
+        newReplacementVehicle,
+        reason,
+        damagedMileage,
+        status: status as "planned" | "active" | "completed" | "cancelled",
+        notes: optionalString(body.notes, 4000),
+        uploadGroupId,
+        mediaIds: mediaIds as Id<"mediaAssets">[],
+      });
+      return json({ ok: true, ...result }, 201, origin);
+    }
+
+    if (operation === "update_replacement_case" || operation === "remove_replacement_case") {
+      if (session.account.role !== "admin") throw new Error("forbidden");
+      const replacementCaseId = clean(body.replacementCaseId, 80);
+      if (!replacementCaseId) throw new Error("validation_failed");
+      if (operation === "remove_replacement_case") {
+        await ctx.runMutation(internal.portal.removeVehicleReplacementCase, {
+          actorAccountId: session.account.id,
+          replacementCaseId: replacementCaseId as Id<"vehicleReplacementCases">,
+        });
+      } else {
+        const customerId = clean(body.customerId, 80);
+        const driverId = clean(body.driverId, 80);
+        const damagedVehicleId = clean(body.damagedVehicleId, 80);
+        const replacementVehicleId = clean(body.replacementVehicleId, 80);
+        const reason = clean(body.reason, 4000);
+        const status = clean(body.status, 20);
+        const damagedMileage = boundedNumber(body.damagedMileage, 0, 2_000_000);
+        if (!customerId || !driverId || !damagedVehicleId || !replacementVehicleId || !reason || damagedMileage === undefined || !allowedReplacementStatuses.has(status)) {
+          throw new Error("validation_failed");
+        }
+        await ctx.runMutation(internal.portal.updateVehicleReplacementCase, {
+          actorAccountId: session.account.id,
+          replacementCaseId: replacementCaseId as Id<"vehicleReplacementCases">,
+          customerId: customerId as Id<"customers">,
+          driverId: driverId as Id<"customerDrivers">,
+          damagedVehicleId: damagedVehicleId as Id<"operationalVehicles">,
+          replacementVehicleId: replacementVehicleId as Id<"operationalVehicles">,
+          reason,
+          damagedMileage,
+          status: status as "planned" | "active" | "completed" | "cancelled",
+          notes: optionalString(body.notes, 4000),
+        });
+      }
+      return json({ ok: true }, 200, origin);
+    }
+
+    if (operation === "create_vehicle_document") {
+      if (session.account.role !== "admin") throw new Error("forbidden");
+      const vehicleId = clean(body.vehicleId, 80);
+      const title = clean(body.title, 160);
+      const documentType = clean(body.documentType, 30);
+      const uploadGroupId = clean(body.uploadGroupId, 80);
+      const mediaId = clean(body.mediaId, 80);
+      const validUntil = optionalString(body.validUntil, 10);
+      if (!vehicleId || !title || !uploadGroupId || !mediaId || !allowedVehicleDocumentTypes.has(documentType) || typeof body.visibleToCustomer !== "boolean" || (validUntil !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(validUntil))) {
+        throw new Error("validation_failed");
+      }
+      const vehicleDocumentId = await ctx.runMutation(internal.portal.createVehicleDocument, {
+        actorAccountId: session.account.id,
+        vehicleId: vehicleId as Id<"operationalVehicles">,
+        title,
+        documentType: documentType as "registration" | "insurance" | "inspection" | "maintenance" | "contract" | "other",
+        validUntil,
+        visibleToCustomer: body.visibleToCustomer,
+        uploadGroupId,
+        mediaId: mediaId as Id<"mediaAssets">,
+      });
+      return json({ ok: true, vehicleDocumentId }, 201, origin);
+    }
+
+    if (operation === "update_vehicle_document" || operation === "remove_vehicle_document") {
+      if (session.account.role !== "admin") throw new Error("forbidden");
+      const vehicleDocumentId = clean(body.vehicleDocumentId, 80);
+      if (!vehicleDocumentId) throw new Error("validation_failed");
+      if (operation === "remove_vehicle_document") {
+        await ctx.runMutation(internal.portal.removeVehicleDocument, {
+          actorAccountId: session.account.id,
+          vehicleDocumentId: vehicleDocumentId as Id<"vehicleDocuments">,
+        });
+      } else {
+        const title = clean(body.title, 160);
+        const documentType = clean(body.documentType, 30);
+        const validUntil = optionalString(body.validUntil, 10);
+        if (!title || !allowedVehicleDocumentTypes.has(documentType) || typeof body.visibleToCustomer !== "boolean" || (validUntil !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(validUntil))) throw new Error("validation_failed");
+        await ctx.runMutation(internal.portal.updateVehicleDocument, {
+          actorAccountId: session.account.id,
+          vehicleDocumentId: vehicleDocumentId as Id<"vehicleDocuments">,
+          title,
+          documentType: documentType as "registration" | "insurance" | "inspection" | "maintenance" | "contract" | "other",
+          validUntil,
+          visibleToCustomer: body.visibleToCustomer,
         });
       }
       return json({ ok: true }, 200, origin);
@@ -970,6 +1132,7 @@ export const portalProfile = httpAction(async (ctx, request) => {
         actorAccountId: session.account.id,
         fullName,
         company: optionalString(body.company, 120),
+        companyVatNumber: optionalString(body.companyVatNumber, 40),
         email,
         phone,
         address,
@@ -1233,9 +1396,11 @@ export const portalUpload = httpAction(async (ctx, request) => {
         | "maintenance"
         | "accident"
         | "payment"
-        | "inspection"
-        | "driver_document"
-        | "other",
+         | "inspection"
+         | "driver_document"
+         | "replacement"
+         | "vehicle_document"
+         | "other",
       expiresAt,
       slot: slot || undefined,
       captureSource: captureSource as "camera" | "gallery" | "signature" | undefined,
@@ -1514,6 +1679,61 @@ export const portalDriverMedia = httpAction(async (ctx, request) => {
       })),
     );
     return json({ ok: true, items, expiresAt }, 200, origin);
+  } catch (error) {
+    const code = safeError(error);
+    return json({ ok: false, error: code }, statusFor(code), origin);
+  }
+});
+
+export const portalReplacementMedia = httpAction(async (ctx, request) => {
+  const origin = originFor(request);
+  if (origin === "") return json({ ok: false, error: "origin_not_allowed" }, 403, null);
+  try {
+    const session = await requireSession(ctx, request);
+    const workerUrl = process.env.MEDIA_WORKER_URL?.replace(/\/+$/, "");
+    if (!workerUrl) throw new Error("media_service_unavailable");
+    const body = await parseBody(request);
+    const replacementCaseId = clean(body.replacementCaseId, 80);
+    if (!replacementCaseId) throw new Error("validation_failed");
+    const media = await ctx.runQuery(internal.portal.getReplacementMedia, {
+      actorAccountId: session.account.id,
+      replacementCaseId: replacementCaseId as Id<"vehicleReplacementCases">,
+    });
+    const expiresAt = Date.now() + 10 * 60 * 1000;
+    const items = await Promise.all(media.map(async (item) => ({
+      id: item.id,
+      fileName: item.fileName,
+      contentType: item.contentType,
+      category: item.category,
+      slot: item.slot,
+      captureSource: item.captureSource,
+      sortOrder: item.sortOrder,
+      url: `${workerUrl}/object/${encodeURIComponent(item.r2Key)}?token=${encodeURIComponent(await mediaToken({ op: "get", key: item.r2Key, exp: expiresAt }))}`,
+    })));
+    return json({ ok: true, items, expiresAt }, 200, origin);
+  } catch (error) {
+    const code = safeError(error);
+    return json({ ok: false, error: code }, statusFor(code), origin);
+  }
+});
+
+export const portalVehicleDocumentMedia = httpAction(async (ctx, request) => {
+  const origin = originFor(request);
+  if (origin === "") return json({ ok: false, error: "origin_not_allowed" }, 403, null);
+  try {
+    const session = await requireSession(ctx, request);
+    const workerUrl = process.env.MEDIA_WORKER_URL?.replace(/\/+$/, "");
+    if (!workerUrl) throw new Error("media_service_unavailable");
+    const body = await parseBody(request);
+    const vehicleDocumentId = clean(body.vehicleDocumentId, 80);
+    if (!vehicleDocumentId) throw new Error("validation_failed");
+    const media = await ctx.runQuery(internal.portal.getVehicleDocumentMedia, {
+      actorAccountId: session.account.id,
+      vehicleDocumentId: vehicleDocumentId as Id<"vehicleDocuments">,
+    });
+    const expiresAt = Date.now() + 10 * 60 * 1000;
+    const url = `${workerUrl}/object/${encodeURIComponent(media.r2Key)}?token=${encodeURIComponent(await mediaToken({ op: "get", key: media.r2Key, exp: expiresAt }))}`;
+    return json({ ok: true, item: { id: media.id, fileName: media.fileName, contentType: media.contentType, url }, expiresAt }, 200, origin);
   } catch (error) {
     const code = safeError(error);
     return json({ ok: false, error: code }, statusFor(code), origin);

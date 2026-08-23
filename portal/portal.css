@@ -1261,3 +1261,81 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
   }
   .record-vehicle-identity { gap: .4rem; }
 }
+
+/* Vehicle replacement cases and customer-visible fleet documents */
+.document-count-button {
+  min-width: 116px;
+  padding: .48rem .62rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  border: 1px solid #d4e0ec;
+  background: #fbfdff;
+  color: var(--blue);
+  text-align: left;
+  cursor: pointer;
+}
+.document-count-button:hover { border-color: var(--blue); background: var(--blue-light); }
+.document-count-button strong {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: var(--navy);
+  color: var(--lime);
+  font: 800 .7rem var(--display);
+}
+.document-count-button span { font-size: .62rem; font-weight: 700; line-height: 1.25; }
+.new-replacement-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #cbdbea;
+  border-left: 4px solid var(--lime);
+  background: #f8fbff;
+}
+.new-replacement-panel h4 {
+  margin: 0 0 1rem;
+  color: var(--navy);
+  font: 800 .82rem var(--display);
+  text-transform: uppercase;
+}
+.record-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+.record-detail-grid .field { margin: 0; }
+.vehicle-document-manager .form-submit-row.is-top { margin: 0 0 1rem; justify-content: flex-end; }
+.vehicle-document-list { display: grid; gap: .7rem; }
+.vehicle-document-card {
+  padding: .8rem;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .8rem;
+  border: 1px solid #d4e0ec;
+  background: var(--white);
+}
+.vehicle-document-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: var(--navy);
+  color: var(--lime);
+  font: 800 .61rem var(--display);
+}
+.vehicle-document-card > div:nth-child(2) { min-width: 0; display: grid; gap: .18rem; }
+.vehicle-document-card strong { color: var(--navy); overflow-wrap: anywhere; }
+.vehicle-document-card span,
+.vehicle-document-card small { color: var(--muted); font-size: .62rem; }
+.document-viewer { display: grid; gap: 1rem; }
+.document-viewer > a { justify-self: start; text-decoration: none; }
+.document-viewer iframe { width: 100%; min-height: 62vh; border: 1px solid var(--line); background: var(--surface); }
+.document-image-viewer { margin: 0; display: grid; place-items: center; }
+.document-image-viewer img { max-width: 100%; max-height: 68vh; object-fit: contain; border: 1px solid var(--line); }
+
+@media (max-width: 640px) {
+  .record-detail-grid { grid-template-columns: 1fr; }
+  .vehicle-document-card { grid-template-columns: 40px minmax(0, 1fr); }
+  .vehicle-document-card .table-actions { grid-column: 1 / -1; width: 100%; }
+  .vehicle-document-card .table-actions .icon-button { flex: 1; }
+  .document-viewer iframe { min-height: 52vh; }
+}

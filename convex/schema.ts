@@ -96,6 +96,22 @@ export const maintenanceInterventionTypeValidator = v.union(
   v.literal("technical_inspection"),
 );
 
+export const vehicleReplacementStatusValidator = v.union(
+  v.literal("planned"),
+  v.literal("active"),
+  v.literal("completed"),
+  v.literal("cancelled"),
+);
+
+export const vehicleDocumentTypeValidator = v.union(
+  v.literal("registration"),
+  v.literal("insurance"),
+  v.literal("inspection"),
+  v.literal("maintenance"),
+  v.literal("contract"),
+  v.literal("other"),
+);
+
 export const captureSourceValidator = v.union(
   v.literal("camera"),
   v.literal("gallery"),
@@ -117,6 +133,8 @@ export const mediaCategoryValidator = v.union(
   v.literal("payment"),
   v.literal("inspection"),
   v.literal("driver_document"),
+  v.literal("replacement"),
+  v.literal("vehicle_document"),
   v.literal("other"),
 );
 
@@ -471,6 +489,51 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_deleted_at", ["deletedAt"]),
 
+  vehicleReplacementCases: defineTable({
+    reference: v.string(),
+    customerId: v.id("customers"),
+    driverId: v.id("customerDrivers"),
+    damagedVehicleId: v.id("operationalVehicles"),
+    replacementVehicleId: v.id("operationalVehicles"),
+    reason: v.string(),
+    damagedMileage: v.number(),
+    status: vehicleReplacementStatusValidator,
+    notes: v.optional(v.string()),
+    assignmentId: v.optional(v.id("driverVehicleAssignments")),
+    occurredAt: v.number(),
+    createdBy: v.id("portalAccounts"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    deletedAt: v.optional(v.number()),
+    deletedBy: v.optional(v.id("portalAccounts")),
+  })
+    .index("by_reference", ["reference"])
+    .index("by_customer_id", ["customerId"])
+    .index("by_driver_id", ["driverId"])
+    .index("by_damaged_vehicle_id", ["damagedVehicleId"])
+    .index("by_replacement_vehicle_id", ["replacementVehicleId"])
+    .index("by_status", ["status"])
+    .index("by_deleted_at", ["deletedAt"]),
+
+  vehicleDocuments: defineTable({
+    vehicleId: v.id("operationalVehicles"),
+    mediaId: v.id("mediaAssets"),
+    title: v.string(),
+    documentType: vehicleDocumentTypeValidator,
+    fileName: v.string(),
+    contentType: v.string(),
+    validUntil: v.optional(v.string()),
+    visibleToCustomer: v.boolean(),
+    uploadedBy: v.id("portalAccounts"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    deletedAt: v.optional(v.number()),
+    deletedBy: v.optional(v.id("portalAccounts")),
+  })
+    .index("by_vehicle_id", ["vehicleId"])
+    .index("by_media_id", ["mediaId"])
+    .index("by_deleted_at", ["deletedAt"]),
+
   workflowRecords: defineTable({
     reference: v.string(),
     type: workflowTypeValidator,
@@ -554,6 +617,8 @@ export default defineSchema({
     uploadGroupId: v.string(),
     recordId: v.optional(v.id("workflowRecords")),
     driverId: v.optional(v.id("customerDrivers")),
+    replacementCaseId: v.optional(v.id("vehicleReplacementCases")),
+    vehicleDocumentId: v.optional(v.id("vehicleDocuments")),
     createdBy: v.id("portalAccounts"),
     fileName: v.string(),
     contentType: v.string(),
@@ -576,6 +641,8 @@ export default defineSchema({
     .index("by_upload_group_id", ["uploadGroupId"])
     .index("by_record_id", ["recordId"])
     .index("by_driver_id", ["driverId"])
+    .index("by_replacement_case_id", ["replacementCaseId"])
+    .index("by_vehicle_document_id", ["vehicleDocumentId"])
     .index("by_created_by", ["createdBy"])
     .index("by_status", ["status"]),
 
