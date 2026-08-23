@@ -23,6 +23,18 @@ const allowedContentTypes = new Set([
 ]);
 const maximumUploadSize = 20_000_000;
 
+function pdfFrameAncestors(env: Env): string {
+  const configuredOrigins = env.ALLOWED_ORIGINS.split(",").flatMap((value) => {
+    try {
+      return [new URL(value.trim()).origin];
+    } catch {
+      return [];
+    }
+  });
+  return [...new Set([...configuredOrigins, "https://*.yabi-location.pages.dev"])]
+    .join(" ");
+}
+
 function base64UrlBytes(value: string): Uint8Array {
   const padded = value.replace(/-/g, "+").replace(/_/g, "/");
   const binary = atob(padded + "=".repeat((4 - (padded.length % 4)) % 4));
@@ -193,7 +205,19 @@ async function handleObject(request: Request, env: Env): Promise<Response> {
     object.writeHttpMetadata(headers);
     headers.set("ETag", object.httpEtag);
     headers.set("Cache-Control", "private, max-age=300");
-    headers.set("Content-Security-Policy", "default-src 'none'");
+    const contentType = (headers.get("Content-Type") ?? "")
+      .split(";")[0]
+      .trim()
+      .toLowerCase();
+    if (contentType === "application/pdf") {
+      headers.set("Content-Disposition", "inline");
+      headers.set(
+        "Content-Security-Policy",
+        `frame-ancestors ${pdfFrameAncestors(env)}`,
+      );
+    } else {
+      headers.set("Content-Security-Policy", "default-src 'none'");
+    }
     return new Response(object.body, { status: 200, headers });
   }
 
