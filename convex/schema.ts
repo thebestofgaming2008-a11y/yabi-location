@@ -497,6 +497,7 @@ export default defineSchema({
     replacementVehicleId: v.id("operationalVehicles"),
     reason: v.string(),
     damagedMileage: v.number(),
+    replacementMileage: v.optional(v.number()),
     status: vehicleReplacementStatusValidator,
     notes: v.optional(v.string()),
     assignmentId: v.optional(v.id("driverVehicleAssignments")),

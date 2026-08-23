@@ -526,6 +526,7 @@ const translations = {
     "Boss / driver": "Responsable / chauffeur",
     "Damaged vehicle": "Véhicule endommagé",
     "Damaged vehicle mileage": "Kilométrage du véhicule endommagé",
+    "Replacement vehicle mileage": "Kilométrage du véhicule de remplacement",
     "Reason for replacement": "Motif du remplacement",
     "Replacement vehicle": "Véhicule de remplacement",
     "Replacement source": "Origine du véhicule de remplacement",
@@ -575,6 +576,7 @@ const translations = {
     "A Belgian VAT number is required for a company and must be valid.": "Un numéro de TVA belge valide est obligatoire pour une entreprise.",
     "The selected vehicle is not linked to this customer or driver.": "Le véhicule sélectionné n’est pas lié à ce client ou à ce chauffeur.",
     "Choose a different replacement vehicle.": "Choisissez un autre véhicule de remplacement.",
+    "That replacement vehicle is no longer free. Choose another available fleet vehicle.": "Ce véhicule de remplacement n’est plus disponible. Choisissez un autre véhicule libre de la flotte.",
     "This replacement case no longer exists.": "Ce dossier de remplacement n’existe plus.",
     "This vehicle document no longer exists.": "Ce document du véhicule n’existe plus.",
     "A vehicle with this registration plate already exists.": "Un véhicule avec cette plaque d’immatriculation existe déjà.",
@@ -1103,6 +1105,7 @@ const translations = {
     "Boss / driver": "Zaakvoerder / chauffeur",
     "Damaged vehicle": "Beschadigd voertuig",
     "Damaged vehicle mileage": "Kilometerstand beschadigd voertuig",
+    "Replacement vehicle mileage": "Kilometerstand vervangvoertuig",
     "Reason for replacement": "Reden van vervanging",
     "Replacement vehicle": "Vervangvoertuig",
     "Replacement source": "Bron van het vervangvoertuig",
@@ -1152,6 +1155,7 @@ const translations = {
     "A Belgian VAT number is required for a company and must be valid.": "Een geldig Belgisch btw-nummer is verplicht voor een bedrijf.",
     "The selected vehicle is not linked to this customer or driver.": "Het geselecteerde voertuig is niet aan deze klant of chauffeur gekoppeld.",
     "Choose a different replacement vehicle.": "Kies een ander vervangvoertuig.",
+    "That replacement vehicle is no longer free. Choose another available fleet vehicle.": "Dit vervangvoertuig is niet meer vrij. Kies een ander beschikbaar voertuig uit de vloot.",
     "This replacement case no longer exists.": "Dit vervangingsdossier bestaat niet meer.",
     "This vehicle document no longer exists.": "Dit voertuigdocument bestaat niet meer.",
     "A vehicle with this registration plate already exists.": "Er bestaat al een voertuig met deze nummerplaat.",
@@ -1603,6 +1607,7 @@ function messageFor(error) {
     invalid_vat_number: "A Belgian VAT number is required for a company and must be valid.",
     vehicle_customer_mismatch: "The selected vehicle is not linked to this customer or driver.",
     replacement_vehicle_required: "Choose a different replacement vehicle.",
+    replacement_vehicle_unavailable: "That replacement vehicle is no longer free. Choose another available fleet vehicle.",
     replacement_case_not_found: "This replacement case no longer exists.",
     vehicle_document_not_found: "This vehicle document no longer exists.",
     vehicle_exists: "A vehicle with this registration plate already exists.",
@@ -1989,12 +1994,33 @@ function replacementStatusOptions() {
   return [["planned", "Planned"], ["active", "Active"], ["completed", "Completed"], ["cancelled", "Cancelled"]];
 }
 
-function vehicleSelectOptions(vehicles = state.data.vehicles) {
+function vehicleSelectOptions(vehicles = state.data.vehicles, showMileage = false) {
   return vehicles.map((vehicle) => [
     vehicle.id,
-    `${vehicle.registrationPlate} · ${vehicle.make} ${vehicle.model}`,
+    `${vehicle.registrationPlate} · ${vehicle.make} ${vehicle.model}${showMileage ? ` · ${Number(vehicle.currentMileage).toLocaleString(languageLocales[state.language])} km` : ""}`,
     vehicleBrandMark(vehicle.make, "vehicle-brand-mark is-select"),
   ]);
+}
+
+function freeReplacementVehicles(damagedVehicleId = "", currentReplacementVehicleId = "") {
+  const committedRentalVehicleIds = new Set(
+    (state.data.rentals || [])
+      .filter((rental) => ["draft", "scheduled", "active"].includes(rental.status))
+      .map((rental) => rental.vehicleId),
+  );
+  const committedReplacementVehicleIds = new Set(
+    (state.data.vehicleReplacements || [])
+      .filter((replacementCase) => replacementCase.status !== "cancelled")
+      .map((replacementCase) => replacementCase.replacementVehicleId),
+  );
+  return (state.data.vehicles || []).filter(
+    (vehicle) =>
+      vehicle.id !== damagedVehicleId &&
+      (vehicle.id === currentReplacementVehicleId ||
+        (vehicle.status === "available" &&
+          !committedRentalVehicleIds.has(vehicle.id) &&
+          !committedReplacementVehicleIds.has(vehicle.id))),
+  );
 }
 
 function renderReplacements() {
@@ -2009,11 +2035,12 @@ function renderReplacements() {
       <td><strong>${clean(customer?.company || customer?.fullName || "—")}</strong><small>${clean(driver?.fullName || "—")}</small></td>
       <td>${damaged ? `<span class="vehicle-table-identity is-inline">${vehicleBrandMark(damaged.make, "vehicle-brand-mark is-compact")}<span>${clean(damaged.registrationPlate)}</span></span>` : "—"}</td>
       <td>${replacement ? `<span class="vehicle-table-identity is-inline">${vehicleBrandMark(replacement.make, "vehicle-brand-mark is-compact")}<span>${clean(replacement.registrationPlate)}</span></span>` : "—"}</td>
-      <td>${Number(item.damagedMileage).toLocaleString(languageLocales[state.language])} km</td><td>${badge(item.status)}</td>
+      <td>${Number(item.damagedMileage).toLocaleString(languageLocales[state.language])} km</td>
+      <td>${Number(item.replacementMileage ?? replacement?.currentMileage ?? 0).toLocaleString(languageLocales[state.language])} km</td><td>${badge(item.status)}</td>
       <td><div class="table-actions"><button class="icon-button" data-action="view-replacement-case" data-id="${item.id}">View</button><button class="icon-button" data-action="edit-replacement-case" data-id="${item.id}">Edit</button><button class="icon-button is-danger" data-action="remove-replacement-case" data-id="${item.id}">Remove</button></div></td></tr>`;
   }).join("");
   el.view.innerHTML = `${header('<button class="primary-button" data-action="create-replacement-case">Create replacement case</button>')}
-    ${cases.length ? table(["Reference", "Boss / driver", "Damaged vehicle", "Replacement vehicle", "Mileage", "Status", ""], rows) : empty("No replacement cases", "Create a replacement case when a damaged vehicle must be exchanged.", '<button class="primary-button" data-action="create-replacement-case">Create replacement case</button>')}`;
+    ${cases.length ? table(["Reference", "Boss / driver", "Damaged vehicle", "Replacement vehicle", "Damaged vehicle mileage", "Replacement vehicle mileage", "Status", ""], rows) : empty("No replacement cases", "Create a replacement case when a damaged vehicle must be exchanged.", '<button class="primary-button" data-action="create-replacement-case">Create replacement case</button>')}`;
 }
 
 function vehiclesForReplacementCustomer(customerId, driverId = "") {
@@ -2049,10 +2076,19 @@ function bindReplacementRelationships(form, selected = {}) {
       true,
       selectedVehicleId,
     );
-    const replacementWrap = form.querySelector("[data-existing-replacement]");
+    const replacementWrap = form.querySelector("[data-existing-replacement-select]");
     const rebuildReplacement = () => {
       if (!replacementWrap) return;
-      replaceCustomSelect(replacementWrap, "Replacement vehicle", "replacementVehicleId", vehicleSelectOptions(state.data.vehicles.filter((vehicle) => vehicle.id !== damagedInput.value)), true);
+      const currentReplacementVehicleId = selected.replacementVehicleId || "";
+      const selectedReplacementVehicleId = replacementWrap.querySelector('[name="replacementVehicleId"]')?.value || currentReplacementVehicleId;
+      replaceCustomSelect(
+        replacementWrap,
+        "Replacement vehicle",
+        "replacementVehicleId",
+        vehicleSelectOptions(freeReplacementVehicles(damagedInput.value, currentReplacementVehicleId), true),
+        true,
+        selectedReplacementVehicleId,
+      );
     };
     damagedInput.addEventListener("change", rebuildReplacement);
     rebuildReplacement();
@@ -2117,7 +2153,7 @@ function createReplacementCase() {
       ${replacementEvidenceFields()}
       <section class="form-section"><h3>${clean(tr("Replacement vehicle"))}</h3><div class="form-grid">
         ${select("Replacement source", "replacementSource", [["existing", "Existing fleet vehicle"], ["new", "Add a new vehicle"]], true)}
-        <div data-existing-replacement>${select("Replacement vehicle", "replacementVehicleId", vehicleSelectOptions(), true)}</div>
+        <div data-existing-replacement><div data-existing-replacement-select>${select("Replacement vehicle", "replacementVehicleId", vehicleSelectOptions(freeReplacementVehicles(), true), true)}</div></div>
         ${select("Replacement status", "status", [["planned", "Planned"], ["active", "Active"]], true)}
       </div><div class="new-replacement-panel" data-new-replacement hidden><h4>${clean(tr("New replacement vehicle"))}</h4><div class="form-grid">
         ${field("Licence plate", "newRegistrationPlate", "", false, "text", "data-new-required")}${field("Make", "newMake", "", false, "text", "data-new-required")}
@@ -2177,6 +2213,7 @@ async function viewReplacementCase(id) {
       ["Damaged vehicle", damaged ? `${damaged.registrationPlate} · ${damaged.make} ${damaged.model}` : ""],
       ["Damaged vehicle mileage", `${Number(item.damagedMileage).toLocaleString(languageLocales[state.language])} km`],
       ["Replacement vehicle", replacement ? `${replacement.registrationPlate} · ${replacement.make} ${replacement.model}` : ""],
+      ["Replacement vehicle mileage", `${Number(item.replacementMileage ?? replacement?.currentMileage ?? 0).toLocaleString(languageLocales[state.language])} km`],
       ["Replacement status", tr(item.status)], ["Reason for replacement", item.reason], ["Internal notes", item.notes],
       ["Server date and time", date(item.occurredAt, true)],
     ].filter(([, value]) => value);
@@ -2203,7 +2240,7 @@ function editReplacementCase(id) {
     content: `<form class="portal-form"><section class="form-section"><div class="form-grid">
       ${select("Boss / customer", "customerId", state.data.customers.map((customer) => [customer.id, customer.company || customer.fullName]), true)}
       <div data-replacement-driver>${select("Driver", "driverId", [], true)}</div><div data-replacement-damaged>${select("Damaged vehicle", "damagedVehicleId", [], true)}</div>
-      ${select("Replacement vehicle", "replacementVehicleId", vehicleSelectOptions(), true)}${field("Damaged vehicle mileage", "damagedMileage", item.damagedMileage, true, "number", 'min="0" max="2000000"')}
+      <div data-existing-replacement><div data-existing-replacement-select>${select("Replacement vehicle", "replacementVehicleId", vehicleSelectOptions(freeReplacementVehicles(item.damagedVehicleId, item.replacementVehicleId), true), true)}</div></div>${field("Damaged vehicle mileage", "damagedMileage", item.damagedMileage, true, "number", 'min="0" max="2000000"')}
       ${select("Replacement status", "status", replacementStatusOptions(), true)}</div>
       ${textareaField("Reason for replacement", "reason", item.reason, true)}${textareaField("Internal notes", "notes", item.notes || "")}</section></form>`,
     handler: async (data) => {

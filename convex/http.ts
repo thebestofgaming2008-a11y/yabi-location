@@ -398,6 +398,8 @@ for (const path of [
   "/api/portal/workflows",
   "/api/portal/uploads",
   "/api/portal/record-media",
+  "/api/portal/replacement-media",
+  "/api/portal/vehicle-document-media",
   "/api/portal/bootstrap",
   "/api/portal/applications/start",
   "/api/portal/applications/upload",

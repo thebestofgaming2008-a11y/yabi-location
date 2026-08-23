@@ -143,6 +143,7 @@ const vehicleReplacementPublicValidator = v.object({
   replacementVehicleId: v.id("operationalVehicles"),
   reason: v.string(),
   damagedMileage: v.number(),
+  replacementMileage: v.optional(v.number()),
   status: vehicleReplacementStatusValidator,
   notes: v.optional(v.string()),
   occurredAt: v.number(),
@@ -385,6 +386,7 @@ function publicVehicleReplacement(replacement: Doc<"vehicleReplacementCases">) {
     replacementVehicleId: replacement.replacementVehicleId,
     reason: replacement.reason,
     damagedMileage: replacement.damagedMileage,
+    replacementMileage: replacement.replacementMileage,
     status: replacement.status,
     notes: replacement.notes,
     occurredAt: replacement.occurredAt,
@@ -533,6 +535,66 @@ async function driverHasDirectVehicle(
     )
     .unique();
   return assignment !== null;
+}
+
+async function vehicleHasOpenCommitments(
+  ctx: QueryCtx | MutationCtx,
+  vehicleId: Id<"operationalVehicles">,
+  excludedReplacementCaseId?: Id<"vehicleReplacementCases">,
+): Promise<boolean> {
+  const [rentals, replacementCases] = await Promise.all([
+    ctx.db
+      .query("rentals")
+      .withIndex("by_vehicle_id", (q) => q.eq("vehicleId", vehicleId))
+      .take(100),
+    ctx.db
+      .query("vehicleReplacementCases")
+      .withIndex("by_replacement_vehicle_id", (q) =>
+        q.eq("replacementVehicleId", vehicleId),
+      )
+      .take(100),
+  ]);
+  return (
+    rentals.some(
+      (rental) =>
+        rental.deletedAt === undefined &&
+        ["draft", "scheduled", "active"].includes(rental.status),
+    ) ||
+    replacementCases.some(
+      (replacementCase) =>
+        replacementCase._id !== excludedReplacementCaseId &&
+        replacementCase.deletedAt === undefined &&
+        replacementCase.status !== "cancelled",
+    )
+  );
+}
+
+async function replacementVehicleIsFree(
+  ctx: QueryCtx | MutationCtx,
+  vehicle: Doc<"operationalVehicles">,
+  excludedReplacementCaseId?: Id<"vehicleReplacementCases">,
+): Promise<boolean> {
+  return (
+    vehicle.deletedAt === undefined &&
+    vehicle.status === "available" &&
+    !(await vehicleHasOpenCommitments(ctx, vehicle._id, excludedReplacementCaseId))
+  );
+}
+
+async function releaseReplacementVehicleIfUnused(
+  ctx: MutationCtx,
+  vehicle: Doc<"operationalVehicles"> | null,
+  excludedReplacementCaseId: Id<"vehicleReplacementCases">,
+  now: number,
+): Promise<void> {
+  if (
+    vehicle &&
+    vehicle.deletedAt === undefined &&
+    ["reserved", "rented"].includes(vehicle.status) &&
+    !(await vehicleHasOpenCommitments(ctx, vehicle._id, excludedReplacementCaseId))
+  ) {
+    await ctx.db.patch(vehicle._id, { status: "available", updatedAt: now });
+  }
 }
 
 async function actorCanAccessVehicle(
@@ -2684,6 +2746,9 @@ export const createVehicleReplacementCase = internalMutation({
       if (!replacementVehicle || replacementVehicle.deletedAt !== undefined) {
         throw new Error("vehicle_not_found");
       }
+      if (!(await replacementVehicleIsFree(ctx, replacementVehicle))) {
+        throw new Error("replacement_vehicle_unavailable");
+      }
     } else if (args.newReplacementVehicle) {
       const existing = await ctx.db
         .query("operationalVehicles")
@@ -2692,10 +2757,16 @@ export const createVehicleReplacementCase = internalMutation({
         )
         .unique();
       if (existing && existing.deletedAt === undefined) throw new Error("vehicle_exists");
+      const replacementVehicleStatus =
+        args.status === "planned"
+          ? "reserved"
+          : args.status === "cancelled"
+            ? "available"
+            : "rented";
       if (existing) {
         await ctx.db.patch(existing._id, {
           ...args.newReplacementVehicle,
-          status: args.status === "planned" ? "reserved" : "rented",
+          status: replacementVehicleStatus,
           deletedAt: undefined,
           deletedBy: undefined,
           updatedAt: now,
@@ -2704,7 +2775,7 @@ export const createVehicleReplacementCase = internalMutation({
       } else {
         const replacementVehicleId = await ctx.db.insert("operationalVehicles", {
           ...args.newReplacementVehicle,
-          status: args.status === "planned" ? "reserved" : "rented",
+          status: replacementVehicleStatus,
           createdAt: now,
           updatedAt: now,
         });
@@ -2725,6 +2796,7 @@ export const createVehicleReplacementCase = internalMutation({
       replacementVehicleId: replacementVehicle._id,
       reason: args.reason.trim(),
       damagedMileage: args.damagedMileage,
+      replacementMileage: replacementVehicle.currentMileage,
       status: args.status,
       notes: args.notes,
       assignmentId,
@@ -2790,6 +2862,13 @@ export const updateVehicleReplacementCase = internalMutation({
     ) {
       throw new Error("vehicle_customer_mismatch");
     }
+    const replacementVehicleChanged = replacementCase.replacementVehicleId !== replacementVehicle._id;
+    if (
+      replacementVehicleChanged &&
+      !(await replacementVehicleIsFree(ctx, replacementVehicle, replacementCase._id))
+    ) {
+      throw new Error("replacement_vehicle_unavailable");
+    }
     const assignmentChanged = replacementCase.driverId !== driver._id || replacementCase.replacementVehicleId !== replacementVehicle._id;
     if ((assignmentChanged || args.status === "cancelled") && replacementCase.assignmentId) {
       const oldAssignment = await ctx.db.get(replacementCase.assignmentId);
@@ -2800,6 +2879,9 @@ export const updateVehicleReplacementCase = internalMutation({
       assignmentId = await ensureDriverVehicleAssignment(ctx, actor._id, driver._id, replacementVehicle._id);
     }
     const now = Date.now();
+    const previousReplacementVehicle = replacementVehicleChanged
+      ? await ctx.db.get(replacementCase.replacementVehicleId)
+      : null;
     await ctx.db.patch(replacementCase._id, {
       customerId: customer._id,
       driverId: driver._id,
@@ -2807,6 +2889,9 @@ export const updateVehicleReplacementCase = internalMutation({
       replacementVehicleId: replacementVehicle._id,
       reason: args.reason.trim(),
       damagedMileage: args.damagedMileage,
+      replacementMileage: replacementVehicleChanged
+        ? replacementVehicle.currentMileage
+        : replacementCase.replacementMileage ?? replacementVehicle.currentMileage,
       status: args.status,
       notes: args.notes,
       assignmentId: args.status === "cancelled" ? undefined : assignmentId,
@@ -2817,6 +2902,21 @@ export const updateVehicleReplacementCase = internalMutation({
       await ctx.db.patch(replacementVehicle._id, { status: "rented", updatedAt: now });
     } else if (args.status === "planned") {
       await ctx.db.patch(replacementVehicle._id, { status: "reserved", updatedAt: now });
+    } else if (args.status === "cancelled") {
+      await releaseReplacementVehicleIfUnused(
+        ctx,
+        replacementVehicle,
+        replacementCase._id,
+        now,
+      );
+    }
+    if (previousReplacementVehicle) {
+      await releaseReplacementVehicleIfUnused(
+        ctx,
+        previousReplacementVehicle,
+        replacementCase._id,
+        now,
+      );
     }
     await audit(ctx, actor._id, "vehicle_replacement.updated", "vehicleReplacementCase", String(replacementCase._id), `${replacementCase.reference} updated`);
     return null;
@@ -2843,8 +2943,15 @@ export const removeVehicleReplacementCase = internalMutation({
       if (assignment) await ctx.db.delete(assignment._id);
     }
     const now = Date.now();
+    const replacementVehicle = await ctx.db.get(replacementCase.replacementVehicleId);
     await Promise.all(media.map((item) => ctx.db.patch(item._id, { status: "deleted", replacementCaseId: undefined })));
     await ctx.db.patch(replacementCase._id, { assignmentId: undefined, deletedAt: now, deletedBy: actor._id, updatedAt: now });
+    await releaseReplacementVehicleIfUnused(
+      ctx,
+      replacementVehicle,
+      replacementCase._id,
+      now,
+    );
     await audit(ctx, actor._id, "vehicle_replacement.removed", "vehicleReplacementCase", String(replacementCase._id), `${replacementCase.reference} removed`, JSON.stringify({ evidenceFilesRemoved: media.length }));
     return null;
   },

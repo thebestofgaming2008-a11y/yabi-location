@@ -295,6 +295,7 @@ function safeError(error: unknown): string {
     "vehicle_unavailable",
     "vehicle_customer_mismatch",
     "replacement_vehicle_required",
+    "replacement_vehicle_unavailable",
     "replacement_case_not_found",
     "vehicle_document_not_found",
     "invalid_vat_number",
@@ -340,6 +341,7 @@ function safeError(error: unknown): string {
 function statusFor(error: string): number {
   if (error === "unauthorized") return 401;
   if (error === "forbidden" || error === "forbidden_workflow") return 403;
+  if (error === "replacement_vehicle_unavailable") return 409;
   if (error === "payload_too_large") return 413;
   if (error === "invalid_content_type") return 415;
   if (error.endsWith("_unavailable") || error.endsWith("_not_configured")) {
