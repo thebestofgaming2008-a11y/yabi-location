@@ -2338,11 +2338,12 @@ async function discardUploadGroup(uploadGroupId) {
 }
 
 function createDriver() {
-  if (state.data.account.role === "admin" && !state.data.customers.length) {
+  const isAdmin = state.data.account.role === "admin";
+  if (isAdmin && !state.data.customers.length) {
     toast("Add a customer before adding a driver.", "error");
     return;
   }
-  const customerField = state.data.account.role === "admin"
+  const customerField = isAdmin
     ? select("Customer / company", "customerId", state.data.customers.filter((c) => c.status === "active").map((c) => [c.id, c.company || c.fullName]), true)
     : "";
   modal({
@@ -2352,7 +2353,7 @@ function createDriver() {
       ${field("First name", "firstName", "", true)}${field("Last name", "lastName", "", true)}${field("Phone", "phone", "", true, "tel")}${field("Email", "email", "", true, "email")}
       ${field("Date of birth", "dateOfBirth", "", true, "date")}${field("Identity-card number", "identityCardNumber", "", true)}
       ${field("Driving-licence number", "drivingLicenceNumber", "", true)}${field("Licence issue date", "licenceIssueDate", "", true, "date")}${field("Licence valid since", "licenceValidSince", "", true, "date")}</div>
-      <div class="started-vehicle-note"><strong>${clean(tr("Eligibility"))}</strong><span>${clean(tr("The driver must be at least 23 and must have held a valid licence for at least five years."))}</span></div>
+      ${isAdmin ? "" : `<div class="started-vehicle-note"><strong>${clean(tr("Eligibility"))}</strong><span>${clean(tr("The driver must be at least 23 and must have held a valid licence for at least five years."))}</span></div>`}
       <section class="form-section"><h3>${clean(tr("Identity and driving-licence photographs"))}</h3><p>${clean(tr("Clear photographs are required. Only authorised administrators and the linked customer can view them."))}</p>
       <div class="evidence-grid">${uploadField("ID card — front", "driver_identity_front", "driver_document", true, "driver_identity_front")}${uploadField("ID card — back", "driver_identity_back", "driver_document", true, "driver_identity_back")}${uploadField("Driving licence — front", "driver_licence_front", "driver_document", true, "driver_licence_front")}${uploadField("Driving licence — back", "driver_licence_back", "driver_document", true, "driver_licence_back")}</div></section></form>`,
     handler: async (data, form) => {
@@ -2361,7 +2362,7 @@ function createDriver() {
         if (!(value instanceof File)) values[key] = value;
       }
       const progress = driverUploadProgress(form);
-      if (!driverDateIsEligible(values.dateOfBirth, values.licenceIssueDate, values.licenceValidSince)) {
+      if (!isAdmin && !driverDateIsEligible(values.dateOfBirth, values.licenceIssueDate, values.licenceValidSince)) {
         const error = new Error("driver_eligibility_failed");
         showDriverUploadError(progress, error);
         throw error;

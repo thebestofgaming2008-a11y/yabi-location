@@ -1515,12 +1515,15 @@ export const createDriverWithAccount = internalMutation({
     const customer = await ctx.db.get(customerId);
     if (!customer) throw new Error("customer_not_found");
     if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(args.dateOfBirth) ||
-      !/^\d{4}-\d{2}-\d{2}$/.test(args.licenceIssueDate) ||
-      !/^\d{4}-\d{2}-\d{2}$/.test(args.licenceValidSince) ||
-      args.dateOfBirth > yearsBeforeToday(23) ||
-      args.licenceValidSince > yearsBeforeToday(5) ||
-      args.licenceIssueDate > new Date().toISOString().slice(0, 10)
+      actor.role !== "admin" &&
+      (
+        !/^\d{4}-\d{2}-\d{2}$/.test(args.dateOfBirth) ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(args.licenceIssueDate) ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(args.licenceValidSince) ||
+        args.dateOfBirth > yearsBeforeToday(23) ||
+        args.licenceValidSince > yearsBeforeToday(5) ||
+        args.licenceIssueDate > new Date().toISOString().slice(0, 10)
+      )
     ) {
       throw new Error("driver_eligibility_failed");
     }
