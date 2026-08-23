@@ -398,6 +398,10 @@ const translations = {
     "Send an invoice payment proof to accounting.": "Envoyez une preuve de paiement à la comptabilité.",
     "Complete the required monthly vehicle inspection.": "Effectuez l’inspection mensuelle obligatoire du véhicule.",
     "Assigned vehicles": "Véhicules attribués",
+    "Assign vehicles": "Attribuer des véhicules",
+    "Save assignments": "Enregistrer les attributions",
+    "Choose every vehicle this driver may use.": "Choisissez chaque véhicule que ce chauffeur peut utiliser.",
+    "No vehicle assigned": "Aucun véhicule attribué",
     "Monthly inspections": "Inspections mensuelles",
     "Add driver": "Ajouter un chauffeur",
     "Create driver access": "Créer l’accès chauffeur",
@@ -902,6 +906,10 @@ const translations = {
     "Send an invoice payment proof to accounting.": "Stuur een betalingsbewijs naar de boekhouding.",
     "Complete the required monthly vehicle inspection.": "Voer de verplichte maandelijkse voertuiginspectie uit.",
     "Assigned vehicles": "Toegewezen voertuigen",
+    "Assign vehicles": "Voertuigen toewijzen",
+    "Save assignments": "Toewijzingen opslaan",
+    "Choose every vehicle this driver may use.": "Kies elk voertuig dat deze chauffeur mag gebruiken.",
+    "No vehicle assigned": "Geen voertuig toegewezen",
     "Monthly inspections": "Maandelijkse inspecties",
     "Add driver": "Chauffeur toevoegen",
     "Create driver access": "Chauffeurstoegang aanmaken",
@@ -1793,16 +1801,21 @@ function renderDrivers() {
   const canManage = ["admin", "customer"].includes(state.data.account.role);
   const rows = drivers.map((driver) => {
     const customer = dataMaps.customers.get(driver.customerId);
+    const assignedVehicles = (driver.assignedVehicleIds || [])
+      .map((vehicleId) => dataMaps.vehicles.get(vehicleId))
+      .filter(Boolean);
     return `<tr><td><strong>${clean(driver.fullName)}</strong><small>${clean(driver.email)}</small></td>
       ${state.data.account.role === "admin" ? `<td>${clean(customer?.company || customer?.fullName || "—")}</td>` : ""}
       <td>${clean(driver.phone)}</td><td>${badge(driver.active && driver.accountActive !== false ? "active" : "inactive")}</td>
+      ${state.data.account.role === "admin" ? `<td>${assignedVehicles.length ? assignedVehicles.map((vehicle) => `<span class="vehicle-table-identity is-inline">${vehicleBrandMark(vehicle.make, "vehicle-brand-mark is-compact")}<span>${clean(vehicle.registrationPlate)}</span></span>`).join("") : clean(tr("No vehicle assigned"))}</td>` : ""}
       <td>${driver.codeHint ? `<span class="account-code-row"><code data-driver-code>YABI-••••-••••-${clean(driver.codeHint)}</code>${canManage ? `<button class="inline-code-button" data-action="reveal-driver-code" data-id="${driver.id}">${clean(tr("Reveal"))}</button><button class="inline-code-button" data-action="copy-driver-code" data-id="${driver.id}" hidden>${clean(tr("Copy"))}</button>` : ""}</span>` : clean(tr("No access code"))}</td>
       <td><div class="table-actions"><button class="icon-button" data-action="view-driver" data-id="${driver.id}">View</button>${state.data.account.role === "admin" ? `<button class="icon-button" data-action="edit-driver" data-id="${driver.id}">Edit</button><button class="icon-button is-danger" data-action="remove-driver" data-id="${driver.id}">Remove</button>` : ""}
+      ${state.data.account.role === "admin" ? `<button class="icon-button" data-action="assign-driver-vehicles" data-id="${driver.id}">${clean(tr("Assign vehicles"))}</button>` : ""}
       ${canManage && !driver.portalAccountId ? `<button class="icon-button" data-action="driver-access" data-id="${driver.id}">Create code</button>` : ""}
       ${canManage ? `<button class="icon-button" data-action="toggle-driver" data-id="${driver.id}" data-active="${driver.active && driver.accountActive !== false}">${driver.active && driver.accountActive !== false ? "Deactivate" : "Reactivate"}</button>` : ""}</div></td></tr>`;
   }).join("");
   el.view.innerHTML = `${header(canManage ? '<button class="primary-button" data-action="create-driver">Add driver</button>' : "")}
-    ${drivers.length ? table(["Driver", ...(state.data.account.role === "admin" ? ["Customer"] : []), "Phone", "Status", "Access", ""], rows) : empty("No drivers", "Add a driver to create personal access.")}`;
+    ${drivers.length ? table(["Driver", ...(state.data.account.role === "admin" ? ["Customer"] : []), "Phone", "Status", ...(state.data.account.role === "admin" ? ["Assigned vehicles"] : []), "Access", ""], rows) : empty("No drivers", "Add a driver to create personal access.")}`;
 }
 
 function renderFleet() {
@@ -2486,6 +2499,31 @@ function editDriver(id) {
   setCustomValue(el.modalBody, "customerId", driver.customerId);
   setCustomValue(el.modalBody, "province", driver.province || "");
   setCustomValue(el.modalBody, "active", String(driver.active && driver.accountActive !== false));
+}
+
+function assignDriverVehicles(id) {
+  const driver = state.data.drivers.find((item) => item.id === id);
+  if (!driver || state.data.account.role !== "admin") return;
+  const assigned = new Set(driver.assignedVehicleIds || []);
+  const vehicleOptions = state.data.vehicles.map((vehicle) => `<label class="permission-option vehicle-assignment-option">
+    <input type="checkbox" name="vehicleIds" value="${vehicle.id}" ${assigned.has(vehicle.id) ? "checked" : ""}>
+    ${vehicleBrandMark(vehicle.make, "vehicle-brand-mark is-select")}
+    <span><strong>${clean(vehicle.registrationPlate)}</strong><small>${clean(`${vehicle.make} ${vehicle.model}`)}</small></span>
+  </label>`).join("");
+  modal({
+    title: `${tr("Assign vehicles")} — ${driver.fullName}`,
+    submit: tr("Save assignments"),
+    content: `<form class="portal-form"><fieldset class="permission-field"><legend>${clean(tr("Assigned vehicles"))}</legend><p>${clean(tr("Choose every vehicle this driver may use."))}</p><div class="permission-grid vehicle-assignment-grid">${vehicleOptions}</div></fieldset></form>`,
+    handler: async (data) => {
+      await api("/api/portal/drivers", {
+        method: "POST",
+        body: { operation: "assign_vehicles", driverId: id, vehicleIds: data.getAll("vehicleIds") },
+      });
+      closeModal();
+      toast(tr("Save assignments"));
+      await refresh();
+    },
+  });
 }
 
 async function removeDriver(id) {
@@ -3395,6 +3433,7 @@ el.view.addEventListener("click", async (event) => {
   if (action === "view-driver") viewDriver(id);
   if (action === "edit-driver") editDriver(id);
   if (action === "remove-driver") removeDriver(id);
+  if (action === "assign-driver-vehicles") assignDriverVehicles(id);
   if (action === "reveal-driver-code") revealDriverCode(id, button);
   if (action === "copy-driver-code") copyDriverCode(id, button);
   if (action === "driver-access") createDriverAccess(id);

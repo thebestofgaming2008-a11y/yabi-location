@@ -1088,6 +1088,20 @@ export const portalDrivers = httpAction(async (ctx, request) => {
       );
     }
 
+    if (operation === "assign_vehicles") {
+      const driverId = clean(body.driverId, 80);
+      const vehicleIds = Array.isArray(body.vehicleIds)
+        ? body.vehicleIds.map((item) => clean(item, 80)).filter(Boolean).slice(0, 101)
+        : [];
+      if (!driverId || vehicleIds.length > 100) throw new Error("validation_failed");
+      await ctx.runMutation(internal.portal.setDriverVehicleAssignments, {
+        actorAccountId: session.account.id,
+        driverId: driverId as Id<"customerDrivers">,
+        vehicleIds: vehicleIds as Id<"operationalVehicles">[],
+      });
+      return json({ ok: true }, 200, origin);
+    }
+
     if (operation === "set_active") {
       const driverId = clean(body.driverId, 80);
       if (!driverId || typeof body.active !== "boolean") {

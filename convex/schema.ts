@@ -303,6 +303,17 @@ export default defineSchema({
     .index("by_source_application_driver_id", ["sourceApplicationDriverId"])
     .index("by_deleted_at", ["deletedAt"]),
 
+  driverVehicleAssignments: defineTable({
+    driverId: v.id("customerDrivers"),
+    vehicleId: v.id("operationalVehicles"),
+    assignedBy: v.id("portalAccounts"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_driver_id", ["driverId"])
+    .index("by_vehicle_id", ["vehicleId"])
+    .index("by_driver_id_and_vehicle_id", ["driverId", "vehicleId"]),
+
   rentalApplications: defineTable({
     reference: v.string(),
     tokenHash: v.string(),
