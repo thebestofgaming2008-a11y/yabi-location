@@ -3987,7 +3987,7 @@ el.view.addEventListener("click", async (event) => {
   if (action === "view-record") viewRecord(id);
   if (action === "remove-record") removeRecord(id);
   if (action === "resolve-report") resolveReport(id);
-  if (action === "rotate-code" && confirm("Generate a new code? The current code and all active sessions will stop working.")) {
+  if (action === "rotate-code" && state.data.account.role === "admin" && confirm("Generate a new code? The current code and all active sessions will stop working.")) {
     try {
       const account = state.data.accounts.find((item) => item.id === id);
       const result = await api("/api/portal/admin", { method: "POST", body: { operation: "rotate_code", targetAccountId: id } });

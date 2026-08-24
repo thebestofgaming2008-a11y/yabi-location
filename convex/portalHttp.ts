@@ -534,6 +534,7 @@ export const portalAdmin = httpAction(async (ctx, request) => {
     }
 
     if (operation === "rotate_code") {
+      if (session.account.role !== "admin") throw new Error("forbidden");
       const targetAccountId = clean(body.targetAccountId, 80);
       if (!targetAccountId) throw new Error("validation_failed");
       const access = generateAccessCode();

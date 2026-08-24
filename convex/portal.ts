@@ -607,10 +607,7 @@ async function actorCanAccessVehicle(
     return await customerHasVehicle(ctx, actor.linkedCustomerId, vehicleId);
   }
   if (actor.role === "driver" && actor.linkedCustomerId && actor.linkedDriverId) {
-    return (
-      (await driverHasDirectVehicle(ctx, actor.linkedDriverId, vehicleId)) ||
-      (await customerHasVehicle(ctx, actor.linkedCustomerId, vehicleId))
-    );
+    return await driverHasDirectVehicle(ctx, actor.linkedDriverId, vehicleId);
   }
   return false;
 }
@@ -999,13 +996,15 @@ export const getPortalData = internalQuery({
       const customerVehicleIds = [
         ...new Set(openRentals.map((rental) => rental.vehicleId)),
       ];
-      vehicles = (
-        await Promise.all(
-          customerVehicleIds.map((vehicleId) => ctx.db.get(vehicleId)),
-        )
-      ).filter(
-        (vehicle): vehicle is Doc<"operationalVehicles"> => vehicle !== null,
-      );
+      vehicles = actor.role === "customer"
+        ? (
+            await Promise.all(
+              customerVehicleIds.map((vehicleId) => ctx.db.get(vehicleId)),
+            )
+          ).filter(
+            (vehicle): vehicle is Doc<"operationalVehicles"> => vehicle !== null,
+          )
+        : [];
       rentals = [];
       if (actor.role === "customer") {
         workflows = await ctx.db
@@ -3247,7 +3246,7 @@ export const createWorkflowRecord = internalMutation({
     ) {
       throw new Error("forbidden");
     }
-    const canAccessCustomerVehicle = vehicle && actor.linkedCustomerId
+    const canAccessCustomerVehicle = vehicle && actor.role === "customer" && actor.linkedCustomerId
       ? await customerHasVehicle(ctx, actor.linkedCustomerId, vehicle._id)
       : false;
     const canAccessDirectDriverVehicle = vehicle && actor.role === "driver" && actor.linkedDriverId
