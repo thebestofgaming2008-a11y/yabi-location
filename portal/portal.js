@@ -481,6 +481,9 @@ const translations = {
     "files selected": "fichiers sélectionnés",
     "Performed by": "Effectué par",
     "Required monthly photographs": "Photos mensuelles obligatoires",
+    "Additional inspection information": "Informations supplémentaires sur l’inspection",
+    "Additional information (optional)": "Informations supplémentaires (facultatif)",
+    "Add any observations, damage, warning lights, or other useful details.": "Ajoutez toute observation, tout dommage, tout voyant d’alerte ou toute autre information utile.",
     "The dashboard photo must clearly show the current mileage while the engine is running.": "La photo du tableau de bord doit montrer clairement le kilométrage actuel lorsque le moteur tourne.",
     "Amicable settlement": "Règlement amiable",
     "Inspection month": "Mois de l’inspection",
@@ -1060,6 +1063,9 @@ const translations = {
     "files selected": "bestanden geselecteerd",
     "Performed by": "Uitgevoerd door",
     "Required monthly photographs": "Verplichte maandelijkse foto’s",
+    "Additional inspection information": "Aanvullende inspectie-informatie",
+    "Additional information (optional)": "Aanvullende informatie (optioneel)",
+    "Add any observations, damage, warning lights, or other useful details.": "Voeg observaties, schade, waarschuwingslampjes of andere nuttige informatie toe.",
     "The dashboard photo must clearly show the current mileage while the engine is running.": "De dashboardfoto moet de huidige kilometerstand duidelijk tonen terwijl de motor draait.",
     "Amicable settlement": "Minnelijke schikking",
     "Inspection month": "Inspectiemaand",
@@ -3322,7 +3328,8 @@ function workflowForm(type) {
   if (type === "monthly_inspection") {
     return `<form class="portal-form">${vehicle}<div class="form-grid">${mileage}${readonlyField("Performed by", state.data.account.displayName, "Taken from the signed-in account.")}${readonlyField("Date and time", date(Date.now(), true), "Recorded automatically by the server.")}</div>
       <section class="form-section"><h3>${clean(tr("Required monthly photographs"))}</h3><div class="evidence-grid">${uploadField("Interior", "interior", "inspection", true, "interior")}${uploadField("Front", "front", "inspection", true, "front")}${uploadField("Right side", "right", "inspection", true, "right")}${uploadField("Left side", "left", "inspection", true, "left")}${uploadField("Rear", "rear", "inspection", true, "rear")}</div>
-      <div class="started-vehicle-note"><strong>${clean(tr("Vehicle must be started"))}</strong><span>${clean(tr("The dashboard photo must clearly show the current mileage while the engine is running."))}</span></div>${uploadField("Dashboard photo — vehicle started", "dashboard_started", "inspection", true, "dashboard_started")}</section></form>`;
+      <div class="started-vehicle-note"><strong>${clean(tr("Vehicle must be started"))}</strong><span>${clean(tr("The dashboard photo must clearly show the current mileage while the engine is running."))}</span></div>${uploadField("Dashboard photo — vehicle started", "dashboard_started", "inspection", true, "dashboard_started")}</section>
+      <section class="form-section"><h3>${clean(tr("Additional inspection information"))}</h3><div class="field"><label>${clean(tr("Additional information (optional)"))}</label><textarea name="description"></textarea><small>${clean(tr("Add any observations, damage, warning lights, or other useful details."))}</small></div>${uploadField("Extra photos (optional)", "extra", "inspection", false, "extra", true)}</section></form>`;
   }
   if (["check_in", "check_out"].includes(type)) {
     return `<form class="portal-form">${vehicle}${rentals.length ? rental : ""}<div class="form-grid">${field("Driver / guest full name", "personName", "", true)}${mileage}${field("Autonomy (km)", "autonomyKm", "", true, "number", 'min="0" max="5000"')}</div>
@@ -3724,7 +3731,7 @@ function recordEditForm(record) {
   } else if (record.type === "payment_proof") {
     fields.push(`<section class="form-section"><div class="form-grid">${field("Invoice number or reference", "invoiceReference", record.invoiceReference || "", true)}${field("Performed by", "performedByName", record.performedByName || "")}</div>${textareaField("Description", "description", record.description || "")}</section>`);
   } else if (record.type === "monthly_inspection") {
-    fields.push(`<section class="form-section"><div class="form-grid">${field("Inspection month", "inspectionMonth", record.inspectionMonth || "", true, "month")}${field("Performed by", "performedByName", record.performedByName || "")}</div>${textareaField("Description", "description", record.description || "")}</section>`);
+    fields.push(`<section class="form-section"><div class="form-grid">${field("Inspection month", "inspectionMonth", record.inspectionMonth || "", true, "month")}${field("Performed by", "performedByName", record.performedByName || "")}</div>${textareaField("Additional information (optional)", "description", record.description || "")}</section>`);
   } else if (record.type === "report") {
     fields.push(`<section class="form-section"><div class="form-grid">${select("Category", "reportCategory", [["damage", "Damage"], ["mechanical", "Mechanical"], ["administrative", "Administrative"], ["request", "Request"], ["other", "Other"]], true)}${select("Priority", "reportPriority", [["low", "Low"], ["normal", "Normal"], ["urgent", "Urgent"]], true)}</div>${textareaField("Description", "description", record.description || "", true)}${textareaField("Maintenance", "maintenanceWork", record.maintenanceWork || "")}${textareaField("Changes", "changesMade", record.changesMade || "")}</section>`);
   } else if (record.type !== "maintenance") {
@@ -3846,7 +3853,7 @@ async function viewRecord(id) {
       ["Ready for service", record.readyForService == null ? "" : tr(record.readyForService ? "Yes" : "No")],
       ["Maintenance", !record.maintenanceItems?.length ? record.maintenanceWork : ""],
       ["Changes", record.changesMade],
-      [record.type === "maintenance" ? "Mechanic notes" : "Description", record.description],
+      [record.type === "maintenance" ? "Mechanic notes" : record.type === "monthly_inspection" ? "Additional information (optional)" : "Description", record.description],
       ["Resolution", record.resolution],
     ].filter(([, value]) => value);
     modal({
