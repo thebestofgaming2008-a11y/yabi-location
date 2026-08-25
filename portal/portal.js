@@ -2172,7 +2172,7 @@ function createReplacementCase() {
         .filter((input) => input.files[0])
         .map((input, sortOrder) => ({ file: input.files[0], category: "replacement", slot: input.dataset.slot, captureSource: "gallery", sortOrder }));
       const uploadGroupId = crypto.randomUUID();
-      const progress = driverUploadProgress(form);
+      const progress = uploadProgress(form);
       progress.querySelector("span").textContent = tr(files.length ? "Preparing evidence…" : "Saving record…");
       try {
         const mediaIds = await upload(files, uploadGroupId, (done, total) => {
@@ -2192,7 +2192,7 @@ function createReplacementCase() {
         await viewReplacementCase(result.replacementCaseId);
       } catch (error) {
         await discardUploadGroup(uploadGroupId);
-        showDriverUploadError(progress, error);
+        showUploadError(progress, error);
         throw error;
       }
     },
@@ -2306,7 +2306,7 @@ function addVehicleDocument(vehicleId) {
       const input = form.querySelector('input[type="file"]');
       if (!input.files[0]) throw new Error("media_required");
       const uploadGroupId = crypto.randomUUID();
-      const progress = driverUploadProgress(form);
+      const progress = uploadProgress(form);
       try {
         const [mediaId] = await upload([{ file: input.files[0], category: "vehicle_document", slot: "vehicle_document", captureSource: "gallery", sortOrder: 0 }], uploadGroupId, (done, total) => {
           progress.querySelector("i").style.width = `${Math.round((done / total) * 100)}%`;
@@ -2314,7 +2314,7 @@ function addVehicleDocument(vehicleId) {
         });
         await api("/api/portal/admin", { method: "POST", body: { operation: "create_vehicle_document", vehicleId, title: data.get("title"), documentType: data.get("documentType"), validUntil: data.get("validUntil") || undefined, visibleToCustomer: data.get("visibleToCustomer") === "true", uploadGroupId, mediaId } });
         closeModal(); toast("Vehicle document added."); await refresh(); manageVehicleDocuments(vehicleId);
-      } catch (error) { await discardUploadGroup(uploadGroupId); showDriverUploadError(progress, error); throw error; }
+      } catch (error) { await discardUploadGroup(uploadGroupId); showUploadError(progress, error); throw error; }
     },
   });
   setCustomValue(el.modalBody, "visibleToCustomer", "true");
@@ -2895,20 +2895,21 @@ function driverDateIsEligible(dateOfBirth, licenceIssueDate, licenceValidSince) 
   );
 }
 
-function driverUploadProgress(form) {
-  let progress = form.querySelector("[data-driver-upload-progress]");
+function uploadProgress(form) {
+  let progress = form.querySelector("[data-upload-progress]");
   if (!progress) {
     progress = document.createElement("div");
     progress.className = "upload-progress visible";
-    progress.dataset.driverUploadProgress = "true";
+    progress.dataset.uploadProgress = "true";
     progress.innerHTML = `<div class="progress-track"><i></i></div><span></span>`;
     form.querySelector(".form-submit-row").before(progress);
   }
   progress.classList.remove("is-error");
+  progress.querySelector("i").style.width = "0%";
   return progress;
 }
 
-function showDriverUploadError(progress, error) {
+function showUploadError(progress, error) {
   progress.classList.add("is-error");
   progress.querySelector("i").style.width = "100%";
   progress.querySelector("span").textContent = messageFor(error);
@@ -2950,16 +2951,16 @@ function createDriver() {
       for (const [key, value] of data.entries()) {
         if (!(value instanceof File)) values[key] = value;
       }
-      const progress = driverUploadProgress(form);
+      const progress = uploadProgress(form);
       if (!isAdmin && !driverDateIsEligible(values.dateOfBirth, values.licenceIssueDate, values.licenceValidSince)) {
         const error = new Error("driver_eligibility_failed");
-        showDriverUploadError(progress, error);
+        showUploadError(progress, error);
         throw error;
       }
       const files = [...form.querySelectorAll('input[type="file"]')].map((input, sortOrder) => ({ file: input.files[0], category: "driver_document", slot: input.dataset.slot, captureSource: "gallery", sortOrder }));
       if (files.some((item) => !item.file)) {
         const error = new Error("driver_documents_required");
-        showDriverUploadError(progress, error);
+        showUploadError(progress, error);
         throw error;
       }
       progress.querySelector("i").style.width = "0%";
@@ -2977,7 +2978,7 @@ function createDriver() {
         revealCode(`${values.firstName} ${values.lastName}`, result.accessCode);
       } catch (error) {
         await discardUploadGroup(uploadGroupId);
-        showDriverUploadError(progress, error);
+        showUploadError(progress, error);
         throw error;
       }
     },
@@ -3415,7 +3416,6 @@ function openWorkflow(type) {
           sortOrder: files.length,
         }));
       });
-      if (files.length > 24) throw new Error("too_many_files");
       if (
         ["handover_take", "handover_return"].includes(type) &&
           form.querySelector('[name="handover"]').files.length < 2)
@@ -3432,48 +3432,59 @@ function openWorkflow(type) {
           sortOrder: files.length,
         });
       }
-      const progress = document.createElement("div");
-      progress.className = "upload-progress visible";
-      progress.innerHTML = `<div class="progress-track"><i></i></div><span>${clean(tr("Preparing evidence…"))}</span>`;
-      form.querySelector(".form-submit-row").before(progress);
+      if (files.length > 24) throw new Error("too_many_files");
+      const progress = uploadProgress(form);
+      progress.querySelector("span").textContent = tr("Preparing evidence…");
       const uploadGroupId = crypto.randomUUID();
-      const mediaIds = await upload(files, uploadGroupId, (done, total) => {
-        progress.querySelector("i").style.width = `${Math.round((done / Math.max(1, total)) * 100)}%`;
-        progress.querySelector("span").textContent = total
-          ? `${tr("Uploading evidence")} ${Math.ceil(done)} ${tr("of")} ${total}`
-          : tr("Saving record…");
-      });
-      const values = {};
-      for (const [key, value] of formData.entries()) {
-        if (!(value instanceof File)) values[key] = value;
+      try {
+        const mediaIds = await upload(files, uploadGroupId, (done, total, phase) => {
+          progress.querySelector("i").style.width = `${Math.round((done / Math.max(1, total)) * 100)}%`;
+          if (!total) {
+            progress.querySelector("span").textContent = tr("Saving record…");
+            return;
+          }
+          const current = Math.min(total, Math.floor(done) + (done < total ? 1 : 0));
+          progress.querySelector("span").textContent = phase === "preparing"
+            ? `${tr("Preparing evidence…")} ${current} ${tr("of")} ${total}`
+            : `${tr("Uploading evidence")} ${Math.max(1, current)} ${tr("of")} ${total}`;
+        });
+        const values = {};
+        for (const [key, value] of formData.entries()) {
+          if (!(value instanceof File)) values[key] = value;
+        }
+        if (type === "maintenance") {
+          values.maintenanceItems = maintenanceItems;
+          values.maintenanceWork = maintenanceItems.join(", ") || values.maintenanceOtherDetails;
+          values.roadTestPerformed = values.roadTestPerformed === "true";
+          values.readyForService = values.readyForService === "true";
+        }
+        if (type === "accident_report") {
+          values.eventOccurredAt = new Date(String(values.eventOccurredAt)).getTime();
+          if (!Number.isFinite(values.eventOccurredAt)) throw new Error("validation_failed");
+          if (values.accidentLiability === "at_fault") values.amicableSettlement = values.amicableSettlement === "true";
+          else delete values.amicableSettlement;
+        }
+        ["mileage", "mileageAfter", "fuelPercent", "autonomyKm", "secondaryMileage", "secondaryAutonomyKm"].forEach((key) => {
+          if (values[key]) values[key] = Number(values[key]);
+          else delete values[key];
+        });
+        if (values.rentalId) {
+          const selectedRental = state.data.rentals.find((r) => r.id === values.rentalId);
+          values.vehicleId ||= selectedRental?.vehicleId;
+          values.customerId = selectedRental?.customerId;
+        }
+        progress.querySelector("span").textContent = tr("Saving record…");
+        const result = await api("/api/portal/workflows", { method: "POST", body: { type, uploadGroupId, mediaIds, ...values } });
+        closeModal();
+        toast("Operation recorded.");
+        await refresh();
+        navigate("operations");
+        await viewRecord(result.recordId);
+      } catch (error) {
+        await discardUploadGroup(uploadGroupId);
+        showUploadError(progress, error);
+        throw error;
       }
-      if (type === "maintenance") {
-        values.maintenanceItems = maintenanceItems;
-        values.maintenanceWork = maintenanceItems.join(", ") || values.maintenanceOtherDetails;
-        values.roadTestPerformed = values.roadTestPerformed === "true";
-        values.readyForService = values.readyForService === "true";
-      }
-      if (type === "accident_report") {
-        values.eventOccurredAt = new Date(String(values.eventOccurredAt)).getTime();
-        if (!Number.isFinite(values.eventOccurredAt)) throw new Error("validation_failed");
-        if (values.accidentLiability === "at_fault") values.amicableSettlement = values.amicableSettlement === "true";
-        else delete values.amicableSettlement;
-      }
-      ["mileage", "mileageAfter", "fuelPercent", "autonomyKm", "secondaryMileage", "secondaryAutonomyKm"].forEach((key) => {
-        if (values[key]) values[key] = Number(values[key]);
-        else delete values[key];
-      });
-      if (values.rentalId) {
-        const selectedRental = state.data.rentals.find((r) => r.id === values.rentalId);
-        values.vehicleId ||= selectedRental?.vehicleId;
-        values.customerId = selectedRental?.customerId;
-      }
-      const result = await api("/api/portal/workflows", { method: "POST", body: { type, uploadGroupId, mediaIds, ...values } });
-      closeModal();
-      toast("Operation recorded.");
-      await refresh();
-      navigate("operations");
-      await viewRecord(result.recordId);
     },
   });
   bindUploads();
@@ -3623,6 +3634,29 @@ function bindSignature() {
   });
 }
 
+async function decodeUploadImage(file) {
+  if (typeof createImageBitmap === "function") {
+    try {
+      const bitmap = await createImageBitmap(file);
+      return { source: bitmap, width: bitmap.width, height: bitmap.height, release: () => bitmap.close() };
+    } catch {}
+  }
+  const url = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = url;
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = reject;
+    });
+    return { source: image, width: image.naturalWidth, height: image.naturalHeight, release: () => URL.revokeObjectURL(url) };
+  } catch {
+    URL.revokeObjectURL(url);
+    throw new Error("upload_failed");
+  }
+}
+
 async function optimise(file, category) {
   if (file.size > 20_000_000) throw new Error("upload_failed");
   if (file.type === "application/pdf") {
@@ -3630,16 +3664,27 @@ async function optimise(file, category) {
     if (file.size > maximumPdfSize) throw new Error("upload_failed");
     return file;
   }
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, 2200 / Math.max(bitmap.width, bitmap.height));
+  if (!file.type.startsWith("image/")) throw new Error("upload_failed");
+  const decoded = await decodeUploadImage(file);
+  const scale = Math.min(1, 2200 / Math.max(decoded.width, decoded.height));
   const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", 0.84));
-  if (!blob || blob.size > 8_000_000) throw new Error("upload_failed");
-  return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".webp", { type: "image/webp" });
+  canvas.width = Math.max(1, Math.round(decoded.width * scale));
+  canvas.height = Math.max(1, Math.round(decoded.height * scale));
+  try {
+    const context = canvas.getContext("2d", { alpha: false });
+    if (!context) throw new Error("upload_failed");
+    context.drawImage(decoded.source, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", 0.84));
+    if (!blob || blob.size > 8_000_000) throw new Error("upload_failed");
+    return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".webp", { type: "image/webp" });
+  } catch (error) {
+    if (error?.message === "upload_failed") throw error;
+    throw new Error("upload_failed");
+  } finally {
+    decoded.release();
+    canvas.width = 1;
+    canvas.height = 1;
+  }
 }
 
 function canvasBlob(canvas) {
@@ -3649,7 +3694,7 @@ function canvasBlob(canvas) {
 async function upload(files, uploadGroupId, progress) {
   const ids = [];
   for (let index = 0; index < files.length; index += 1) {
-    progress(index, files.length);
+    progress(index, files.length, "preparing");
     const file = await optimise(files[index].file, files[index].category);
     const prepared = await api("/api/portal/uploads", {
       method: "POST",
@@ -3664,10 +3709,26 @@ async function upload(files, uploadGroupId, progress) {
         sortOrder: files[index].sortOrder,
       },
     });
-    const response = await fetch(prepared.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
-    if (!response.ok) throw new Error("upload_failed");
+    progress(index, files.length, "uploading");
+    let uploaded = false;
+    for (let attempt = 0; attempt < 2 && !uploaded; attempt += 1) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 90_000);
+      try {
+        const response = await fetch(prepared.uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type },
+          body: file,
+          signal: controller.signal,
+        });
+        uploaded = response.ok;
+      } catch {}
+      finally { clearTimeout(timeout); }
+      if (!uploaded && attempt === 0) await new Promise((resolve) => setTimeout(resolve, 750));
+    }
+    if (!uploaded) throw new Error("upload_failed");
     ids.push(prepared.mediaId);
-    progress(index + 1, files.length);
+    progress(index + 1, files.length, "uploaded");
   }
   return ids;
 }
