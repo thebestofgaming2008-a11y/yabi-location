@@ -103,6 +103,11 @@ export const vehicleReplacementStatusValidator = v.union(
   v.literal("cancelled"),
 );
 
+export const vehicleReplacementReasonValidator = v.union(
+  v.literal("accident"),
+  v.literal("technical_fault"),
+);
+
 export const vehicleDocumentTypeValidator = v.union(
   v.literal("registration"),
   v.literal("insurance"),
@@ -495,7 +500,9 @@ export default defineSchema({
     driverId: v.id("customerDrivers"),
     damagedVehicleId: v.id("operationalVehicles"),
     replacementVehicleId: v.id("operationalVehicles"),
+    reasonCategory: v.optional(vehicleReplacementReasonValidator),
     reason: v.string(),
+    assignedByName: v.optional(v.string()),
     damagedMileage: v.number(),
     replacementMileage: v.optional(v.number()),
     status: vehicleReplacementStatusValidator,
@@ -558,6 +565,7 @@ export default defineSchema({
     originAddress: v.optional(v.string()),
     destinationAddress: v.optional(v.string()),
     disposition: v.optional(vehicleDispositionValidator),
+    replacementReasonCategory: v.optional(vehicleReplacementReasonValidator),
     mechanicName: v.optional(v.string()),
     maintenanceInterventionType: v.optional(maintenanceInterventionTypeValidator),
     maintenanceItems: v.optional(v.array(v.string())),

@@ -59,6 +59,7 @@ const allowedMaintenanceInterventionTypes = new Set<string>(maintenanceIntervent
 const allowedMaintenanceItemCodes = new Set<string>(maintenanceItemCodes);
 const allowedCaptureSources = new Set(["camera", "gallery", "signature"]);
 const allowedReplacementStatuses = new Set(["planned", "active", "completed", "cancelled"]);
+const allowedReplacementReasons = new Set(["accident", "technical_fault"]);
 const allowedVehicleDocumentTypes = new Set(["registration", "insurance", "inspection", "maintenance", "contract", "other"]);
 const allowedMediaCategories = new Set([
   "vehicle_exterior",
@@ -807,7 +808,9 @@ export const portalAdmin = httpAction(async (ctx, request) => {
       const damagedVehicleId = clean(body.damagedVehicleId, 80);
       const replacementSource = clean(body.replacementSource, 20);
       const replacementVehicleId = optionalString(body.replacementVehicleId, 80);
+      const reasonCategory = clean(body.reasonCategory, 30);
       const reason = clean(body.reason, 4000);
+      const assignedByName = clean(body.assignedByName, 160);
       const status = clean(body.status, 20);
       const uploadGroupId = clean(body.uploadGroupId, 80);
       const damagedMileage = boundedNumber(body.damagedMileage, 0, 2_000_000);
@@ -815,7 +818,7 @@ export const portalAdmin = httpAction(async (ctx, request) => {
         ? body.mediaIds.map((item) => clean(item, 80)).filter(Boolean).slice(0, 6)
         : [];
       if (
-        !customerId || !driverId || !damagedVehicleId || !reason || !uploadGroupId ||
+        !customerId || !driverId || !damagedVehicleId || !allowedReplacementReasons.has(reasonCategory) || !reason || !assignedByName || !uploadGroupId ||
         damagedMileage === undefined || !allowedReplacementStatuses.has(status) ||
         !["existing", "new"].includes(replacementSource) || mediaIds.length > 5 ||
         (replacementSource === "existing" && !replacementVehicleId)
@@ -856,7 +859,9 @@ export const portalAdmin = httpAction(async (ctx, request) => {
         damagedVehicleId: damagedVehicleId as Id<"operationalVehicles">,
         replacementVehicleId: replacementSource === "existing" ? replacementVehicleId as Id<"operationalVehicles"> : undefined,
         newReplacementVehicle,
+        reasonCategory: reasonCategory as "accident" | "technical_fault",
         reason,
+        assignedByName,
         damagedMileage,
         status: status as "planned" | "active" | "completed" | "cancelled",
         notes: optionalString(body.notes, 4000),
@@ -880,10 +885,12 @@ export const portalAdmin = httpAction(async (ctx, request) => {
         const driverId = clean(body.driverId, 80);
         const damagedVehicleId = clean(body.damagedVehicleId, 80);
         const replacementVehicleId = clean(body.replacementVehicleId, 80);
+        const reasonCategory = clean(body.reasonCategory, 30);
         const reason = clean(body.reason, 4000);
+        const assignedByName = clean(body.assignedByName, 160);
         const status = clean(body.status, 20);
         const damagedMileage = boundedNumber(body.damagedMileage, 0, 2_000_000);
-        if (!customerId || !driverId || !damagedVehicleId || !replacementVehicleId || !reason || damagedMileage === undefined || !allowedReplacementStatuses.has(status)) {
+        if (!customerId || !driverId || !damagedVehicleId || !replacementVehicleId || !allowedReplacementReasons.has(reasonCategory) || !reason || !assignedByName || damagedMileage === undefined || !allowedReplacementStatuses.has(status)) {
           throw new Error("validation_failed");
         }
         await ctx.runMutation(internal.portal.updateVehicleReplacementCase, {
@@ -893,7 +900,9 @@ export const portalAdmin = httpAction(async (ctx, request) => {
           driverId: driverId as Id<"customerDrivers">,
           damagedVehicleId: damagedVehicleId as Id<"operationalVehicles">,
           replacementVehicleId: replacementVehicleId as Id<"operationalVehicles">,
+          reasonCategory: reasonCategory as "accident" | "technical_fault",
           reason,
+          assignedByName,
           damagedMileage,
           status: status as "planned" | "active" | "completed" | "cancelled",
           notes: optionalString(body.notes, 4000),
@@ -1022,6 +1031,7 @@ export const portalAdmin = httpAction(async (ctx, request) => {
       const status = clean(body.status, 20);
       const maintenanceInterventionType = clean(body.maintenanceInterventionType, 40);
       const disposition = clean(body.disposition, 20);
+      const replacementReasonCategory = clean(body.replacementReasonCategory, 30);
       const accidentLiability = clean(body.accidentLiability, 20);
       const reportCategory = clean(body.reportCategory, 30);
       const reportPriority = clean(body.reportPriority, 20);
@@ -1056,6 +1066,9 @@ export const portalAdmin = httpAction(async (ctx, request) => {
         destinationAddress: optionalString(body.destinationAddress, 500),
         disposition: allowedDispositions.has(disposition)
           ? disposition as "self" | "towing" | "mechanic" | "other"
+          : undefined,
+        replacementReasonCategory: allowedReplacementReasons.has(replacementReasonCategory)
+          ? replacementReasonCategory as "accident" | "technical_fault"
           : undefined,
         mechanicName: optionalString(body.mechanicName, 100),
         maintenanceInterventionType: allowedMaintenanceInterventionTypes.has(maintenanceInterventionType)
@@ -1494,6 +1507,7 @@ export const portalWorkflow = httpAction(async (ctx, request) => {
     const reportCategory = optionalString(body.reportCategory, 30);
     const reportPriority = optionalString(body.reportPriority, 20);
     const maintenanceInterventionType = clean(body.maintenanceInterventionType, 40);
+    const replacementReasonCategory = clean(body.replacementReasonCategory, 30);
     const maintenanceItems = Array.isArray(body.maintenanceItems)
       ? body.maintenanceItems.map((item) => clean(item, 80))
       : undefined;
@@ -1515,6 +1529,12 @@ export const portalWorkflow = httpAction(async (ctx, request) => {
       maintenanceItems?.some((item) => !allowedMaintenanceItemCodes.has(item))
     ) {
       throw new Error("invalid_maintenance_items");
+    }
+    if (
+      replacementReasonCategory &&
+      !allowedReplacementReasons.has(replacementReasonCategory)
+    ) {
+      throw new Error("validation_failed");
     }
     const reference = `OP-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${base64Url(randomBytes(5)).toUpperCase().slice(0, 7)}`;
     const result = await ctx.runMutation(internal.portal.createWorkflowRecord, {
@@ -1559,6 +1579,9 @@ export const portalWorkflow = httpAction(async (ctx, request) => {
       destinationAddress: optionalString(body.destinationAddress, 500),
       disposition: allowedDispositions.has(clean(body.disposition, 20))
         ? clean(body.disposition, 20) as "self" | "towing" | "mechanic" | "other"
+        : undefined,
+      replacementReasonCategory: allowedReplacementReasons.has(replacementReasonCategory)
+        ? replacementReasonCategory as "accident" | "technical_fault"
         : undefined,
       maintenanceInterventionType: allowedMaintenanceInterventionTypes.has(maintenanceInterventionType)
         ? maintenanceInterventionType as "regular_service" | "breakdown_repair" | "technical_inspection"

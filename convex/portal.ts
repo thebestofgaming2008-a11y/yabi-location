@@ -17,6 +17,7 @@ import {
   rentalStatusValidator,
   vehicleDocumentTypeValidator,
   vehicleFormatValidator,
+  vehicleReplacementReasonValidator,
   vehicleReplacementStatusValidator,
   workflowTypeValidator,
   vehicleDispositionValidator,
@@ -141,7 +142,9 @@ const vehicleReplacementPublicValidator = v.object({
   driverId: v.id("customerDrivers"),
   damagedVehicleId: v.id("operationalVehicles"),
   replacementVehicleId: v.id("operationalVehicles"),
+  reasonCategory: v.optional(vehicleReplacementReasonValidator),
   reason: v.string(),
+  assignedByName: v.optional(v.string()),
   damagedMileage: v.number(),
   replacementMileage: v.optional(v.number()),
   status: vehicleReplacementStatusValidator,
@@ -189,6 +192,7 @@ const workflowPublicValidator = v.object({
   originAddress: v.optional(v.string()),
   destinationAddress: v.optional(v.string()),
   disposition: v.optional(vehicleDispositionValidator),
+  replacementReasonCategory: v.optional(vehicleReplacementReasonValidator),
   mechanicName: v.optional(v.string()),
   maintenanceInterventionType: v.optional(maintenanceInterventionTypeValidator),
   maintenanceItems: v.optional(v.array(v.string())),
@@ -384,7 +388,9 @@ function publicVehicleReplacement(replacement: Doc<"vehicleReplacementCases">) {
     driverId: replacement.driverId,
     damagedVehicleId: replacement.damagedVehicleId,
     replacementVehicleId: replacement.replacementVehicleId,
+    reasonCategory: replacement.reasonCategory,
     reason: replacement.reason,
+    assignedByName: replacement.assignedByName,
     damagedMileage: replacement.damagedMileage,
     replacementMileage: replacement.replacementMileage,
     status: replacement.status,
@@ -436,6 +442,7 @@ function publicWorkflow(record: Doc<"workflowRecords">) {
     originAddress: record.originAddress,
     destinationAddress: record.destinationAddress,
     disposition: record.disposition,
+    replacementReasonCategory: record.replacementReasonCategory,
     mechanicName: record.mechanicName,
     maintenanceInterventionType: record.maintenanceInterventionType,
     maintenanceItems: record.maintenanceItems,
@@ -2369,7 +2376,7 @@ export const createRental = internalMutation({
     ]);
     if (!customer) throw new Error("customer_not_found");
     if (!vehicle) throw new Error("vehicle_not_found");
-    if (!["available", "reserved"].includes(vehicle.status)) {
+    if (!(await replacementVehicleIsFree(ctx, vehicle))) {
       throw new Error("vehicle_unavailable");
     }
     const existing = await ctx.db
@@ -2597,8 +2604,7 @@ export const updateRental = internalMutation({
     if (!vehicle || vehicle.deletedAt !== undefined) throw new Error("vehicle_not_found");
     const openStatus = ["draft", "scheduled", "active"].includes(args.status);
     if (openStatus && vehicle._id !== rental.vehicleId) {
-      const vehicleRentals = await ctx.db.query("rentals").withIndex("by_vehicle_id", (q) => q.eq("vehicleId", vehicle._id)).take(100);
-      if (vehicleRentals.some((item) => item._id !== rental._id && item.deletedAt === undefined && ["draft", "scheduled", "active"].includes(item.status))) {
+      if (!(await replacementVehicleIsFree(ctx, vehicle))) {
         throw new Error("vehicle_unavailable");
       }
     }
@@ -2670,7 +2676,9 @@ export const createVehicleReplacementCase = internalMutation({
     damagedVehicleId: v.id("operationalVehicles"),
     replacementVehicleId: v.optional(v.id("operationalVehicles")),
     newReplacementVehicle: v.optional(newReplacementVehicleValidator),
+    reasonCategory: vehicleReplacementReasonValidator,
     reason: v.string(),
+    assignedByName: v.string(),
     damagedMileage: v.number(),
     status: vehicleReplacementStatusValidator,
     notes: v.optional(v.string()),
@@ -2687,6 +2695,7 @@ export const createVehicleReplacementCase = internalMutation({
     requireRole(actor, ["admin"]);
     if (
       !args.reason.trim() ||
+      !args.assignedByName.trim() ||
       args.damagedMileage < 0 ||
       args.mediaIds.length > 5 ||
       Boolean(args.replacementVehicleId) === Boolean(args.newReplacementVehicle)
@@ -2793,7 +2802,9 @@ export const createVehicleReplacementCase = internalMutation({
       driverId: driver._id,
       damagedVehicleId: damagedVehicle._id,
       replacementVehicleId: replacementVehicle._id,
+      reasonCategory: args.reasonCategory,
       reason: args.reason.trim(),
+      assignedByName: args.assignedByName.trim(),
       damagedMileage: args.damagedMileage,
       replacementMileage: replacementVehicle.currentMileage,
       status: args.status,
@@ -2820,7 +2831,7 @@ export const createVehicleReplacementCase = internalMutation({
       "vehicleReplacementCase",
       String(replacementCaseId),
       `${args.reference} created for ${damagedVehicle.registrationPlate}`,
-      JSON.stringify({ customerId: String(customer._id), driverId: String(driver._id), replacementVehicleId: String(replacementVehicle._id), evidenceFiles: uploadedMedia.length }),
+      JSON.stringify({ customerId: String(customer._id), driverId: String(driver._id), replacementVehicleId: String(replacementVehicle._id), reasonCategory: args.reasonCategory, assignedByName: args.assignedByName.trim(), evidenceFiles: uploadedMedia.length }),
     );
     return { replacementCaseId, replacementVehicleId: replacementVehicle._id, reference: args.reference };
   },
@@ -2834,7 +2845,9 @@ export const updateVehicleReplacementCase = internalMutation({
     driverId: v.id("customerDrivers"),
     damagedVehicleId: v.id("operationalVehicles"),
     replacementVehicleId: v.id("operationalVehicles"),
+    reasonCategory: vehicleReplacementReasonValidator,
     reason: v.string(),
+    assignedByName: v.string(),
     damagedMileage: v.number(),
     status: vehicleReplacementStatusValidator,
     notes: v.optional(v.string()),
@@ -2854,7 +2867,7 @@ export const updateVehicleReplacementCase = internalMutation({
     if (!customer || customer.deletedAt !== undefined) throw new Error("customer_not_found");
     if (!driver || driver.deletedAt !== undefined || driver.customerId !== customer._id) throw new Error("driver_customer_mismatch");
     if (!damagedVehicle || damagedVehicle.deletedAt !== undefined || !replacementVehicle || replacementVehicle.deletedAt !== undefined) throw new Error("vehicle_not_found");
-    if (damagedVehicle._id === replacementVehicle._id || !args.reason.trim() || args.damagedMileage < 0) throw new Error("validation_failed");
+    if (damagedVehicle._id === replacementVehicle._id || !args.reason.trim() || !args.assignedByName.trim() || args.damagedMileage < 0) throw new Error("validation_failed");
     if (
       !(await customerHasVehicle(ctx, customer._id, damagedVehicle._id)) &&
       !(await driverHasDirectVehicle(ctx, driver._id, damagedVehicle._id))
@@ -2886,7 +2899,9 @@ export const updateVehicleReplacementCase = internalMutation({
       driverId: driver._id,
       damagedVehicleId: damagedVehicle._id,
       replacementVehicleId: replacementVehicle._id,
+      reasonCategory: args.reasonCategory,
       reason: args.reason.trim(),
+      assignedByName: args.assignedByName.trim(),
       damagedMileage: args.damagedMileage,
       replacementMileage: replacementVehicleChanged
         ? replacementVehicle.currentMileage
@@ -3178,6 +3193,7 @@ export const createWorkflowRecord = internalMutation({
     originAddress: v.optional(v.string()),
     destinationAddress: v.optional(v.string()),
     disposition: v.optional(vehicleDispositionValidator),
+    replacementReasonCategory: v.optional(vehicleReplacementReasonValidator),
     maintenanceInterventionType: v.optional(maintenanceInterventionTypeValidator),
     maintenanceItems: v.optional(v.array(v.string())),
     maintenanceOtherDetails: v.optional(v.string()),
@@ -3282,6 +3298,13 @@ export const createWorkflowRecord = internalMutation({
     ) {
       throw new Error("mileage_required");
     }
+    if (
+      args.type === "breakdown_replacement" &&
+      vehicle &&
+      !(await replacementVehicleIsFree(ctx, vehicle))
+    ) {
+      throw new Error("replacement_vehicle_unavailable");
+    }
     if (args.type === "maintenance") {
       const maintenanceItems = args.maintenanceItems ?? [];
       if (
@@ -3341,7 +3364,7 @@ export const createWorkflowRecord = internalMutation({
     }
     if (
       args.type === "breakdown_replacement" &&
-      (!args.customerName || !args.secondaryLicensePlate || args.secondaryMileage === undefined ||
+      (!args.customerName || !args.replacementReasonCategory || !args.secondaryLicensePlate || args.secondaryMileage === undefined ||
         args.secondaryAutonomyKm === undefined || !args.disposition)
     ) {
       throw new Error("operation_details_required");
@@ -3426,6 +3449,7 @@ export const createWorkflowRecord = internalMutation({
       originAddress: args.originAddress,
       destinationAddress: args.destinationAddress,
       disposition: args.disposition,
+      replacementReasonCategory: args.replacementReasonCategory,
       mechanicName: args.type === "maintenance" ? actor.displayName : undefined,
       maintenanceInterventionType: args.maintenanceInterventionType,
       maintenanceItems: args.maintenanceItems,
@@ -3594,6 +3618,7 @@ export const updateWorkflowRecord = internalMutation({
     originAddress: v.optional(v.string()),
     destinationAddress: v.optional(v.string()),
     disposition: v.optional(vehicleDispositionValidator),
+    replacementReasonCategory: v.optional(vehicleReplacementReasonValidator),
     mechanicName: v.optional(v.string()),
     maintenanceInterventionType: v.optional(maintenanceInterventionTypeValidator),
     maintenanceItems: v.optional(v.array(v.string())),
@@ -3658,6 +3683,14 @@ export const updateWorkflowRecord = internalMutation({
     if (mileageRequired && args.mileage === undefined) {
       throw new Error("mileage_required");
     }
+    if (
+      record.type === "breakdown_replacement" &&
+      vehicle &&
+      vehicle._id !== record.vehicleId &&
+      !(await replacementVehicleIsFree(ctx, vehicle))
+    ) {
+      throw new Error("replacement_vehicle_unavailable");
+    }
     if (record.type === "maintenance") {
       const maintenanceItems = args.maintenanceItems ?? [];
       if (
@@ -3721,7 +3754,7 @@ export const updateWorkflowRecord = internalMutation({
     }
     if (
       record.type === "breakdown_replacement" &&
-      (!args.customerName || !args.secondaryLicensePlate ||
+      (!args.customerName || !args.replacementReasonCategory || !args.secondaryLicensePlate ||
         args.secondaryMileage === undefined ||
         args.secondaryAutonomyKm === undefined || !args.disposition)
     ) {
@@ -3774,6 +3807,7 @@ export const updateWorkflowRecord = internalMutation({
       originAddress: args.originAddress,
       destinationAddress: args.destinationAddress,
       disposition: args.disposition,
+      replacementReasonCategory: args.replacementReasonCategory,
       mechanicName: args.mechanicName,
       maintenanceInterventionType: args.maintenanceInterventionType,
       maintenanceItems: args.maintenanceItems,
