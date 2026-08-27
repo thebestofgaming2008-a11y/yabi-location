@@ -518,6 +518,8 @@ const translations = {
     "Vehicle replacements": "Remplacements de véhicules",
     "Plan and document every damaged-vehicle replacement.": "Planifiez et documentez chaque remplacement d’un véhicule endommagé.",
     "Vehicle replacement": "Remplacement de véhicule",
+    "Replacement vehicle for breakdown or maintenance": "Véhicule de remplacement en cas de panne ou d’entretien",
+    "Choose accident or breakdown / maintenance in one guided form.": "Choisissez accident ou panne / entretien dans un seul formulaire guidé.",
     "Replace a damaged vehicle": "Remplacer un véhicule endommagé",
     "Replace a driver’s vehicle": "Remplacer le véhicule d’un chauffeur",
     "Document the replacement vehicle and the vehicle being replaced.": "Documentez le véhicule de remplacement et le véhicule remplacé.",
@@ -539,6 +541,7 @@ const translations = {
     "Replacement reason": "Motif du remplacement",
     Accident: "Accident",
     "Technical fault / maintenance": "Panne technique / entretien",
+    "Breakdown / maintenance": "Panne / entretien",
     "Not specified": "Non précisé",
     "Assigned by": "Attribué par",
     "Driver full name": "Nom complet du chauffeur",
@@ -1117,6 +1120,8 @@ const translations = {
     "Vehicle replacements": "Voertuigvervangingen",
     "Plan and document every damaged-vehicle replacement.": "Plan en documenteer elke vervanging van een beschadigd voertuig.",
     "Vehicle replacement": "Voertuigvervanging",
+    "Replacement vehicle for breakdown or maintenance": "Vervangwagen bij pech of onderhoud",
+    "Choose accident or breakdown / maintenance in one guided form.": "Kies ongeval of pech / onderhoud in één begeleid formulier.",
     "Replace a damaged vehicle": "Een beschadigd voertuig vervangen",
     "Replace a driver’s vehicle": "Het voertuig van een chauffeur vervangen",
     "Document the replacement vehicle and the vehicle being replaced.": "Documenteer het vervangvoertuig en het voertuig dat wordt vervangen.",
@@ -1138,6 +1143,7 @@ const translations = {
     "Replacement reason": "Reden van vervanging",
     Accident: "Ongeval",
     "Technical fault / maintenance": "Technisch defect / onderhoud",
+    "Breakdown / maintenance": "Pech / onderhoud",
     "Not specified": "Niet opgegeven",
     "Assigned by": "Toegewezen door",
     "Driver full name": "Volledige naam chauffeur",
@@ -1224,7 +1230,7 @@ const roleViews = {
 };
 
 const roleWorkflows = {
-  admin: ["check_in", "check_out", "wash", "vehicle_transfer", "maintenance", "handover_take", "handover_return", "report", "problem_report", "accident_report", "payment_proof", "monthly_inspection"],
+  admin: ["check_in", "check_out", "wash", "breakdown_replacement", "vehicle_transfer", "maintenance", "handover_take", "handover_return", "report", "problem_report", "accident_report", "payment_proof", "monthly_inspection"],
   employee: ["check_in", "check_out", "wash", "breakdown_replacement", "vehicle_transfer", "handover_take", "handover_return", "report"],
   mechanic: ["maintenance", "report"],
   contractor: ["check_in", "check_out", "breakdown_replacement", "vehicle_transfer", "handover_take", "handover_return", "report"],
@@ -1254,7 +1260,7 @@ const workflows = {
   maintenance: ["05", "Maintenance", "Record the work, changes and evidence."],
   handover_take: ["06A", "Vehicle taken", "Record who takes the vehicle and its condition."],
   handover_return: ["06B", "Vehicle returned", "Record who returns the vehicle and its condition."],
-  breakdown_replacement: ["08", "Vehicle replacement", "Document the replacement vehicle and the vehicle being replaced."],
+  breakdown_replacement: ["08", "Replacement vehicle for breakdown or maintenance", "Choose accident or breakdown / maintenance in one guided form."],
   vehicle_transfer: ["09", "Move vehicle", "Document a vehicle transfer from point A to point B."],
   report: ["07", "Report an issue", "Report damage, a problem or a modification."],
   problem_report: ["10", "Problem or damage", "Report a technical problem, damage or dashboard warning."],
@@ -1803,7 +1809,7 @@ function quickActions() {
       ["Check in", "Begin a rental inspection", "check_in"],
       ["Check out", "Record a return", "check_out"],
       ["Wash", "Add before and after evidence", "wash"],
-      ["Vehicle replacement", "Replace a driver’s vehicle", "breakdown_replacement"],
+      ["Replacement vehicle for breakdown or maintenance", "Choose accident or breakdown / maintenance in one guided form.", "breakdown_replacement"],
       ["Move vehicle", "Transfer a vehicle from A to B", "vehicle_transfer"],
       ["Report", "Flag a problem", "report"],
     ],
@@ -2189,7 +2195,7 @@ function createReplacementCase() {
         <div data-replacement-driver>${select("Driver", "driverId", [], true)}</div>
         <div data-replacement-damaged>${select("Damaged vehicle", "damagedVehicleId", [], true)}</div>
         ${field("Damaged vehicle mileage", "damagedMileage", "", true, "number", 'min="0" max="2000000"')}
-        ${select("Replacement reason", "reasonCategory", [["accident", "Accident"], ["technical_fault", "Technical fault / maintenance"]], true)}
+        ${select("Replacement reason", "reasonCategory", [["accident", "Accident"], ["technical_fault", "Breakdown / maintenance"]], true)}
         ${field("Assigned by", "assignedByName", state.data.account.displayName, true)}
       </div>${textareaField("Replacement details", "reason", "", true)}${textareaField("Internal notes", "notes")}</section>
       ${replacementEvidenceFields()}
@@ -2284,7 +2290,7 @@ function editReplacementCase(id) {
       ${select("Driver’s company / account holder", "customerId", state.data.customers.map((customer) => [customer.id, customer.company || customer.fullName]), true)}
       <div data-replacement-driver>${select("Driver", "driverId", [], true)}</div><div data-replacement-damaged>${select("Damaged vehicle", "damagedVehicleId", [], true)}</div>
       <div data-existing-replacement><div data-existing-replacement-select>${select("Replacement vehicle", "replacementVehicleId", vehicleSelectOptions(freeReplacementVehicles(item.damagedVehicleId, item.replacementVehicleId), true), true)}</div></div>${field("Damaged vehicle mileage", "damagedMileage", item.damagedMileage, true, "number", 'min="0" max="2000000"')}
-      ${select("Replacement reason", "reasonCategory", [["accident", "Accident"], ["technical_fault", "Technical fault / maintenance"]], true)}${field("Assigned by", "assignedByName", item.assignedByName || state.data.account.displayName, true)}
+      ${select("Replacement reason", "reasonCategory", [["accident", "Accident"], ["technical_fault", "Breakdown / maintenance"]], true)}${field("Assigned by", "assignedByName", item.assignedByName || state.data.account.displayName, true)}
       ${select("Replacement status", "status", replacementStatusOptions(), true)}</div>
       ${textareaField("Replacement details", "reason", item.reason, true)}${textareaField("Internal notes", "notes", item.notes || "")}</section></form>`,
     handler: async (data) => {
@@ -3388,7 +3394,7 @@ function workflowForm(type) {
   }
   if (type === "breakdown_replacement") {
     return `<form class="portal-form">${vehicle}
-      <section class="form-section"><h3>${clean(tr("YABI replacement vehicle"))}</h3><div class="form-grid">${select("Replacement reason", "replacementReasonCategory", [["accident", "Accident"], ["technical_fault", "Technical fault / maintenance"]], true)}${mileage}${field("Autonomy (km)", "autonomyKm", "", true, "number", 'min="0" max="5000"')}</div>${dashboardEvidence("outgoing_")}${standardEvidence("outgoing_")}</section>
+      <section class="form-section"><h3>${clean(tr("YABI replacement vehicle"))}</h3><div class="form-grid">${select("Replacement reason", "replacementReasonCategory", [["accident", "Accident"], ["technical_fault", "Breakdown / maintenance"]], true)}${mileage}${field("Autonomy (km)", "autonomyKm", "", true, "number", 'min="0" max="5000"')}</div>${dashboardEvidence("outgoing_")}${standardEvidence("outgoing_")}</section>
       <section class="form-section"><h3>${clean(tr("Key handover"))}</h3>${field("Driver full name", "customerName", "", true)}${signature("customer_signature", "Driver signature")}</section>
       <section class="form-section"><h3>${clean(tr("Vehicle being replaced"))}</h3><div class="form-grid">${field("Licence plate", "secondaryLicensePlate", "", true)}${field("Mileage (km)", "secondaryMileage", "", true, "number", 'min="0"')}${field("Autonomy (km)", "secondaryAutonomyKm", "", true, "number", 'min="0" max="5000"')}</div>${dashboardEvidence("defective_")}${standardEvidence("defective_")}</section>
       <section class="form-section"><h3>${clean(tr("What happened to the vehicle being replaced?"))}</h3>${select("Disposition", "disposition", [["self", "Moved by me"], ["towing", "Towing service"], ["mechanic", "Mechanic came"], ["other", "Other"]], true)}<div class="form-grid">${field("Destination address (required when moved by me)", "destinationAddress")}${field("Employee full name (required when moved by me)", "employeeName", state.data.account.displayName)}</div>${signature("employee_signature", "Employee signature — only required when moved by me", false)}</section>${notesAndExtras()}</form>`;
@@ -3823,7 +3829,7 @@ function recordEditForm(record) {
     fields.push(`<section class="form-section"><h3>${clean(tr("People"))}</h3>${field("Driver / guest full name", "personName", record.personName || "", true)}</section>`);
   }
   if (record.type === "breakdown_replacement") {
-    fields.push(`<section class="form-section"><h3>${clean(tr("Replacement details"))}</h3><div class="form-grid">${select("Replacement reason", "replacementReasonCategory", [["accident", "Accident"], ["technical_fault", "Technical fault / maintenance"]], true)}${field("Driver full name", "customerName", record.customerName || "", true)}${field("Licence plate", "secondaryLicensePlate", record.secondaryLicensePlate || "", true)}${field("Vehicle being replaced mileage", "secondaryMileage", record.secondaryMileage ?? "", true, "number", 'min="0" max="2000000"')}${field("Vehicle being replaced autonomy", "secondaryAutonomyKm", record.secondaryAutonomyKm ?? "", true, "number", 'min="0" max="5000"')}${select("Disposition", "disposition", [["self", "Moved by me"], ["towing", "Towing service"], ["mechanic", "Mechanic came"], ["other", "Other"]], true)}${field("Destination address (required when moved by me)", "destinationAddress", record.destinationAddress || "")}${field("Employee full name (required when moved by me)", "employeeName", record.employeeName || "")}</div></section>`);
+    fields.push(`<section class="form-section"><h3>${clean(tr("Replacement details"))}</h3><div class="form-grid">${select("Replacement reason", "replacementReasonCategory", [["accident", "Accident"], ["technical_fault", "Breakdown / maintenance"]], true)}${field("Driver full name", "customerName", record.customerName || "", true)}${field("Licence plate", "secondaryLicensePlate", record.secondaryLicensePlate || "", true)}${field("Vehicle being replaced mileage", "secondaryMileage", record.secondaryMileage ?? "", true, "number", 'min="0" max="2000000"')}${field("Vehicle being replaced autonomy", "secondaryAutonomyKm", record.secondaryAutonomyKm ?? "", true, "number", 'min="0" max="5000"')}${select("Disposition", "disposition", [["self", "Moved by me"], ["towing", "Towing service"], ["mechanic", "Mechanic came"], ["other", "Other"]], true)}${field("Destination address (required when moved by me)", "destinationAddress", record.destinationAddress || "")}${field("Employee full name (required when moved by me)", "employeeName", record.employeeName || "")}</div></section>`);
   }
   if (record.type === "vehicle_transfer") {
     fields.push(`<section class="form-section"><h3>${clean(tr("Transfer details"))}</h3><div class="form-grid">${field("Employee full name", "employeeName", record.employeeName || "", true)}${field("Point A — origin address", "originAddress", record.originAddress || "", true)}${field("Point B — destination address", "destinationAddress", record.destinationAddress || "", true)}</div></section>`);
