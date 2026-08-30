@@ -157,15 +157,13 @@ Do not exclude `particulier` or `particulier huren` unless YABI decides it no lo
 
 ## Designed poster variants
 
-- `yabi-google-poster-fr-mobile-1080x1350-v3.png` — recommended mobile-first 4:5 poster
-- `yabi-google-poster-fr-square-1200x1200-v3.png` — recommended square poster
-- `yabi-google-poster-fr-landscape-1200x628-v3.png` — recommended landscape poster
+- `yabi-google-poster-fr-mobile-1080x1350-v2.png` — recommended mobile-first 4:5 poster
+- `yabi-google-poster-fr-square-1200x1200-v2.png` — recommended square poster
+- `yabi-google-poster-fr-landscape-1200x628-v2.png` — recommended landscape poster
 
-The recommended v3 poster family uses the same visual system at every size: bright realistic daylight fleet photography, a neutral modern warehouse, minimal white/blue geometric shapes, one restrained lime discount accent, one CTA, and YABI’s real website logo. Each canvas has its own responsive composition rather than being mechanically cropped. Typography is rendered deterministically in the website’s Barlow Condensed and Manrope families, so accents, spacing, line breaks, and prices remain exact.
+The recommended poster family uses the same visual system at every size: bright realistic daylight fleet photography, a neutral modern warehouse, minimal white/blue geometric shapes, one restrained lime discount accent, one CTA, and YABI’s three vehicle sizes. Each canvas has its own responsive composition rather than being mechanically cropped.
 
-Keep the clean vehicle image assets in the preceding section alongside the designed posters. Those clean assets deliberately contain no overlaid text, logo, fake CTA, or collage, so Google can combine them with the uploaded logo, headline, price, and CTA without producing cramped or duplicated text.
-
-The repeatable typography, safe-area, file-size, copy, and contrast checks are documented in `YABI-POSTER-DESIGN-AUDIT.md` and can be rerun with `node assets/ads/audit-yabi-posters.js`.
+The vehicle images deliberately contain no overlaid text, logo, fake CTA, or collage. Google can combine the clean image with the uploaded logo, headline, price, and CTA without producing cramped or duplicated text.
 
 ## Conversion and quality checklist before spending
 
