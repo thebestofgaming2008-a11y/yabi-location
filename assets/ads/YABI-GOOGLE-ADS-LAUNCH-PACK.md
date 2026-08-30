@@ -155,6 +155,14 @@ Do not exclude `particulier` or `particulier huren` unless YABI decides it no lo
 - `yabi-google-van-vertical-900x1600-v1.jpg` — 9:16 vertical
 - `yabi-google-logo-square-1200-v1.png` — real website logo, 1:1
 
+## Designed poster variants
+
+- `yabi-google-poster-fr-mobile-1080x1350-v1.png` — mobile-first 4:5 poster
+- `yabi-google-poster-fr-square-1200x1200-v1.png` — square poster
+- `yabi-google-poster-fr-landscape-1200x628-v1.png` — landscape poster
+
+The poster family uses the same visual system at every size: dark Belgian fleet photography, a minimal white/blue geometric offer panel, one restrained lime discount accent, one CTA, and YABI’s three actual vehicle sizes. Each canvas has its own responsive composition rather than being mechanically cropped.
+
 The vehicle images deliberately contain no overlaid text, logo, fake CTA, or collage. Google can combine the clean image with the uploaded logo, headline, price, and CTA without producing cramped or duplicated text.
 
 ## Conversion and quality checklist before spending
