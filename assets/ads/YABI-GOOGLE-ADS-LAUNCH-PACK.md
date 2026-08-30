@@ -174,4 +174,3 @@ The vehicle images deliberately contain no overlaid text, logo, fake CTA, or col
 - Responsive display creative best practices: https://support.google.com/google-ads/answer/9823397
 - Search campaign image assets: https://support.google.com/google-ads/answer/9566341
 - Performance Max creative guidance: https://support.google.com/google-ads/answer/14528221
-
