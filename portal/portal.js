@@ -516,6 +516,11 @@ const translations = {
     "Something went wrong. Please try again.": "Une erreur s’est produite. Réessayez.",
     "This vehicle still has a scheduled or active rental.": "Ce véhicule a encore une location planifiée ou active.",
     "Vehicle replacements": "Remplacements de véhicules",
+    "Administrative replacement cases": "Dossiers administratifs de remplacement",
+    "Operational replacement forms": "Formulaires opérationnels de remplacement",
+    "Replacement cases created here also appear in Operations.": "Les dossiers créés ici apparaissent également dans les opérations.",
+    "Replacement forms completed in Operations appear here automatically.": "Les formulaires terminés dans les opérations apparaissent automatiquement ici.",
+    "No operational replacement forms": "Aucun formulaire opérationnel de remplacement",
     "Plan and document every damaged-vehicle replacement.": "Planifiez et documentez chaque remplacement d’un véhicule endommagé.",
     "Vehicle replacement": "Remplacement de véhicule",
     "Replacement vehicle for breakdown or maintenance": "Véhicule de remplacement en cas de panne ou d’entretien",
@@ -1118,6 +1123,11 @@ const translations = {
     "Something went wrong. Please try again.": "Er is iets misgegaan. Probeer opnieuw.",
     "This vehicle still has a scheduled or active rental.": "Dit voertuig heeft nog een geplande of actieve verhuur.",
     "Vehicle replacements": "Voertuigvervangingen",
+    "Administrative replacement cases": "Administratieve vervangingsdossiers",
+    "Operational replacement forms": "Operationele vervangingsformulieren",
+    "Replacement cases created here also appear in Operations.": "Dossiers die hier worden aangemaakt, verschijnen ook bij Werkzaamheden.",
+    "Replacement forms completed in Operations appear here automatically.": "Formulieren die bij Werkzaamheden worden voltooid, verschijnen hier automatisch.",
+    "No operational replacement forms": "Geen operationele vervangingsformulieren",
     "Plan and document every damaged-vehicle replacement.": "Plan en documenteer elke vervanging van een beschadigd voertuig.",
     "Vehicle replacement": "Voertuigvervanging",
     "Replacement vehicle for breakdown or maintenance": "Vervangwagen bij pech of onderhoud",
@@ -2069,9 +2079,55 @@ function freeReplacementVehicles(damagedVehicleId = "", currentReplacementVehicl
   );
 }
 
+function operationalReplacementTable(records) {
+  if (!records.length) {
+    return empty("No operational replacement forms", "Replacement forms completed in Operations appear here automatically.");
+  }
+  const dataMaps = maps();
+  const rows = records.map((record) => {
+    const replacement = dataMaps.vehicles.get(record.vehicleId);
+    const reason = record.replacementReasonCategory === "accident"
+      ? tr("Accident")
+      : record.replacementReasonCategory === "technical_fault"
+        ? tr("Technical fault / maintenance")
+        : tr("Not specified");
+    return `<tr><td><strong>${clean(record.reference)}</strong><small>${date(record.occurredAt, true)}</small></td>
+      <td>${clean(record.customerName || "—")}</td>
+      <td>${clean(record.secondaryLicensePlate || "—")}</td>
+      <td>${replacement ? `<span class="vehicle-table-identity is-inline">${vehicleBrandMark(replacement.make, "vehicle-brand-mark is-compact")}<span>${clean(replacement.registrationPlate)}</span></span>` : clean(record.licensePlate || "—")}</td>
+      <td>${record.secondaryMileage != null ? `${Number(record.secondaryMileage).toLocaleString(languageLocales[state.language])} km` : "—"}</td>
+      <td>${record.mileage != null ? `${Number(record.mileage).toLocaleString(languageLocales[state.language])} km` : "—"}</td>
+      <td>${clean(reason)}</td><td>${badge(record.status)}</td>
+      <td><button class="icon-button" data-action="view-record" data-id="${record.id}">${clean(tr("View"))}</button></td></tr>`;
+  }).join("");
+  return table(["Reference", "Driver", "Vehicle being replaced", "Replacement vehicle", "Damaged vehicle mileage", "Replacement vehicle mileage", "Replacement reason", "Status", ""], rows);
+}
+
+function replacementCasesOperationTable(cases) {
+  if (!cases.length) return empty("No replacement cases", "Replacement cases created here also appear in Operations.");
+  const dataMaps = maps();
+  const rows = cases.map((item) => {
+    const driver = dataMaps.drivers.get(item.driverId);
+    const damaged = dataMaps.vehicles.get(item.damagedVehicleId);
+    const replacement = dataMaps.vehicles.get(item.replacementVehicleId);
+    const reason = item.reasonCategory === "accident"
+      ? tr("Accident")
+      : item.reasonCategory === "technical_fault"
+        ? tr("Technical fault / maintenance")
+        : tr("Not specified");
+    return `<tr><td><span class="record-operation-identity">${actionPictogram("breakdown_replacement")}<span><strong>${clean(tr("Vehicle replacement"))}</strong><small>${clean(item.reference)}</small></span></span></td>
+      <td>${damaged ? `<span class="record-vehicle-identity">${vehicleBrandMark(damaged.make, "vehicle-brand-mark is-compact")}<span>${clean(damaged.registrationPlate)}</span></span>` : "—"}</td>
+      <td>${replacement ? `<span class="record-vehicle-identity">${vehicleBrandMark(replacement.make, "vehicle-brand-mark is-compact")}<span>${clean(replacement.registrationPlate)}</span></span>` : "—"}</td>
+      <td><strong>${clean(driver?.fullName || "—")}</strong><small>${clean(reason)}</small></td><td>${date(item.occurredAt, true)}</td>
+      <td>${badge(item.status)}</td><td><button class="icon-button" data-action="view-replacement-case" data-id="${item.id}">${clean(tr("View"))}</button></td></tr>`;
+  }).join("");
+  return table(["Operation", "Vehicle being replaced", "Replacement vehicle", "Driver", "Date", "Status", ""], rows);
+}
+
 function renderReplacements() {
   const dataMaps = maps();
   const cases = state.data.vehicleReplacements || [];
+  const operationalRecords = (state.data.workflows || []).filter((record) => record.type === "breakdown_replacement");
   const rows = cases.map((item) => {
     const customer = dataMaps.customers.get(item.customerId);
     const driver = dataMaps.drivers.get(item.driverId);
@@ -2086,7 +2142,10 @@ function renderReplacements() {
       <td><div class="table-actions"><button class="icon-button" data-action="view-replacement-case" data-id="${item.id}">View</button><button class="icon-button" data-action="edit-replacement-case" data-id="${item.id}">Edit</button><button class="icon-button is-danger" data-action="remove-replacement-case" data-id="${item.id}">Remove</button></div></td></tr>`;
   }).join("");
   el.view.innerHTML = `${header('<button class="primary-button" data-action="create-replacement-case">Create replacement case</button>')}
-    ${cases.length ? table(["Reference", "Company / driver", "Damaged vehicle", "Replacement vehicle", "Damaged vehicle mileage", "Replacement vehicle mileage", "Replacement reason", "Status", ""], rows) : empty("No replacement cases", "Create a replacement case when a damaged vehicle must be exchanged.", '<button class="primary-button" data-action="create-replacement-case">Create replacement case</button>')}`;
+    <section class="panel"><div class="panel-head"><div><h2>${clean(tr("Administrative replacement cases"))}</h2><p>${clean(tr("Replacement cases created here also appear in Operations."))}</p></div></div>
+      ${cases.length ? table(["Reference", "Company / driver", "Damaged vehicle", "Replacement vehicle", "Damaged vehicle mileage", "Replacement vehicle mileage", "Replacement reason", "Status", ""], rows) : empty("No replacement cases", "Create a replacement case when a damaged vehicle must be exchanged.", '<button class="primary-button" data-action="create-replacement-case">Create replacement case</button>')}</section>
+    <section class="panel"><div class="panel-head"><div><h2>${clean(tr("Operational replacement forms"))}</h2><p>${clean(tr("Replacement forms completed in Operations appear here automatically."))}</p></div></div>
+      ${operationalReplacementTable(operationalRecords)}</section>`;
 }
 
 function vehiclesForReplacementCustomer(customerId, driverId = "") {
@@ -2443,7 +2502,8 @@ function renderOperations() {
     <section class="workflow-grid">${allowed
       .map((type) => `<button class="workflow-card" data-workflow="${type}"><span class="workflow-card-top">${actionPictogram(type)}<b>${workflows[type][0]}</b></span><strong>${clean(workflows[type][1])}</strong></button>`)
       .join("")}</section>
-    <section class="panel"><div class="panel-head"><div><h2>Recorded operations</h2></div></div>${recordTable(state.data.workflows)}</section>`;
+    <section class="panel"><div class="panel-head"><div><h2>Recorded operations</h2></div></div>${recordTable(state.data.workflows)}</section>
+    <section class="panel"><div class="panel-head"><div><h2>${clean(tr("Vehicle replacements"))}</h2><p>${clean(tr("Replacement cases created here also appear in Operations."))}</p></div></div>${replacementCasesOperationTable(state.data.vehicleReplacements || [])}</section>`;
 }
 
 function recordTable(records, compact = false) {
