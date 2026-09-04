@@ -1,5 +1,4 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import { internalMutation, internalQuery } from "./_generated/server";
 import { durationValidator, vehicleValidator } from "./schema";
 import { quoteRateLimiter } from "./rateLimits";
@@ -7,6 +6,7 @@ import { quoteRateLimiter } from "./rateLimits";
 const resultValidator = v.object({
   ok: v.boolean(),
   duplicate: v.optional(v.boolean()),
+  quoteRequestId: v.optional(v.id("quoteRequests")),
   reference: v.optional(v.string()),
   retryAfter: v.optional(v.number()),
   limitedBy: v.optional(
@@ -40,7 +40,12 @@ export const createFromWebsite = internalMutation({
       .unique();
 
     if (existing) {
-      return { ok: true, duplicate: true, reference: existing.reference };
+      return {
+        ok: true,
+        duplicate: true,
+        quoteRequestId: existing._id,
+        reference: existing.reference,
+      };
     }
 
     const globalLimit = await quoteRateLimiter.limit(
@@ -111,11 +116,12 @@ export const createFromWebsite = internalMutation({
       emailStatus: "pending",
     });
 
-    await ctx.scheduler.runAfter(0, internal.emails.sendQuoteNotification, {
+    return {
+      ok: true,
+      duplicate: false,
       quoteRequestId,
-    });
-
-    return { ok: true, duplicate: false, reference };
+      reference,
+    };
   },
 });
 
@@ -134,6 +140,12 @@ export const getForEmail = internalQuery({
       startDate: v.optional(v.string()),
       message: v.optional(v.string()),
       createdAt: v.number(),
+      emailStatus: v.union(
+        v.literal("not_configured"),
+        v.literal("pending"),
+        v.literal("sent"),
+        v.literal("failed"),
+      ),
     }),
   ),
   handler: async (ctx, args) => {
@@ -150,6 +162,7 @@ export const getForEmail = internalQuery({
       startDate: request.startDate,
       message: request.message,
       createdAt: request.createdAt,
+      emailStatus: request.emailStatus,
     };
   },
 });
@@ -162,11 +175,17 @@ export const setEmailStatus = internalMutation({
       v.literal("sent"),
       v.literal("failed"),
     ),
+    emailProviderId: v.optional(v.string()),
+    emailLastError: v.optional(v.string()),
+    emailAttemptedAt: v.number(),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
     await ctx.db.patch(args.quoteRequestId, {
       emailStatus: args.emailStatus,
+      emailProviderId: args.emailProviderId,
+      emailLastError: args.emailLastError,
+      emailAttemptedAt: args.emailAttemptedAt,
       updatedAt: Date.now(),
     });
     return null;

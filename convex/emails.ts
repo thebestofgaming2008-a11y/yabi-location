@@ -21,6 +21,7 @@ type QuoteEmailPayload = {
   vehicle:
     | "unspecified"
     | "l1h1"
+    | "l2h2"
     | "master_l2h2_2023"
     | "citroen_l2h2_2019"
     | "l3h2"
@@ -34,6 +35,7 @@ type QuoteEmailPayload = {
   startDate?: string;
   message?: string;
   createdAt: number;
+  emailStatus: "not_configured" | "pending" | "sent" | "failed";
 };
 
 function escapeHtml(value: string): string {
@@ -53,6 +55,16 @@ const durationLabels: Record<string, string> = {
   "over_6_months": "Plus de 6 mois",
 };
 
+const vehicleLabels: Record<string, string> = {
+  unspecified: "Non précisé",
+  l1h1: "L1H1",
+  l2h2: "L2H2",
+  master_l2h2_2023: "Renault Master L2H2 2023",
+  citroen_l2h2_2019: "Citroën Jumper L2H2 2019",
+  l3h2: "L3H2",
+  fleet: "Plusieurs véhicules",
+};
+
 export const sendQuoteNotification = internalAction({
   args: { quoteRequestId: v.id("quoteRequests") },
   returns: resultValidator,
@@ -64,6 +76,9 @@ export const sendQuoteNotification = internalAction({
       },
     );
     if (!request) return { sent: false, reason: "request_not_found" };
+    if (request.emailStatus === "sent") {
+      return { sent: true };
+    }
 
     const apiKey = process.env.RESEND_API_KEY;
     const from = process.env.RESEND_FROM_EMAIL;
@@ -75,6 +90,8 @@ export const sendQuoteNotification = internalAction({
       await ctx.runMutation(internal.quoteRequests.setEmailStatus, {
         quoteRequestId: args.quoteRequestId,
         emailStatus: "not_configured",
+        emailLastError: "email_not_configured",
+        emailAttemptedAt: Date.now(),
       });
       return { sent: false, reason: "email_not_configured" };
     }
@@ -85,6 +102,7 @@ export const sendQuoteNotification = internalAction({
       ["Entreprise", request.company ?? "Non renseignée"],
       ["E-mail", request.email],
       ["Téléphone", request.phone],
+      ["Véhicule", vehicleLabels[request.vehicle] ?? request.vehicle],
       ["Durée", durationLabels[request.duration] ?? request.duration],
       ["Date de début", request.startDate ?? "Non renseignée"],
       ["Message", request.message ?? "Aucun message"],
@@ -104,6 +122,7 @@ export const sendQuoteNotification = internalAction({
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
+          "Idempotency-Key": `quote-notification-${String(args.quoteRequestId)}`,
         },
         body: JSON.stringify({
           from,
@@ -116,22 +135,33 @@ export const sendQuoteNotification = internalAction({
       });
 
       if (!response.ok) {
+        const reason = `resend_${response.status}`;
         await ctx.runMutation(internal.quoteRequests.setEmailStatus, {
           quoteRequestId: args.quoteRequestId,
           emailStatus: "failed",
+          emailLastError: reason,
+          emailAttemptedAt: Date.now(),
         });
-        return { sent: false, reason: `resend_${response.status}` };
+        return { sent: false, reason };
       }
 
+      const body = (await response.json().catch(() => ({}))) as {
+        id?: unknown;
+      };
       await ctx.runMutation(internal.quoteRequests.setEmailStatus, {
         quoteRequestId: args.quoteRequestId,
         emailStatus: "sent",
+        emailProviderId:
+          typeof body.id === "string" ? body.id.slice(0, 200) : undefined,
+        emailAttemptedAt: Date.now(),
       });
       return { sent: true };
     } catch {
       await ctx.runMutation(internal.quoteRequests.setEmailStatus, {
         quoteRequestId: args.quoteRequestId,
         emailStatus: "failed",
+        emailLastError: "request_failed",
+        emailAttemptedAt: Date.now(),
       });
       return { sent: false, reason: "request_failed" };
     }

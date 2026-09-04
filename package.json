@@ -5,15 +5,19 @@
   "description": "YABI Location public website and Convex lead backend",
   "scripts": {
     "check": "tsc --noEmit",
+    "check:media-worker": "tsc --noEmit -p media-worker/tsconfig.json",
     "convex:dev": "convex dev",
-    "convex:deploy": "convex deploy"
+    "convex:deploy": "convex deploy",
+    "media:deploy": "wrangler deploy --config media-worker/wrangler.jsonc"
   },
   "dependencies": {
     "@convex-dev/rate-limiter": "^0.3.2",
     "convex": "^1.42.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260727.1",
     "@types/node": "^26.1.1",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "wrangler": "^4.114.0"
   }
 }

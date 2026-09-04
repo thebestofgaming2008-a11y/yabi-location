@@ -8,8 +8,16 @@
  * @module
  */
 
+import type * as accessCodeVault from "../accessCodeVault.js";
+import type * as applicationEmails from "../applicationEmails.js";
+import type * as applicationHttp from "../applicationHttp.js";
+import type * as applications from "../applications.js";
 import type * as emails from "../emails.js";
 import type * as http from "../http.js";
+import type * as maintenanceCatalog from "../maintenanceCatalog.js";
+import type * as portal from "../portal.js";
+import type * as portalHttp from "../portalHttp.js";
+import type * as portalNotifications from "../portalNotifications.js";
 import type * as quoteRequests from "../quoteRequests.js";
 import type * as rateLimits from "../rateLimits.js";
 
@@ -20,8 +28,16 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  accessCodeVault: typeof accessCodeVault;
+  applicationEmails: typeof applicationEmails;
+  applicationHttp: typeof applicationHttp;
+  applications: typeof applications;
   emails: typeof emails;
   http: typeof http;
+  maintenanceCatalog: typeof maintenanceCatalog;
+  portal: typeof portal;
+  portalHttp: typeof portalHttp;
+  portalNotifications: typeof portalNotifications;
   quoteRequests: typeof quoteRequests;
   rateLimits: typeof rateLimits;
 }>;

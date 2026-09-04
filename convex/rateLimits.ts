@@ -11,14 +11,42 @@ export const quoteRateLimiter = new RateLimiter(components.rateLimiter, {
   },
   quoteSubmissionsByFingerprint: {
     kind: "fixed window",
-    rate: 5,
+    rate: 20,
     period: HOUR,
-    capacity: 5,
+    capacity: 20,
   },
   quoteSubmissionsByEmail: {
     kind: "fixed window",
-    rate: 3,
+    rate: 10,
     period: HOUR,
-    capacity: 3,
+    capacity: 10,
+  },
+});
+
+export const portalRateLimiter = new RateLimiter(components.rateLimiter, {
+  portalLoginGlobal: {
+    kind: "token bucket",
+    rate: 200,
+    period: MINUTE,
+    capacity: 300,
+    shards: 10,
+  },
+  portalLoginByFingerprint: {
+    kind: "fixed window",
+    rate: 8,
+    period: 15 * MINUTE,
+    capacity: 8,
+  },
+  applicationStartByFingerprint: {
+    kind: "fixed window",
+    rate: 20,
+    period: HOUR,
+    capacity: 20,
+  },
+  applicationUploadsByApplication: {
+    kind: "fixed window",
+    rate: 120,
+    period: HOUR,
+    capacity: 120,
   },
 });
