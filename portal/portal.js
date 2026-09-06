@@ -490,6 +490,9 @@ const translations = {
     "Company notification": "Notification à l’entreprise",
     "Open document": "Ouvrir le document",
     pending: "en attente",
+    approved: "approuvée",
+    rejected: "refusée",
+    not_required: "non requise",
     sent: "envoyée",
     failed: "échouée",
     not_configured: "non configurée",
@@ -611,6 +614,48 @@ const translations = {
     "The file could not be prepared or uploaded. Please try another file.": "Le fichier n’a pas pu être préparé ou téléchargé. Essayez un autre fichier.",
     "PDF documents up to 20 MB.": "Documents PDF jusqu’à 20 Mo.",
     "This file is too large. Vehicle-document PDFs can be up to 20 MB.": "Ce fichier est trop volumineux. Les PDF des véhicules peuvent atteindre 20 Mo.",
+    "Activity & approvals": "Activité et validations",
+    "Review pending vehicle changes and operational history.": "Examinez les modifications de véhicules en attente et l’historique opérationnel.",
+    "Pending approvals": "Validations en attente",
+    "Inspect the submitted operation and evidence before changing the fleet record.": "Examinez l’opération et les preuves envoyées avant de modifier la fiche de flotte.",
+    "Operational activity": "Activité opérationnelle",
+    "Vehicle, assignment, document, and operation changes only.": "Uniquement les modifications de véhicules, d’attributions, de documents et d’opérations.",
+    "Approval history": "Historique des validations",
+    "Nothing awaiting approval": "Aucune validation en attente",
+    "All vehicle information is up to date.": "Toutes les informations des véhicules sont à jour.",
+    "No operational activity": "Aucune activité opérationnelle",
+    "Operational changes will appear here.": "Les modifications opérationnelles apparaîtront ici.",
+    "Requested change": "Modification demandée",
+    "Vehicle information change": "Modification des informations du véhicule",
+    "Inspect": "Examiner",
+    "Accept": "Accepter",
+    "Reject": "Refuser",
+    "Inspect vehicle change": "Examiner la modification du véhicule",
+    "Open submitted operation and evidence": "Ouvrir l’opération et les preuves envoyées",
+    "Reject vehicle change": "Refuser la modification du véhicule",
+    "Reject change": "Refuser la modification",
+    "Reason for rejection": "Motif du refus",
+    "Review note": "Note de validation",
+    "Accept this vehicle information change?": "Accepter cette modification des informations du véhicule ?",
+    "Change vehicle": "Changer de véhicule",
+    "Assign vehicle": "Attribuer un véhicule",
+    "Assigned vehicle": "Véhicule attribué",
+    "Save assignment": "Enregistrer l’attribution",
+    "Assignment saved": "Attribution enregistrée",
+    "No vehicle": "Aucun véhicule",
+    "A driver can have one active vehicle. Only available vehicles can be selected.": "Un chauffeur peut avoir un seul véhicule actif. Seuls les véhicules disponibles peuvent être sélectionnés.",
+    "Mileage": "Kilométrage",
+    "Fuel level": "Niveau de carburant",
+    "Autonomy": "Autonomie",
+    "Submitted": "Envoyé",
+    "Submitted by": "Envoyé par",
+    "Request": "Demande",
+    "Portal user": "Utilisateur du portail",
+    "Vehicle update approval": "Validation de la mise à jour du véhicule",
+    "A driver can have only one active vehicle.": "Un chauffeur ne peut avoir qu’un seul véhicule actif.",
+    "This vehicle change request no longer exists.": "Cette demande de modification de véhicule n’existe plus.",
+    "This vehicle change has already been reviewed.": "Cette modification de véhicule a déjà été examinée.",
+    "Add a reason before rejecting this change.": "Ajoutez un motif avant de refuser cette modification.",
   },
   nl: {
     "Skip to content": "Ga naar inhoud",
@@ -1097,6 +1142,9 @@ const translations = {
     "Company notification": "Bedrijfskennisgeving",
     "Open document": "Document openen",
     pending: "in afwachting",
+    approved: "goedgekeurd",
+    rejected: "afgewezen",
+    not_required: "niet vereist",
     sent: "verzonden",
     failed: "mislukt",
     not_configured: "niet geconfigureerd",
@@ -1218,6 +1266,48 @@ const translations = {
     "The file could not be prepared or uploaded. Please try another file.": "Het bestand kon niet worden voorbereid of geüpload. Probeer een ander bestand.",
     "PDF documents up to 20 MB.": "PDF-documenten tot 20 MB.",
     "This file is too large. Vehicle-document PDFs can be up to 20 MB.": "Dit bestand is te groot. PDF-voertuigdocumenten mogen maximaal 20 MB zijn.",
+    "Activity & approvals": "Activiteit en goedkeuringen",
+    "Review pending vehicle changes and operational history.": "Controleer voertuigwijzigingen in afwachting en de operationele historiek.",
+    "Pending approvals": "Wachtende goedkeuringen",
+    "Inspect the submitted operation and evidence before changing the fleet record.": "Controleer de ingediende handeling en bewijzen voordat de vlootfiche wordt aangepast.",
+    "Operational activity": "Operationele activiteit",
+    "Vehicle, assignment, document, and operation changes only.": "Alleen voertuig-, toewijzings-, document- en operationele wijzigingen.",
+    "Approval history": "Goedkeuringshistoriek",
+    "Nothing awaiting approval": "Geen goedkeuringen in afwachting",
+    "All vehicle information is up to date.": "Alle voertuiginformatie is actueel.",
+    "No operational activity": "Geen operationele activiteit",
+    "Operational changes will appear here.": "Operationele wijzigingen verschijnen hier.",
+    "Requested change": "Gevraagde wijziging",
+    "Vehicle information change": "Wijziging van voertuiginformatie",
+    "Inspect": "Controleren",
+    "Accept": "Goedkeuren",
+    "Reject": "Afwijzen",
+    "Inspect vehicle change": "Voertuigwijziging controleren",
+    "Open submitted operation and evidence": "Ingediende handeling en bewijzen openen",
+    "Reject vehicle change": "Voertuigwijziging afwijzen",
+    "Reject change": "Wijziging afwijzen",
+    "Reason for rejection": "Reden van afwijzing",
+    "Review note": "Beoordelingsnotitie",
+    "Accept this vehicle information change?": "Deze wijziging van voertuiginformatie goedkeuren?",
+    "Change vehicle": "Voertuig wijzigen",
+    "Assign vehicle": "Voertuig toewijzen",
+    "Assigned vehicle": "Toegewezen voertuig",
+    "Save assignment": "Toewijzing opslaan",
+    "Assignment saved": "Toewijzing opgeslagen",
+    "No vehicle": "Geen voertuig",
+    "A driver can have one active vehicle. Only available vehicles can be selected.": "Een chauffeur kan één actief voertuig hebben. Alleen beschikbare voertuigen kunnen worden gekozen.",
+    "Mileage": "Kilometerstand",
+    "Fuel level": "Brandstofniveau",
+    "Autonomy": "Actieradius",
+    "Submitted": "Ingediend",
+    "Submitted by": "Ingediend door",
+    "Request": "Aanvraag",
+    "Portal user": "Portaalgebruiker",
+    "Vehicle update approval": "Goedkeuring van voertuigupdate",
+    "A driver can have only one active vehicle.": "Een chauffeur kan slechts één actief voertuig hebben.",
+    "This vehicle change request no longer exists.": "Deze aanvraag voor een voertuigwijziging bestaat niet meer.",
+    "This vehicle change has already been reviewed.": "Deze voertuigwijziging is al beoordeeld.",
+    "Add a reason before rejecting this change.": "Voeg een reden toe voordat u deze wijziging afwijst.",
   },
 };
 
@@ -1231,9 +1321,9 @@ const roles = {
 };
 
 const roleViews = {
-  admin: ["overview", "applications", "access", "customers", "drivers", "fleet", "rentals", "replacements", "operations", "audit"],
+  admin: ["overview", "applications", "access", "customers", "drivers", "fleet", "rentals", "operations", "activity", "audit"],
   employee: ["overview", "customers", "fleet", "rentals", "operations"],
-  mechanic: ["overview", "fleet", "operations"],
+  mechanic: ["overview", "fleet", "operations", "activity"],
   contractor: ["overview", "rentals", "operations"],
   customer: ["overview", "profile", "fleet", "drivers", "operations"],
   driver: ["overview", "fleet", "operations"],
@@ -1256,8 +1346,8 @@ const viewCopy = {
   drivers: ["Drivers", "Manage company drivers and their personal access."],
   fleet: ["Fleet", "Availability, mileage, and vehicle status at a glance."],
   rentals: ["Rentals", "Follow every rental from planning to closure."],
-  replacements: ["Vehicle replacements", "Plan and document every damaged-vehicle replacement."],
   operations: ["Operations", "Guided procedures with time-stamped evidence."],
+  activity: ["Activity & approvals", "Review pending vehicle changes and operational history."],
   audit: ["Audit trail", "A traceable record of sensitive actions."],
   profile: ["My details", "Keep your personal and licence information accurate."],
 };
@@ -1434,7 +1524,7 @@ function workspaceLabel(role) {
 const state = {
   token: localStorage.getItem(TOKEN_KEY) || "",
   data: null,
-  view: location.hash.slice(1) || "overview",
+  view: location.hash.slice(1) === "replacements" ? "operations" : (location.hash.slice(1) || "overview"),
   language: supportedLanguages.includes(localStorage.getItem(LANGUAGE_KEY))
     ? localStorage.getItem(LANGUAGE_KEY)
     : "en",
@@ -1669,6 +1759,10 @@ function messageFor(error) {
     vehicle_exists: "A vehicle with this registration plate already exists.",
     upload_failed: "The file could not be prepared or uploaded. Please try another file.",
     invalid_file_size: "This file is too large. Vehicle-document PDFs can be up to 20 MB.",
+    one_active_vehicle_per_driver: "A driver can have only one active vehicle.",
+    change_request_not_found: "This vehicle change request no longer exists.",
+    change_request_already_reviewed: "This vehicle change has already been reviewed.",
+    rejection_reason_required: "Add a reason before rejecting this change.",
   };
   return tr(messages[error?.message] || "Something went wrong. Please try again.");
 }
@@ -1714,15 +1808,28 @@ function showApp() {
   el.app.hidden = false;
 }
 
-async function refresh() {
+async function refresh({ background = false } = {}) {
   try {
     const result = await api("/api/portal/data");
     state.data = result.data;
+    if (state.data.account.role === "mechanic") {
+      state.data.customers = (state.data.approverCustomers || []).map((customer) => ({
+        id: customer.id,
+        fullName: customer.name,
+        company: customer.name,
+        status: "active",
+      }));
+      state.data.drivers = (state.data.approverDrivers || []).map((driver) => ({
+        ...driver,
+        active: true,
+        assignedVehicleIds: driver.assignedVehicleId ? [driver.assignedVehicleId] : [],
+      }));
+    }
     const allowed = allowedViews();
     if (!allowed.includes(state.view)) state.view = "overview";
     showApp();
     renderNavigation();
-    render();
+    if (!background || !el.modal.open) render();
   } catch (error) {
     if (error.status === 401) {
       state.token = "";
@@ -1739,11 +1846,12 @@ function renderNavigation() {
   el.profileRole.textContent = tr(roles[account.role] || account.role);
   el.profileAvatar.textContent = initials(account.displayName);
   el.workspace.textContent = workspaceLabel(account.role);
+  const pendingCount = (state.data.changeRequests || []).filter((request) => request.status === "pending").length;
   el.navigation.innerHTML = allowedViews()
     .map(
       (view) => `<button class="nav-button ${state.view === view ? "active" : ""}" data-view="${view}">
         ${navigationPictogram(view)}
-        <strong>${clean(navigationLabel(view, account.role))}</strong>
+        <strong>${clean(navigationLabel(view, account.role))}</strong>${view === "activity" && pendingCount ? `<span class="nav-count" aria-label="${pendingCount} pending">${pendingCount}</span>` : ""}
       </button>`,
     )
     .join("");
@@ -1764,7 +1872,7 @@ function empty(title, description, action = "") {
 
 function table(head, rows) {
   return `<div class="data-panel"><div class="table-wrap"><table class="data-table">
-    <thead><tr>${head.map((item) => `<th>${clean(item)}</th>`).join("")}</tr></thead>
+    <thead><tr>${head.map((item) => `<th>${clean(tr(item))}</th>`).join("")}</tr></thead>
     <tbody>${rows}</tbody>
   </table></div></div>`;
 }
@@ -1790,6 +1898,7 @@ function render() {
     rentals: renderRentals,
     replacements: renderReplacements,
     operations: renderOperations,
+    activity: renderActivity,
     audit: renderAudit,
     profile: renderProfile,
   };
@@ -1812,7 +1921,7 @@ function quickActions() {
       ["Access", "Create a personal code", "access"],
       ["Fleet", "Register a vehicle", "fleet"],
       ["Rental", "Connect customer and vehicle", "rentals"],
-      ["Vehicle replacement", "Replace a damaged vehicle", "replacements"],
+      ["Vehicle replacement", "Replace a damaged vehicle", "operations"],
       ["Report", "Record a new issue", "report"],
     ],
     employee: [
@@ -1825,6 +1934,8 @@ function quickActions() {
     ],
     mechanic: [
       ["Maintenance", "Record completed work", "maintenance"],
+      ["Vehicle replacement", "Assign a replacement after damage or a technical fault", "operations"],
+      ["Approvals", "Review pending vehicle changes", "activity"],
       ["Report", "Flag another concern", "report"],
     ],
     contractor: [
@@ -1952,6 +2063,7 @@ function renderOverview() {
           ["Available", vehicles.filter((v) => v.status === "available").length],
           ["Active rentals", rentals.filter((r) => ["scheduled", "active"].includes(r.status)).length],
           ["Open reports", openReports.length],
+          ["Pending approvals", (state.data.changeRequests || []).filter((request) => request.status === "pending").length],
           ["Today", records.filter((r) => new Date(r.occurredAt).toDateString() === new Date().toDateString()).length],
         ];
   const actions = quickActions();
@@ -2021,7 +2133,7 @@ function renderDrivers() {
       ${state.data.account.role === "admin" ? `<td>${assignedVehicles.length ? assignedVehicles.map((vehicle) => `<span class="vehicle-table-identity is-inline">${vehicleBrandMark(vehicle.make, "vehicle-brand-mark is-compact")}<span>${clean(vehicle.registrationPlate)}</span></span>`).join("") : clean(tr("No vehicle assigned"))}</td>` : ""}
       <td>${driver.codeHint ? `<span class="account-code-row"><code data-driver-code>YABI-••••-••••-${clean(driver.codeHint)}</code>${canManage ? `<button class="inline-code-button" data-action="reveal-driver-code" data-id="${driver.id}">${clean(tr("Reveal"))}</button><button class="inline-code-button" data-action="copy-driver-code" data-id="${driver.id}" hidden>${clean(tr("Copy"))}</button>` : ""}</span>` : clean(tr("No access code"))}</td>
       <td><div class="table-actions"><button class="icon-button" data-action="view-driver" data-id="${driver.id}">View</button>${state.data.account.role === "admin" ? `<button class="icon-button" data-action="edit-driver" data-id="${driver.id}">Edit</button><button class="icon-button is-danger" data-action="remove-driver" data-id="${driver.id}">Remove</button>` : ""}
-      ${state.data.account.role === "admin" ? `<button class="icon-button" data-action="assign-driver-vehicles" data-id="${driver.id}">${clean(tr("Assign vehicles"))}</button>` : ""}
+      ${state.data.account.role === "admin" ? `<button class="icon-button" data-action="assign-driver-vehicles" data-id="${driver.id}">${clean(tr("Assign vehicle"))}</button>${assignedVehicles[0] ? `<button class="icon-button" data-action="change-driver-vehicle" data-id="${driver.id}">${clean(tr("Change vehicle"))}</button>` : ""}` : ""}
       ${canManage && !driver.portalAccountId ? `<button class="icon-button" data-action="driver-access" data-id="${driver.id}">Create code</button>` : ""}
       ${canManage ? `<button class="icon-button" data-action="toggle-driver" data-id="${driver.id}" data-active="${driver.active && driver.accountActive !== false}">${driver.active && driver.accountActive !== false ? "Deactivate" : "Reactivate"}</button>` : ""}</div></td></tr>`;
   }).join("");
@@ -2031,7 +2143,7 @@ function renderDrivers() {
 
 function renderFleet() {
   const vehicles = state.data.vehicles;
-  const canUpdate = ["admin", "employee"].includes(state.data.account.role);
+  const canUpdate = ["admin", "mechanic"].includes(state.data.account.role);
   const canSeeDocuments = ["admin", "customer", "driver"].includes(state.data.account.role);
   const rows = vehicles
     .map(
@@ -2039,7 +2151,7 @@ function renderFleet() {
       <td>${clean(vehicle.format.toUpperCase())}</td><td>${clean(vehicle.year)}</td><td>${clean(vehicle.color)}</td>
       <td>${vehicle.currentMileage.toLocaleString(languageLocales[state.language])} km</td><td>${badge(vehicle.status)}</td>
       ${canSeeDocuments ? `<td><button class="document-count-button" data-action="manage-vehicle-documents" data-id="${vehicle.id}"><strong>${(state.data.vehicleDocuments || []).filter((item) => item.vehicleId === vehicle.id).length}</strong><span>${clean(tr(state.data.account.role === "admin" ? "Manage documents" : "View documents"))}</span></button></td>` : ""}
-      ${canUpdate ? `<td><div class="table-actions"><button class="icon-button" data-action="vehicle-status" data-id="${vehicle.id}">${state.data.account.role === "admin" ? "Edit" : "Update"}</button>${state.data.account.role === "admin" ? `<button class="icon-button is-danger" data-action="remove-vehicle" data-id="${vehicle.id}">Remove</button>` : ""}</div></td>` : ""}</tr>`,
+      ${canUpdate ? `<td><div class="table-actions"><button class="icon-button" data-action="vehicle-status" data-id="${vehicle.id}">${state.data.account.role === "admin" ? "Edit" : "Update"}</button><button class="icon-button" data-action="change-vehicle" data-id="${vehicle.id}">${clean(tr("Change vehicle"))}</button>${state.data.account.role === "admin" ? `<button class="icon-button is-danger" data-action="remove-vehicle" data-id="${vehicle.id}">Remove</button>` : ""}</div></td>` : ""}</tr>`,
     )
     .join("");
   el.view.innerHTML = `${header(state.data.account.role === "admin" ? '<button class="primary-button" data-action="create-vehicle">Add vehicle</button>' : "")}
@@ -2069,13 +2181,17 @@ function freeReplacementVehicles(damagedVehicleId = "", currentReplacementVehicl
       .filter((replacementCase) => replacementCase.status !== "cancelled")
       .map((replacementCase) => replacementCase.replacementVehicleId),
   );
+  const assignedVehicleIds = new Set(
+    (state.data.drivers || []).flatMap((driver) => driver.assignedVehicleIds || []),
+  );
   return (state.data.vehicles || []).filter(
     (vehicle) =>
       vehicle.id !== damagedVehicleId &&
       (vehicle.id === currentReplacementVehicleId ||
         (vehicle.status === "available" &&
           !committedRentalVehicleIds.has(vehicle.id) &&
-          !committedReplacementVehicleIds.has(vehicle.id))),
+          !committedReplacementVehicleIds.has(vehicle.id) &&
+          !assignedVehicleIds.has(vehicle.id))),
   );
 }
 
@@ -2239,7 +2355,24 @@ function replacementEvidenceFields() {
   </div></section>`;
 }
 
-function createReplacementCase() {
+function openVehicleChange(vehicleId, driverId = "", customerId = "") {
+  const driver = (state.data.drivers || []).find((item) =>
+    driverId ? item.id === driverId : (item.assignedVehicleIds || []).includes(vehicleId),
+  );
+  const vehicle = (state.data.vehicles || []).find((item) => item.id === vehicleId);
+  if (!driver || !vehicle) {
+    toast("Assign the current vehicle to a driver before replacing it.", "error");
+    return;
+  }
+  createReplacementCase({
+    customerId: customerId || driver.customerId,
+    driverId: driver.id,
+    damagedVehicleId: vehicle.id,
+    damagedMileage: vehicle.currentMileage,
+  });
+}
+
+function createReplacementCase(selected = {}) {
   if (!state.data.customers.length || !state.data.drivers.length || !state.data.vehicles.length) {
     toast("Add an account holder, driver and vehicle before creating a replacement case.", "error");
     return;
@@ -2253,7 +2386,7 @@ function createReplacementCase() {
         ${select("Driver’s company / account holder", "customerId", state.data.customers.filter((customer) => customer.status !== "inactive").map((customer) => [customer.id, customer.company || customer.fullName]), true)}
         <div data-replacement-driver>${select("Driver", "driverId", [], true)}</div>
         <div data-replacement-damaged>${select("Damaged vehicle", "damagedVehicleId", [], true)}</div>
-        ${field("Damaged vehicle mileage", "damagedMileage", "", true, "number", 'min="0" max="2000000"')}
+        ${field("Damaged vehicle mileage", "damagedMileage", selected.damagedMileage ?? "", true, "number", 'min="0" max="2000000"')}
         ${select("Replacement reason", "reasonCategory", [["accident", "Accident"], ["technical_fault", "Breakdown / maintenance"]], true)}
         ${field("Assigned by", "assignedByName", state.data.account.displayName, true)}
       </div>${textareaField("Replacement details", "reason", "", true)}${textareaField("Internal notes", "notes")}</section>
@@ -2289,7 +2422,7 @@ function createReplacementCase() {
         closeModal();
         toast("Replacement case created.");
         await refresh();
-        navigate("replacements");
+        navigate("operations");
         await viewReplacementCase(result.replacementCaseId);
       } catch (error) {
         await discardUploadGroup(uploadGroupId);
@@ -2298,7 +2431,7 @@ function createReplacementCase() {
       }
     },
   });
-  bindReplacementRelationships(el.modalBody.querySelector("form"));
+  bindReplacementRelationships(el.modalBody.querySelector("form"), selected);
   bindReplacementSource(el.modalBody.querySelector("form"));
   setCustomValue(el.modalBody, "replacementSource", "existing");
   setCustomValue(el.modalBody, "status", "planned");
@@ -2356,7 +2489,7 @@ function editReplacementCase(id) {
       const values = Object.fromEntries(data);
       values.damagedMileage = Number(values.damagedMileage);
       await api("/api/portal/admin", { method: "POST", body: { operation: "update_replacement_case", replacementCaseId: id, ...values } });
-      closeModal(); toast("Replacement case updated."); await refresh(); navigate("replacements");
+      closeModal(); toast("Replacement case updated."); await refresh(); navigate("operations");
     },
   });
   bindReplacementRelationships(el.modalBody.querySelector("form"), item);
@@ -2375,7 +2508,7 @@ function removeReplacementCase(id) {
     handler: async (data) => {
       if (String(data.get("confirmation") || "").trim().toUpperCase() !== item.reference.toUpperCase()) throw new Error("confirmation_mismatch");
       await api("/api/portal/admin", { method: "POST", body: { operation: "remove_replacement_case", replacementCaseId: id } });
-      closeModal(); toast("Replacement case removed."); await refresh(); navigate("replacements");
+      closeModal(); toast("Replacement case removed."); await refresh(); navigate("operations");
     },
   });
 }
@@ -2472,7 +2605,7 @@ function renderRentals() {
         <td>${vehicle ? `<span class="vehicle-table-identity">${vehicleBrandMark(vehicle.make)}<span>${clean(`${vehicle.registrationPlate} · ${vehicle.make} ${vehicle.model}`)}</span></span>` : "—"}</td>
         <td>${date(rental.startDate)} → ${date(rental.expectedEndDate)}</td>
         <td>${money(rental.monthlyPriceCents)}<small>excl. VAT / month</small></td><td>${badge(rental.status)}</td>
-        ${admin ? `<td><div class="table-actions"><button class="icon-button" data-action="rental-status" data-id="${rental.id}">Edit</button><button class="icon-button is-danger" data-action="remove-rental" data-id="${rental.id}">Remove</button></div></td>` : ""}</tr>`;
+        ${admin ? `<td><div class="table-actions"><button class="icon-button" data-action="rental-status" data-id="${rental.id}">Edit</button><button class="icon-button" data-action="change-rental-vehicle" data-id="${rental.id}">${clean(tr("Change vehicle"))}</button><button class="icon-button is-danger" data-action="remove-rental" data-id="${rental.id}">Remove</button></div></td>` : ""}</tr>`;
     })
     .join("");
   el.view.innerHTML = `${header(admin ? '<button class="primary-button" data-action="create-rental">Create rental</button>' : "")}
@@ -2482,7 +2615,7 @@ function renderRentals() {
 function renderOperations() {
   const allowed = allowedWorkflows();
   const role = state.data.account.role;
-  if (role !== "admin") {
+  if (role !== "admin" && role !== "mechanic") {
     const actions = quickActions().filter(([, , target]) => workflows[target] && allowed.includes(target));
     const records = (state.data.workflows || []).filter((record) =>
       role === "customer" || record.actorAccountId === state.data.account.id,
@@ -2498,7 +2631,10 @@ function renderOperations() {
       </section>`;
     return;
   }
-  el.view.innerHTML = `${header()}
+  const replacementButton = ["admin", "mechanic"].includes(role)
+    ? '<button class="primary-button" data-action="create-replacement-case">Create replacement case</button>'
+    : "";
+  el.view.innerHTML = `${header(replacementButton)}
     <section class="workflow-grid">${allowed
       .map((type) => `<button class="workflow-card" data-workflow="${type}"><span class="workflow-card-top">${actionPictogram(type)}<b>${workflows[type][0]}</b></span><strong>${clean(workflows[type][1])}</strong></button>`)
       .join("")}</section>
@@ -2512,15 +2648,101 @@ function recordTable(records, compact = false) {
   const rows = records
     .map((record) => {
       const vehicle = dataMaps.vehicles.get(record.vehicleId);
-      const account = dataMaps.accounts.get(record.actorAccountId);
+      const account = dataMaps.accounts.get(record.actorAccountId) || (record.actorAccountId === state.data.account.id ? state.data.account : null);
       return `<tr><td><span class="record-operation-identity">${actionPictogram(record.type)}<span><strong>${clean(workflows[record.type]?.[1] || record.type)}</strong><small>${clean(record.reference)}</small></span></span></td>
         <td><span class="record-vehicle-identity">${vehicleBrandMark(vehicle?.make, "vehicle-brand-mark is-compact")}<span>${clean(vehicle ? vehicle.registrationPlate : record.licensePlate || "—")}</span></span></td>
         ${compact ? "" : `<td>${clean(record.performedByName || account?.displayName || "Portal user")}</td>`}<td>${date(record.occurredAt, true)}</td>
-        <td>${badge(record.status)}</td><td><div class="table-actions"><button class="icon-button" data-action="view-record" data-id="${record.id}">View</button>${state.data.account.role === "admin" ? `<button class="icon-button is-danger" data-action="remove-record" data-id="${record.id}">Remove</button>` : ""}
+        <td>${badge(record.approvalStatus === "pending" ? "pending" : record.status)}${record.approvalStatus && !["not_required", "pending"].includes(record.approvalStatus) ? `<small>${clean(tr(record.approvalStatus))}</small>` : ""}</td><td><div class="table-actions"><button class="icon-button" data-action="view-record" data-id="${record.id}">View</button>${state.data.account.role === "admin" ? `<button class="icon-button is-danger" data-action="remove-record" data-id="${record.id}">Remove</button>` : ""}
         ${["report", "problem_report", "accident_report", "payment_proof"].includes(record.type) && record.status !== "resolved" && ["admin", "employee"].includes(state.data.account.role) ? `<button class="icon-button" data-action="resolve-report" data-id="${record.id}">Resolve</button>` : ""}</div></td></tr>`;
     })
     .join("");
   return table(["Operation", "Vehicle", ...(compact ? [] : ["Person"]), "Date", "Status", ""], rows);
+}
+
+function snapshotObject(value) {
+  try { return value ? JSON.parse(value) : {}; } catch { return {}; }
+}
+
+function changeSummary(request) {
+  const before = snapshotObject(request.beforeSnapshot);
+  const after = snapshotObject(request.requestedSnapshot);
+  const labels = [
+    ["mileage", "Mileage", " km"],
+    ["fuelPercent", "Fuel level", "%"],
+    ["autonomyKm", "Autonomy", " km"],
+    ["status", "Status", ""],
+  ];
+  const changes = labels
+    .filter(([key]) => after[key] !== undefined && after[key] !== before[key])
+    .map(([key, label, suffix]) => `${tr(label)}: ${before[key] ?? "—"} → ${after[key]}${suffix}`);
+  return changes.length ? changes.join(" · ") : tr("Vehicle information change");
+}
+
+function renderActivity() {
+  const dataMaps = maps();
+  const requests = state.data.changeRequests || [];
+  const pending = requests.filter((request) => request.status === "pending");
+  const decided = requests.filter((request) => request.status !== "pending").slice(0, 50);
+  const activity = state.data.operationalActivities || [];
+  const requestRows = (items, actionable) => items.map((request) => {
+    const vehicle = dataMaps.vehicles.get(request.vehicleId);
+    const submitter = dataMaps.accounts.get(request.submittedBy);
+    const matchingActivity = activity.find((entry) => entry.changeRequestId === request.id);
+    return `<tr><td><strong>${clean(request.reference)}</strong><small>${date(request.submittedAt, true)}</small></td>
+      <td>${vehicle ? `<span class="vehicle-table-identity is-inline">${vehicleBrandMark(vehicle.make, "vehicle-brand-mark is-compact")}<span>${clean(vehicle.registrationPlate)}</span></span>` : "—"}</td>
+      <td><strong>${clean(submitter?.displayName || matchingActivity?.actorName || tr("Portal user"))}</strong><small>${clean(tr(roles[request.submittedByRole] || request.submittedByRole))}</small></td>
+      <td>${clean(changeSummary(request))}</td><td>${badge(request.status)}</td>
+      <td><div class="table-actions"><button class="icon-button" data-action="inspect-change" data-id="${request.id}">${clean(tr("Inspect"))}</button>${actionable ? `<button class="icon-button is-positive" data-action="approve-change" data-id="${request.id}">${clean(tr("Accept"))}</button><button class="icon-button is-danger" data-action="reject-change" data-id="${request.id}">${clean(tr("Reject"))}</button>` : ""}</div></td></tr>`;
+  }).join("");
+  el.view.innerHTML = `${header()}
+    <section class="panel approval-panel"><div class="panel-head"><div><h2>${clean(tr("Pending approvals"))}</h2><p>${clean(tr("Inspect the submitted operation and evidence before changing the fleet record."))}</p></div><span class="approval-total">${pending.length}</span></div>
+      ${pending.length ? table(["Request", "Vehicle", "Submitted by", "Requested change", "Status", ""], requestRows(pending, true)) : empty("Nothing awaiting approval", "All vehicle information is up to date.")}</section>
+    <section class="panel"><div class="panel-head"><div><h2>${clean(tr("Operational activity"))}</h2><p>${clean(tr("Vehicle, assignment, document, and operation changes only."))}</p></div></div>
+      ${activity.length ? `<div class="timeline">${activity.map((entry) => `<article class="timeline-item"><strong>${clean(tr(entry.title))}</strong><p>${clean(entry.summary)}</p><span>${clean(entry.actorName)} · ${date(entry.createdAt, true)}</span></article>`).join("")}</div>` : empty("No operational activity", "Operational changes will appear here.")}</section>
+    ${decided.length ? `<section class="panel"><div class="panel-head"><div><h2>${clean(tr("Approval history"))}</h2></div></div>${table(["Request", "Vehicle", "Submitted by", "Requested change", "Status", ""], requestRows(decided, false))}</section>` : ""}`;
+}
+
+function inspectChangeRequest(id) {
+  const request = (state.data.changeRequests || []).find((item) => item.id === id);
+  if (!request) return;
+  const vehicle = maps().vehicles.get(request.vehicleId);
+  const source = (state.data.workflows || []).find((record) => record.id === request.workflowRecordId);
+  const item = (label, value) => `<div class="field readonly-field"><label>${clean(tr(label))}</label><div class="readonly-value">${clean(value || "—")}</div></div>`;
+  modal({
+    kicker: request.reference,
+    title: "Inspect vehicle change",
+    submit: null,
+    content: `<div class="record-detail-grid">${item("Vehicle", vehicle ? `${vehicle.registrationPlate} · ${vehicle.make} ${vehicle.model}` : "—")}${item("Submitted", date(request.submittedAt, true))}${item("Role", roles[request.submittedByRole] || request.submittedByRole)}${item("Status", request.status)}</div>
+      <section class="form-section"><h3>${clean(tr("Requested change"))}</h3><p>${clean(changeSummary(request))}</p>${request.reviewNote ? `<p><strong>${clean(tr("Review note"))}:</strong> ${clean(request.reviewNote)}</p>` : ""}</section>
+      ${source ? `<button class="secondary-button" type="button" data-action="view-record" data-id="${source.id}">${clean(tr("Open submitted operation and evidence"))}</button>` : ""}`,
+  });
+  if (source) {
+    el.modalBody.querySelector('[data-action="view-record"]')?.addEventListener("click", () => {
+      closeModal();
+      viewRecord(source.id);
+    });
+  }
+}
+
+async function approveChangeRequest(id) {
+  if (!confirm(tr("Accept this vehicle information change?"))) return;
+  try {
+    await api("/api/portal/admin", { method: "POST", body: { operation: "review_vehicle_change", changeRequestId: id, decision: "approved" } });
+    toast("Vehicle change approved.");
+    await refresh();
+  } catch (error) { toast(messageFor(error), "error"); }
+}
+
+function rejectChangeRequest(id) {
+  modal({
+    title: "Reject vehicle change",
+    submit: "Reject change",
+    content: `<form class="portal-form">${textareaField("Reason for rejection", "reviewNote", "", true)}</form>`,
+    handler: async (data) => {
+      await api("/api/portal/admin", { method: "POST", body: { operation: "review_vehicle_change", changeRequestId: id, decision: "rejected", reviewNote: data.get("reviewNote") } });
+      closeModal(); toast("Vehicle change rejected."); await refresh();
+    },
+  });
 }
 
 function renderAudit() {
@@ -3150,26 +3372,24 @@ function editDriver(id) {
 function assignDriverVehicles(id) {
   const driver = state.data.drivers.find((item) => item.id === id);
   if (!driver || state.data.account.role !== "admin") return;
-  const assigned = new Set(driver.assignedVehicleIds || []);
-  const vehicleOptions = state.data.vehicles.map((vehicle) => `<label class="permission-option vehicle-assignment-option">
-    <input type="checkbox" name="vehicleIds" value="${vehicle.id}" ${assigned.has(vehicle.id) ? "checked" : ""}>
-    ${vehicleBrandMark(vehicle.make, "vehicle-brand-mark is-select")}
-    <span><strong>${clean(vehicle.registrationPlate)}</strong><small>${clean(`${vehicle.make} ${vehicle.model}`)}</small></span>
-  </label>`).join("");
+  const currentVehicleId = driver.assignedVehicleIds?.[0] || "";
+  const vehicleOptions = [["", "No vehicle"], ...vehicleSelectOptions(freeReplacementVehicles("", currentVehicleId), true)];
   modal({
-    title: `${tr("Assign vehicles")} — ${driver.fullName}`,
-    submit: tr("Save assignments"),
-    content: `<form class="portal-form"><fieldset class="permission-field"><legend>${clean(tr("Assigned vehicles"))}</legend><p>${clean(tr("Choose every vehicle this driver may use."))}</p><div class="permission-grid vehicle-assignment-grid">${vehicleOptions}</div></fieldset></form>`,
+    title: `${tr("Assign vehicle")} — ${driver.fullName}`,
+    submit: tr("Save assignment"),
+    content: `<form class="portal-form">${select("Assigned vehicle", "vehicleId", vehicleOptions)}<p class="field-help">${clean(tr("A driver can have one active vehicle. Only available vehicles can be selected."))}</p></form>`,
     handler: async (data) => {
+      const vehicleId = data.get("vehicleId");
       await api("/api/portal/drivers", {
         method: "POST",
-        body: { operation: "assign_vehicles", driverId: id, vehicleIds: data.getAll("vehicleIds") },
+        body: { operation: "assign_vehicles", driverId: id, vehicleIds: vehicleId ? [vehicleId] : [] },
       });
       closeModal();
-      toast(tr("Save assignments"));
+      toast(tr("Assignment saved"));
       await refresh();
     },
   });
+  setCustomValue(el.modalBody, "vehicleId", currentVehicleId);
 }
 
 async function removeDriver(id) {
@@ -3274,11 +3494,19 @@ function updateVehicle(id) {
   if (state.data.account.role !== "admin") {
     modal({
       title: `Update ${vehicle.registrationPlate}`,
-      submit: "Update status",
-      content: `<form class="portal-form">${select("Operational status", "status", [["available", "Available"], ["reserved", "Reserved"], ["rented", "Rented"], ["maintenance", "Maintenance"], ["cleaning", "Cleaning"], ["inactive", "Inactive"]], true)}</form>`,
+      submit: "Save vehicle information",
+      content: `<form class="portal-form"><div class="form-grid">${field("Current mileage", "currentMileage", String(vehicle.currentMileage), true, "number", 'min="0" max="2000000"')}${field("Fuel level (%)", "fuelPercent", vehicle.fuelPercent == null ? "" : String(vehicle.fuelPercent), false, "number", 'min="0" max="100"')}${field("Autonomy (km)", "autonomyKm", vehicle.autonomyKm == null ? "" : String(vehicle.autonomyKm), false, "number", 'min="0" max="5000"')}${select("Operational status", "status", [["available", "Available"], ["reserved", "Reserved"], ["rented", "Rented"], ["maintenance", "Maintenance"], ["cleaning", "Cleaning"], ["inactive", "Inactive"]], true)}</div>${textareaField("Internal notes", "notes", vehicle.notes || "")}</form>`,
       handler: async (data) => {
-        await api("/api/portal/admin", { method: "POST", body: { operation: "update_vehicle_status", vehicleId: id, status: data.get("status") } });
-        closeModal(); await refresh();
+        await api("/api/portal/admin", { method: "POST", body: {
+          operation: "update_vehicle", vehicleId: id,
+          registrationPlate: vehicle.registrationPlate, make: vehicle.make, model: vehicle.model,
+          year: vehicle.year, format: vehicle.format, color: vehicle.color, vin: vehicle.vin,
+          currentMileage: Number(data.get("currentMileage")),
+          fuelPercent: data.get("fuelPercent") ? Number(data.get("fuelPercent")) : undefined,
+          autonomyKm: data.get("autonomyKm") ? Number(data.get("autonomyKm")) : undefined,
+          status: data.get("status"), notes: data.get("notes") || undefined,
+        } });
+        closeModal(); toast("Vehicle updated."); await refresh();
       },
     });
     setCustomValue(el.modalBody, "status", vehicle.status);
@@ -3289,7 +3517,7 @@ function updateVehicle(id) {
     submit: "Save changes",
     content: `<form class="portal-form"><div class="form-grid">
       ${field("Licence plate", "registrationPlate", vehicle.registrationPlate, true)}${field("Make", "make", vehicle.make, true)}${field("Model", "model", vehicle.model, true)}${select("Format", "format", [["l1h1", "L1H1"], ["l2h2", "L2H2"], ["l3h2", "L3H2"]], true)}
-      ${field("Year", "year", String(vehicle.year), true, "number", 'min="1990" max="2100"')}${field("Colour", "color", vehicle.color, true)}${field("Current mileage", "currentMileage", String(vehicle.currentMileage), true, "number", 'min="0"')}${field("Fuel level (%)", "fuelPercent", vehicle.fuelPercent == null ? "" : String(vehicle.fuelPercent), false, "number", 'min="0" max="100"')}
+      ${field("Year", "year", String(vehicle.year), true, "number", 'min="1990" max="2100"')}${field("Colour", "color", vehicle.color, true)}${field("Current mileage", "currentMileage", String(vehicle.currentMileage), true, "number", 'min="0"')}${field("Fuel level (%)", "fuelPercent", vehicle.fuelPercent == null ? "" : String(vehicle.fuelPercent), false, "number", 'min="0" max="100"')}${field("Autonomy (km)", "autonomyKm", vehicle.autonomyKm == null ? "" : String(vehicle.autonomyKm), false, "number", 'min="0" max="5000"')}
       ${field("VIN", "vin", vehicle.vin || "")}${select("Operational status", "status", [["available", "Available"], ["reserved", "Reserved"], ["rented", "Rented"], ["maintenance", "Maintenance"], ["cleaning", "Cleaning"], ["inactive", "Inactive"]], true)}</div>
       <div class="field"><label>${clean(tr("Internal notes"))}</label><textarea name="notes">${clean(vehicle.notes || "")}</textarea></div></form>`,
     handler: async (data) => {
@@ -3297,6 +3525,7 @@ function updateVehicle(id) {
       values.year = Number(values.year);
       values.currentMileage = Number(values.currentMileage);
       values.fuelPercent = values.fuelPercent ? Number(values.fuelPercent) : undefined;
+      values.autonomyKm = values.autonomyKm ? Number(values.autonomyKm) : undefined;
       await api("/api/portal/admin", { method: "POST", body: { operation: "update_vehicle", vehicleId: id, ...values } });
       closeModal();
       toast("Vehicle updated.");
@@ -3997,6 +4226,7 @@ async function viewRecord(id) {
       : "";
     const details = [
       ["Server date and time", date(record.occurredAt, true)],
+      ["Vehicle update approval", record.approvalStatus ? tr(record.approvalStatus) : ""],
       ["Accident date and time", record.eventOccurredAt ? date(record.eventOccurredAt, true) : ""],
       ["Performed by", record.performedByName],
       ["Registration plate", record.licensePlate],
@@ -4061,6 +4291,7 @@ function resolveReport(id) {
 }
 
 function navigate(view) {
+  if (view === "replacements") view = "operations";
   const allowed = allowedViews();
   state.view = allowed.includes(view) ? view : "overview";
   history.replaceState(null, "", `#${state.view}`);
@@ -4150,6 +4381,10 @@ el.view.addEventListener("click", async (event) => {
   if (action === "edit-driver") editDriver(id);
   if (action === "remove-driver") removeDriver(id);
   if (action === "assign-driver-vehicles") assignDriverVehicles(id);
+  if (action === "change-driver-vehicle") {
+    const driver = (state.data.drivers || []).find((item) => item.id === id);
+    if (driver?.assignedVehicleIds?.[0]) openVehicleChange(driver.assignedVehicleIds[0], driver.id, driver.customerId);
+  }
   if (action === "reveal-driver-code") revealDriverCode(id, button);
   if (action === "copy-driver-code") copyDriverCode(id, button);
   if (action === "driver-access") createDriverAccess(id);
@@ -4162,12 +4397,20 @@ el.view.addEventListener("click", async (event) => {
   if (action === "edit-replacement-case") editReplacementCase(id);
   if (action === "remove-replacement-case") removeReplacementCase(id);
   if (action === "vehicle-status") updateVehicle(id);
+  if (action === "change-vehicle") openVehicleChange(id);
   if (action === "rental-status") updateRental(id);
+  if (action === "change-rental-vehicle") {
+    const rental = (state.data.rentals || []).find((item) => item.id === id);
+    if (rental) openVehicleChange(rental.vehicleId, "", rental.customerId);
+  }
   if (action === "remove-vehicle") removeVehicle(id);
   if (action === "remove-rental") removeRental(id);
   if (action === "view-record") viewRecord(id);
   if (action === "remove-record") removeRecord(id);
   if (action === "resolve-report") resolveReport(id);
+  if (action === "inspect-change") inspectChangeRequest(id);
+  if (action === "approve-change") approveChangeRequest(id);
+  if (action === "reject-change") rejectChangeRequest(id);
   if (action === "rotate-code" && state.data.account.role === "admin" && confirm("Generate a new code? The current code and all active sessions will stop working.")) {
     try {
       const account = state.data.accounts.find((item) => item.id === id);
@@ -4229,6 +4472,13 @@ el.menu.addEventListener("click", () => (el.sidebar.classList.contains("open") ?
 el.backdrop.addEventListener("click", closeMenu);
 el.modalClose.addEventListener("click", closeModal);
 window.addEventListener("hashchange", () => state.data && navigate(location.hash.slice(1) || "overview"));
+const refreshWhenActive = () => {
+  if (state.token && document.visibilityState === "visible") refresh({ background: true }).catch(() => {});
+};
+window.setInterval(refreshWhenActive, 10_000);
+window.addEventListener("focus", refreshWhenActive);
+window.addEventListener("online", refreshWhenActive);
+document.addEventListener("visibilitychange", refreshWhenActive);
 mobileNavigation.addEventListener("change", syncNavigationMode);
 syncNavigationMode();
 applyLanguage(state.language, false);

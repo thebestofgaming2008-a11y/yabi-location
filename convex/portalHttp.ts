@@ -795,6 +795,7 @@ export const portalAdmin = httpAction(async (ctx, request) => {
           vin: optionalString(body.vin, 40),
           currentMileage,
           fuelPercent: boundedNumber(body.fuelPercent, 0, 100),
+          autonomyKm: boundedNumber(body.autonomyKm, 0, 5_000),
           notes: optionalString(body.notes, 2000),
         });
       }
@@ -802,7 +803,7 @@ export const portalAdmin = httpAction(async (ctx, request) => {
     }
 
     if (operation === "create_replacement_case") {
-      if (session.account.role !== "admin") throw new Error("forbidden");
+      if (!["admin", "mechanic"].includes(session.account.role)) throw new Error("forbidden");
       const customerId = clean(body.customerId, 80);
       const driverId = clean(body.driverId, 80);
       const damagedVehicleId = clean(body.damagedVehicleId, 80);
@@ -872,7 +873,7 @@ export const portalAdmin = httpAction(async (ctx, request) => {
     }
 
     if (operation === "update_replacement_case" || operation === "remove_replacement_case") {
-      if (session.account.role !== "admin") throw new Error("forbidden");
+      if (!["admin", "mechanic"].includes(session.account.role)) throw new Error("forbidden");
       const replacementCaseId = clean(body.replacementCaseId, 80);
       if (!replacementCaseId) throw new Error("validation_failed");
       if (operation === "remove_replacement_case") {
@@ -908,6 +909,34 @@ export const portalAdmin = httpAction(async (ctx, request) => {
           notes: optionalString(body.notes, 4000),
         });
       }
+      return json({ ok: true }, 200, origin);
+    }
+
+    if (operation === "review_vehicle_change") {
+      if (!["admin", "mechanic"].includes(session.account.role)) throw new Error("forbidden");
+      const changeRequestId = clean(body.changeRequestId, 80);
+      const decision = clean(body.decision, 20);
+      const reviewNote = optionalString(body.reviewNote, 2000);
+      if (!changeRequestId || !["approved", "rejected"].includes(decision) || (decision === "rejected" && !reviewNote)) {
+        throw new Error("validation_failed");
+      }
+      await ctx.runMutation(internal.portal.reviewVehicleChangeRequest, {
+        actorAccountId: session.account.id,
+        changeRequestId: changeRequestId as Id<"vehicleChangeRequests">,
+        decision: decision as "approved" | "rejected",
+        reviewNote,
+      });
+      return json({ ok: true }, 200, origin);
+    }
+
+    if (operation === "mark_notification_read") {
+      if (!["admin", "mechanic"].includes(session.account.role)) throw new Error("forbidden");
+      const notificationId = clean(body.notificationId, 80);
+      if (!notificationId) throw new Error("validation_failed");
+      await ctx.runMutation(internal.portal.markNotificationRead, {
+        actorAccountId: session.account.id,
+        notificationId: notificationId as Id<"portalNotifications">,
+      });
       return json({ ok: true }, 200, origin);
     }
 

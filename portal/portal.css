@@ -102,6 +102,7 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .nav-button.active { border-left-color: var(--lime); background: rgba(255,255,255,.09); color: white; }
 .nav-button .nav-icon { color: #88b6ea; font-size: .78rem; }
 .nav-button strong { font-size: .7rem; }
+.nav-count { margin-left: auto; min-width: 1.65rem; height: 1.65rem; padding: 0 .42rem; border-radius: 999px; display: inline-grid; place-items: center; background: var(--lime); color: #09285d; font-size: .75rem; font-weight: 800; }
 .nav-button small { padding: .18rem .4rem; border-radius: 99px; background: rgba(255,255,255,.1); font-size: .55rem; }
 .sidebar-footer { margin-top: auto; padding: 1rem .65rem 0; display: grid; gap: .75rem; border-top: 1px solid rgba(255,255,255,.12); }
 .sidebar-footer a, .sidebar-footer button { padding: 0; border: 0; background: transparent; color: #8fb2d8; font-size: .63rem; font-weight: 700; text-align: left; text-decoration: none; cursor: pointer; }
@@ -176,6 +177,10 @@ button:disabled { opacity: .55; cursor: wait; transform: none !important; }
 .timeline-item::before { content: ""; width: 9px; height: 9px; position: absolute; left: -5px; top: 1.25rem; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px white; }
 .timeline-item strong { display: block; color: var(--navy); font-size: .69rem; }
 .timeline-item span { color: var(--muted); font-size: .58rem; }
+.timeline-item p { margin: .35rem 0; color: #31435f; }
+.approval-panel .panel-head { align-items: center; }
+.approval-total { min-width: 2.5rem; height: 2.5rem; border-radius: 999px; display: inline-grid; place-items: center; background: #e9f2ff; color: #0d4fa6; font-weight: 800; }
+.icon-button.is-positive { border-color: #9bd9ba; color: #087443; background: #f3fff8; }
 
 .portal-modal { width: min(760px, calc(100% - 24px)); max-width: none; max-height: calc(100svh - 24px); padding: 0; border: 0; background: transparent; overflow: visible; }
 .portal-modal::backdrop { background: rgba(3,25,56,.66); backdrop-filter: blur(3px); }

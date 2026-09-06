@@ -108,6 +108,19 @@ export const vehicleReplacementReasonValidator = v.union(
   v.literal("technical_fault"),
 );
 
+export const vehicleChangeRequestTypeValidator = v.union(
+  v.literal("workflow_vehicle_update"),
+  v.literal("vehicle_assignment"),
+  v.literal("vehicle_replacement"),
+);
+
+export const vehicleChangeRequestStatusValidator = v.union(
+  v.literal("pending"),
+  v.literal("approved"),
+  v.literal("rejected"),
+  v.literal("superseded"),
+);
+
 export const vehicleDocumentTypeValidator = v.union(
   v.literal("registration"),
   v.literal("insurance"),
@@ -330,11 +343,20 @@ export default defineSchema({
     driverId: v.id("customerDrivers"),
     vehicleId: v.id("operationalVehicles"),
     assignedBy: v.id("portalAccounts"),
+    active: v.optional(v.boolean()),
+    assignedAt: v.optional(v.number()),
+    endedAt: v.optional(v.number()),
+    startMileage: v.optional(v.number()),
+    endMileage: v.optional(v.number()),
+    reason: v.optional(v.string()),
+    notes: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_driver_id", ["driverId"])
     .index("by_vehicle_id", ["vehicleId"])
+    .index("by_driver_id_and_active", ["driverId", "active"])
+    .index("by_vehicle_id_and_active", ["vehicleId", "active"])
     .index("by_driver_id_and_vehicle_id", ["driverId", "vehicleId"]),
 
   rentalApplications: defineTable({
@@ -458,6 +480,7 @@ export default defineSchema({
     status: operationalVehicleStatusValidator,
     currentMileage: v.number(),
     fuelPercent: v.optional(v.number()),
+    autonomyKm: v.optional(v.number()),
     notes: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -472,6 +495,7 @@ export default defineSchema({
     reference: v.string(),
     customerId: v.id("customers"),
     vehicleId: v.id("operationalVehicles"),
+    contractVehicleId: v.optional(v.id("operationalVehicles")),
     status: rentalStatusValidator,
     startDate: v.string(),
     expectedEndDate: v.optional(v.string()),
@@ -508,6 +532,10 @@ export default defineSchema({
     status: vehicleReplacementStatusValidator,
     notes: v.optional(v.string()),
     assignmentId: v.optional(v.id("driverVehicleAssignments")),
+    completedAt: v.optional(v.number()),
+    completedBy: v.optional(v.id("portalAccounts")),
+    repairedMileage: v.optional(v.number()),
+    completionNotes: v.optional(v.string()),
     occurredAt: v.number(),
     createdBy: v.id("portalAccounts"),
     createdAt: v.number(),
@@ -594,6 +622,15 @@ export default defineSchema({
     ),
     description: v.optional(v.string()),
     status: v.union(v.literal("submitted"), v.literal("resolved")),
+    approvalStatus: v.optional(
+      v.union(
+        v.literal("not_required"),
+        v.literal("pending"),
+        v.literal("approved"),
+        v.literal("rejected"),
+      ),
+    ),
+    changeRequestId: v.optional(v.id("vehicleChangeRequests")),
     resolution: v.optional(v.string()),
     resolvedAt: v.optional(v.number()),
     resolvedBy: v.optional(v.id("portalAccounts")),
@@ -619,7 +656,79 @@ export default defineSchema({
     .index("by_vehicle_id_and_inspection_month", ["vehicleId", "inspectionMonth"])
     .index("by_customer_id", ["customerId"])
     .index("by_rental_id", ["rentalId"])
+    .index("by_change_request_id", ["changeRequestId"])
     .index("by_status", ["status"]),
+
+  vehicleChangeRequests: defineTable({
+    reference: v.string(),
+    requestType: vehicleChangeRequestTypeValidator,
+    status: vehicleChangeRequestStatusValidator,
+    vehicleId: v.id("operationalVehicles"),
+    driverId: v.optional(v.id("customerDrivers")),
+    customerId: v.optional(v.id("customers")),
+    rentalId: v.optional(v.id("rentals")),
+    workflowRecordId: v.optional(v.id("workflowRecords")),
+    replacementCaseId: v.optional(v.id("vehicleReplacementCases")),
+    requestedMileage: v.optional(v.number()),
+    requestedFuelPercent: v.optional(v.number()),
+    requestedAutonomyKm: v.optional(v.number()),
+    requestedVehicleStatus: v.optional(operationalVehicleStatusValidator),
+    requestedReplacementVehicleId: v.optional(v.id("operationalVehicles")),
+    outgoingMileage: v.optional(v.number()),
+    incomingMileage: v.optional(v.number()),
+    reason: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    beforeSnapshot: v.string(),
+    requestedSnapshot: v.string(),
+    submittedBy: v.id("portalAccounts"),
+    submittedByRole: portalRoleValidator,
+    submittedAt: v.number(),
+    reviewedBy: v.optional(v.id("portalAccounts")),
+    reviewedAt: v.optional(v.number()),
+    reviewNote: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_vehicle_id", ["vehicleId"])
+    .index("by_submitted_by", ["submittedBy"])
+    .index("by_workflow_record_id", ["workflowRecordId"]),
+
+  operationalActivities: defineTable({
+    kind: v.string(),
+    actorAccountId: v.optional(v.id("portalAccounts")),
+    actorName: v.string(),
+    actorRole: v.optional(portalRoleValidator),
+    vehicleId: v.optional(v.id("operationalVehicles")),
+    driverId: v.optional(v.id("customerDrivers")),
+    customerId: v.optional(v.id("customers")),
+    rentalId: v.optional(v.id("rentals")),
+    workflowRecordId: v.optional(v.id("workflowRecords")),
+    changeRequestId: v.optional(v.id("vehicleChangeRequests")),
+    replacementCaseId: v.optional(v.id("vehicleReplacementCases")),
+    title: v.string(),
+    summary: v.string(),
+    beforeSnapshot: v.optional(v.string()),
+    afterSnapshot: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_vehicle_id", ["vehicleId"])
+    .index("by_driver_id", ["driverId"])
+    .index("by_customer_id", ["customerId"])
+    .index("by_created_at", ["createdAt"]),
+
+  portalNotifications: defineTable({
+    recipientAccountId: v.id("portalAccounts"),
+    changeRequestId: v.optional(v.id("vehicleChangeRequests")),
+    title: v.string(),
+    message: v.string(),
+    readAt: v.optional(v.number()),
+    resolvedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_recipient_account_id", ["recipientAccountId"])
+    .index("by_recipient_account_id_and_read_at", ["recipientAccountId", "readAt"])
+    .index("by_change_request_id", ["changeRequestId"]),
 
   mediaAssets: defineTable({
     r2Key: v.string(),
