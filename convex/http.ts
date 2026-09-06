@@ -1,12 +1,36 @@
 import { httpRouter } from "convex/server";
 import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
+import {
+  portalAdmin,
+  portalBootstrap,
+  portalData,
+  portalDriverMedia,
+  portalDrivers,
+  portalLogin,
+  portalLogout,
+  portalMediaCallback,
+  portalOptions,
+  portalProfile,
+  portalRecordMedia,
+  portalReplacementMedia,
+  portalUpload,
+  portalVehicleDocumentMedia,
+  portalWorkflow,
+} from "./portalHttp";
+import {
+  portalApplicationAdmin,
+  portalApplicationStart,
+  portalApplicationSubmit,
+  portalApplicationUpload,
+} from "./applicationHttp";
 
 const http = httpRouter();
 
 const vehicleValues = new Set([
   "unspecified",
   "l1h1",
+  "l2h2",
   "master_l2h2_2023",
   "citroen_l2h2_2019",
   "l3h2",
@@ -144,7 +168,8 @@ const submitQuote = httpAction(async (ctx, request) => {
   const company = cleanString(body.company, 120);
   const email = cleanString(body.email, 254).toLowerCase();
   const phone = cleanString(body.phone, 32);
-  const vehicle = cleanString(body.vehicle, 40) || "unspecified";
+  const vehicle =
+    cleanString(body.vehicle, 40).toLowerCase() || "unspecified";
   const duration = cleanString(body.duration, 40);
   const startDate = cleanString(body.startDate, 10);
   const message = cleanString(body.message, 2_000);
@@ -188,6 +213,7 @@ const submitQuote = httpAction(async (ctx, request) => {
       vehicle: vehicle as
         | "unspecified"
         | "l1h1"
+        | "l2h2"
         | "master_l2h2_2023"
         | "citroen_l2h2_2019"
         | "l3h2"
@@ -215,6 +241,41 @@ const submitQuote = httpAction(async (ctx, request) => {
         retryAfter: result.retryAfter,
       },
       429,
+      origin,
+    );
+  }
+
+  if (!result.quoteRequestId || !result.reference) {
+    return jsonResponse(
+      { ok: false, error: "request_failed" },
+      500,
+      origin,
+    );
+  }
+
+  const notification = await ctx.runAction(
+    internal.emails.sendQuoteNotification,
+    { quoteRequestId: result.quoteRequestId },
+  );
+  if (!notification.sent) {
+    await ctx.scheduler.runAfter(
+      60_000,
+      internal.emails.sendQuoteNotification,
+      { quoteRequestId: result.quoteRequestId },
+    );
+    await ctx.scheduler.runAfter(
+      5 * 60_000,
+      internal.emails.sendQuoteNotification,
+      { quoteRequestId: result.quoteRequestId },
+    );
+    return jsonResponse(
+      {
+        ok: true,
+        reference: result.reference,
+        saved: true,
+        emailPending: true,
+      },
+      202,
       origin,
     );
   }
@@ -249,5 +310,103 @@ http.route({
     jsonResponse({ ok: true, service: "yabi-location-api" }, 200, null),
   ),
 });
+
+http.route({ path: "/api/portal/login", method: "POST", handler: portalLogin });
+http.route({ path: "/api/portal/logout", method: "POST", handler: portalLogout });
+http.route({ path: "/api/portal/data", method: "GET", handler: portalData });
+http.route({ path: "/api/portal/admin", method: "POST", handler: portalAdmin });
+http.route({ path: "/api/portal/drivers", method: "POST", handler: portalDrivers });
+http.route({
+  path: "/api/portal/driver-media",
+  method: "POST",
+  handler: portalDriverMedia,
+});
+http.route({
+  path: "/api/portal/profile",
+  method: "POST",
+  handler: portalProfile,
+});
+http.route({
+  path: "/api/portal/workflows",
+  method: "POST",
+  handler: portalWorkflow,
+});
+http.route({
+  path: "/api/portal/uploads",
+  method: "POST",
+  handler: portalUpload,
+});
+http.route({
+  path: "/api/portal/record-media",
+  method: "POST",
+  handler: portalRecordMedia,
+});
+http.route({
+  path: "/api/portal/replacement-media",
+  method: "POST",
+  handler: portalReplacementMedia,
+});
+http.route({
+  path: "/api/portal/vehicle-document-media",
+  method: "POST",
+  handler: portalVehicleDocumentMedia,
+});
+http.route({
+  path: "/api/portal/bootstrap",
+  method: "POST",
+  handler: portalBootstrap,
+});
+http.route({
+  path: "/api/portal/media-callback",
+  method: "POST",
+  handler: portalMediaCallback,
+});
+http.route({
+  path: "/api/portal/applications/start",
+  method: "POST",
+  handler: portalApplicationStart,
+});
+http.route({
+  path: "/api/portal/applications/upload",
+  method: "POST",
+  handler: portalApplicationUpload,
+});
+http.route({
+  path: "/api/portal/applications/submit",
+  method: "POST",
+  handler: portalApplicationSubmit,
+});
+http.route({
+  path: "/api/portal/applications/admin",
+  method: "GET",
+  handler: portalApplicationAdmin,
+});
+http.route({
+  path: "/api/portal/applications/admin",
+  method: "POST",
+  handler: portalApplicationAdmin,
+});
+
+for (const path of [
+  "/api/portal/login",
+  "/api/portal/logout",
+  "/api/portal/data",
+  "/api/portal/admin",
+  "/api/portal/drivers",
+  "/api/portal/driver-media",
+  "/api/portal/profile",
+  "/api/portal/workflows",
+  "/api/portal/uploads",
+  "/api/portal/record-media",
+  "/api/portal/replacement-media",
+  "/api/portal/vehicle-document-media",
+  "/api/portal/bootstrap",
+  "/api/portal/applications/start",
+  "/api/portal/applications/upload",
+  "/api/portal/applications/submit",
+  "/api/portal/applications/admin",
+]) {
+  http.route({ path, method: "OPTIONS", handler: portalOptions });
+}
 
 export default http;
