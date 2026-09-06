@@ -628,7 +628,7 @@ async function vehicleHasOpenCommitments(
       (replacementCase) =>
         replacementCase._id !== excludedReplacementCaseId &&
         replacementCase.deletedAt === undefined &&
-        replacementCase.status !== "cancelled",
+        ["planned", "active"].includes(replacementCase.status),
     ) || assignments.some(assignmentIsActive)
   );
 }
@@ -2485,6 +2485,69 @@ export const updateDriver = internalMutation({
   },
 });
 
+// Assigning a company's rental to its driver is not a new fleet reservation.
+// Share this check between the selector query and the transactional save.
+async function vehicleCanBeAssignedToDriver(
+  ctx: QueryCtx | MutationCtx,
+  vehicle: Doc<"operationalVehicles">,
+  driver: Doc<"customerDrivers">,
+): Promise<boolean> {
+  if (vehicle.deletedAt !== undefined) return false;
+  const [rentals, cases, assignments] = await Promise.all([
+    Promise.all((["draft", "scheduled", "active"] as const).map((status) =>
+      ctx.db.query("rentals").withIndex("by_vehicle_id_and_status", (q) =>
+        q.eq("vehicleId", vehicle._id).eq("status", status),
+      ).take(101),
+    )),
+    ctx.db.query("vehicleReplacementCases").withIndex("by_replacement_vehicle_id", (q) =>
+      q.eq("replacementVehicleId", vehicle._id),
+    ).order("desc").take(101),
+    Promise.all(([true, undefined] as const).map((active) =>
+      ctx.db.query("driverVehicleAssignments").withIndex("by_vehicle_id_and_active", (q) =>
+        q.eq("vehicleId", vehicle._id).eq("active", active),
+      ).take(101),
+    )),
+  ]);
+  if (rentals.some((rows) => rows.length > 100) || cases.length > 100 || assignments.some((rows) => rows.length > 100)) {
+    return false;
+  }
+  const activeRentals = rentals.flat().filter((rental) => rental.deletedAt === undefined);
+  const openCases = cases.filter((item) => item.deletedAt === undefined && ["planned", "active"].includes(item.status));
+  const activeAssignments = assignments.flat().filter(assignmentIsActive);
+  if (
+    activeRentals.some((rental) => rental.customerId !== driver.customerId) ||
+    openCases.some((item) => item.driverId !== driver._id || item.customerId !== driver.customerId) ||
+    activeAssignments.some((assignment) => assignment.driverId !== driver._id)
+  ) return false;
+  // Retain a current assignment even when its vehicle is temporarily in repair.
+  if (activeAssignments.some((assignment) => assignment.driverId === driver._id)) return true;
+  if (!["available", "reserved", "rented"].includes(vehicle.status)) return false;
+  return vehicle.status === "available" || activeRentals.length > 0 || openCases.length > 0;
+}
+
+export const getDriverAssignmentVehicles = internalQuery({
+  args: { actorAccountId: v.id("portalAccounts"), driverId: v.id("customerDrivers") },
+  returns: v.object({
+    vehicles: v.array(operationalVehiclePublicValidator),
+    currentVehicleId: v.union(v.id("operationalVehicles"), v.null()),
+  }),
+  handler: async (ctx, args) => {
+    const actor = await requireActor(ctx, args.actorAccountId);
+    requireRole(actor, ["admin"]);
+    const driver = await ctx.db.get(args.driverId);
+    if (!driver || driver.deletedAt !== undefined) throw new Error("driver_not_found");
+    const [vehicles, current] = await Promise.all([
+      ctx.db.query("operationalVehicles").withIndex("by_deleted_at", (q) => q.eq("deletedAt", undefined)).order("desc").take(100),
+      activeAssignmentsForDriver(ctx, driver._id),
+    ]);
+    const eligible = await Promise.all(vehicles.map((vehicle) => vehicleCanBeAssignedToDriver(ctx, vehicle, driver)));
+    return {
+      vehicles: vehicles.filter((_, index) => eligible[index]).map((vehicle) => publicVehicle(vehicle)),
+      currentVehicleId: current[0]?.vehicleId ?? null,
+    };
+  },
+});
+
 export const setDriverVehicleAssignments = internalMutation({
   args: {
     actorAccountId: v.id("portalAccounts"),
@@ -2516,10 +2579,12 @@ export const setDriverVehicleAssignments = internalMutation({
     const targetVehicle = vehicles[0] ?? null;
     if (
       targetVehicle &&
-      !activeExisting.some((assignment) => assignment.vehicleId === targetVehicle._id) &&
-      !(await replacementVehicleIsFree(ctx, targetVehicle))
+      !(await vehicleCanBeAssignedToDriver(ctx, targetVehicle, driver))
     ) {
       throw new Error("vehicle_unavailable");
+    }
+    if (targetVehicle && activeExisting.length === 1 && activeExisting[0].vehicleId === targetVehicle._id) {
+      return null;
     }
     if (targetVehicle) {
       await replaceActiveDriverAssignment(
@@ -2530,14 +2595,17 @@ export const setDriverVehicleAssignments = internalMutation({
         targetVehicle.currentMileage,
         "admin_assignment",
       );
-      for (const previous of activeExisting.filter((item) => item.vehicleId !== targetVehicle._id)) {
-        const customerRentals = await ctx.db
+      const customerRentals = await ctx.db
           .query("rentals")
           .withIndex("by_customer_id", (q) => q.eq("customerId", driver.customerId))
           .order("desc")
           .take(100);
+      const targetAlreadyRentedToCustomer = customerRentals.some(
+        (item) => item.deletedAt === undefined && item.vehicleId === targetVehicle._id && ["draft", "scheduled", "active"].includes(item.status),
+      );
+      for (const previous of activeExisting.filter((item) => item.vehicleId !== targetVehicle._id)) {
         for (const rental of customerRentals.filter(
-          (item) => item.vehicleId === previous.vehicleId && ["draft", "scheduled", "active"].includes(item.status),
+          (item) => !targetAlreadyRentedToCustomer && item.deletedAt === undefined && item.vehicleId === previous.vehicleId && ["draft", "scheduled", "active"].includes(item.status),
         )) {
           await ctx.db.patch(rental._id, {
             contractVehicleId: rental.contractVehicleId ?? rental.vehicleId,
@@ -2546,7 +2614,9 @@ export const setDriverVehicleAssignments = internalMutation({
           });
         }
         const previousVehicle = await ctx.db.get(previous.vehicleId);
-        if (previousVehicle && previousVehicle.deletedAt === undefined) {
+        if (previousVehicle && previousVehicle.deletedAt === undefined &&
+          ["rented", "reserved"].includes(previousVehicle.status) &&
+          !(await vehicleHasOpenCommitments(ctx, previousVehicle._id))) {
           await ctx.db.patch(previousVehicle._id, { status: "available", updatedAt: now });
         }
       }
@@ -2559,6 +2629,12 @@ export const setDriverVehicleAssignments = internalMutation({
           endMileage: (await ctx.db.get(assignment.vehicleId))?.currentMileage,
           updatedAt: now,
         });
+        const releasedVehicle = await ctx.db.get(assignment.vehicleId);
+        if (releasedVehicle && releasedVehicle.deletedAt === undefined &&
+          ["rented", "reserved"].includes(releasedVehicle.status) &&
+          !(await vehicleHasOpenCommitments(ctx, releasedVehicle._id))) {
+          await ctx.db.patch(releasedVehicle._id, { status: "available", updatedAt: now });
+        }
       }
     }
     await audit(

@@ -1296,6 +1296,16 @@ export const portalDrivers = httpAction(async (ctx, request) => {
       );
     }
 
+    if (operation === "assignment_vehicles") {
+      const driverId = clean(body.driverId, 80);
+      if (!driverId) throw new Error("validation_failed");
+      const result = await ctx.runQuery(internal.portal.getDriverAssignmentVehicles, {
+        actorAccountId: session.account.id,
+        driverId: driverId as Id<"customerDrivers">,
+      });
+      return json({ ok: true, ...result }, 200, origin);
+    }
+
     if (operation === "assign_vehicles") {
       const driverId = clean(body.driverId, 80);
       const vehicleIds = Array.isArray(body.vehicleIds)

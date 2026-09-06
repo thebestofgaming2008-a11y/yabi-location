@@ -643,7 +643,7 @@ const translations = {
     "Save assignment": "Enregistrer l’attribution",
     "Assignment saved": "Attribution enregistrée",
     "No vehicle": "Aucun véhicule",
-    "A driver can have one active vehicle. Only available vehicles can be selected.": "Un chauffeur peut avoir un seul véhicule actif. Seuls les véhicules disponibles peuvent être sélectionnés.",
+    "Choose an available vehicle or a vehicle already rented to this driver's company. One active vehicle per driver.": "Choisissez un véhicule disponible ou déjà loué à la société de ce chauffeur. Un seul véhicule actif par chauffeur.",
     "Mileage": "Kilométrage",
     "Fuel level": "Niveau de carburant",
     "Autonomy": "Autonomie",
@@ -1295,7 +1295,7 @@ const translations = {
     "Save assignment": "Toewijzing opslaan",
     "Assignment saved": "Toewijzing opgeslagen",
     "No vehicle": "Geen voertuig",
-    "A driver can have one active vehicle. Only available vehicles can be selected.": "Een chauffeur kan één actief voertuig hebben. Alleen beschikbare voertuigen kunnen worden gekozen.",
+    "Choose an available vehicle or a vehicle already rented to this driver's company. One active vehicle per driver.": "Kies een beschikbaar voertuig of een voertuig dat al aan het bedrijf van deze chauffeur is verhuurd. Eén actief voertuig per chauffeur.",
     "Mileage": "Kilometerstand",
     "Fuel level": "Brandstofniveau",
     "Autonomy": "Actieradius",
@@ -2178,7 +2178,7 @@ function freeReplacementVehicles(damagedVehicleId = "", currentReplacementVehicl
   );
   const committedReplacementVehicleIds = new Set(
     (state.data.vehicleReplacements || [])
-      .filter((replacementCase) => replacementCase.status !== "cancelled")
+      .filter((replacementCase) => ["planned", "active"].includes(replacementCase.status))
       .map((replacementCase) => replacementCase.replacementVehicleId),
   );
   const assignedVehicleIds = new Set(
@@ -3369,15 +3369,24 @@ function editDriver(id) {
   setCustomValue(el.modalBody, "active", String(driver.active && driver.accountActive !== false));
 }
 
-function assignDriverVehicles(id) {
+async function assignDriverVehicles(id) {
   const driver = state.data.drivers.find((item) => item.id === id);
   if (!driver || state.data.account.role !== "admin") return;
-  const currentVehicleId = driver.assignedVehicleIds?.[0] || "";
-  const vehicleOptions = [["", "No vehicle"], ...vehicleSelectOptions(freeReplacementVehicles("", currentVehicleId), true)];
+  let availability;
+  try {
+    availability = await api("/api/portal/drivers", {
+      method: "POST", body: { operation: "assignment_vehicles", driverId: id },
+    });
+  } catch (error) {
+    toast(messageFor(error), "error");
+    return;
+  }
+  const currentVehicleId = availability.currentVehicleId || "";
+  const vehicleOptions = [["", "No vehicle"], ...vehicleSelectOptions(availability.vehicles, true)];
   modal({
     title: `${tr("Assign vehicle")} — ${driver.fullName}`,
     submit: tr("Save assignment"),
-    content: `<form class="portal-form">${select("Assigned vehicle", "vehicleId", vehicleOptions)}<p class="field-help">${clean(tr("A driver can have one active vehicle. Only available vehicles can be selected."))}</p></form>`,
+    content: `<form class="portal-form">${select("Assigned vehicle", "vehicleId", vehicleOptions)}<p class="field-help">${clean(tr("Choose an available vehicle or a vehicle already rented to this driver's company. One active vehicle per driver."))}</p></form>`,
     handler: async (data) => {
       const vehicleId = data.get("vehicleId");
       await api("/api/portal/drivers", {
